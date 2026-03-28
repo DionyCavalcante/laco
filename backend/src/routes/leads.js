@@ -116,3 +116,6 @@ router.patch('/:id/status', async (req, res) => {
 })
 
 module.exports = router
+
+// debug temp
+console.log('CLINIC_SLUG value:', JSON.stringify(process.env.CLINIC_SLUG))
