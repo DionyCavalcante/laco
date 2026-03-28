@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     }
     if (req.query.date) {
       params.push(req.query.date)
-      q += ` AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = ${params.length}`
+      q += ` AND a.scheduled_at::date = ${params.length}::date`
     }
     if (search) {
       params.push(`%${search.toLowerCase()}%`)
