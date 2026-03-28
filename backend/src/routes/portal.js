@@ -92,20 +92,14 @@ router.post('/:slug/book', async (req, res) => {
     const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [req.params.slug])
     if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
 
-    // Cria ou encontra o lead pelo telefone
-    let lead
-    const { rows: [existing] } = await db.query(
-      'SELECT * FROM leads WHERE clinic_id=$1 AND phone=$2', [clinic.id, phone]
-    )
-    if (existing) {
-      lead = existing
-    } else {
-      const { rows: [newLead] } = await db.query(`
-        INSERT INTO leads (clinic_id, name, phone, source, status)
-        VALUES ($1, $2, $3, 'link', 'new') RETURNING *
-      `, [clinic.id, name, phone])
-      lead = newLead
-    }
+    // Upsert pelo telefone — nunca duplica
+    const { rows: [lead] } = await db.query(`
+      INSERT INTO leads (clinic_id, name, phone, source, status)
+      VALUES ($1, $2, $3, 'link', 'new')
+      ON CONFLICT (clinic_id, phone)
+      DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
+      RETURNING *
+    `, [clinic.id, name, phone])
 
     // Se o cliente recusou a oferta
     if (reject_reason) {
