@@ -68,7 +68,7 @@ router.get('/stats', async (req, res) => {
     `, [process.env.CLINIC_SLUG || 'bella-estetica'])
     res.json(rows[0])
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar stats' })
+    console.error('stats error:', err); res.status(500).json({ error: err.message })
   }
 })
 
