@@ -2,22 +2,6 @@ const express = require('express')
 const router = express.Router()
 const db = require('../db')
 
-// GET /api/leads/:id — detalhe de um lead
-router.get('/:id', async (req, res) => {
-  try {
-    const { rows } = await db.query(`
-      SELECT l.*, p.name AS procedure_name
-      FROM leads l
-      LEFT JOIN procedures p ON l.procedure_viewed = p.id
-      WHERE l.id = $1
-    `, [req.params.id])
-    if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
-    res.json(rows[0])
-  } catch (err) {
-    console.error('STATS ERROR:', err.message, err.stack); res.status(500).json({ error: err.message })
-  }
-})
-
 // GET /api/leads — lista todos com filtros opcionais
 router.get('/', async (req, res) => {
   try {
@@ -112,6 +96,22 @@ router.patch('/:id/status', async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao atualizar status' })
+  }
+})
+
+// GET /api/leads/:id — detalhe de um lead
+router.get('/:id', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT l.*, p.name AS procedure_name
+      FROM leads l
+      LEFT JOIN procedures p ON l.procedure_viewed = p.id
+      WHERE l.id = $1
+    `, [req.params.id])
+    if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
+    res.json(rows[0])
+  } catch (err) {
+    console.error('STATS ERROR:', err.message, err.stack); res.status(500).json({ error: err.message })
   }
 })
 
