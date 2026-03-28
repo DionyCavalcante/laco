@@ -77,6 +77,9 @@ CREATE TABLE IF NOT EXISTS procedure_photos (
 ALTER TABLE business_hours DROP CONSTRAINT IF EXISTS bh_clinic_day_unique;
 ALTER TABLE business_hours ADD CONSTRAINT bh_clinic_day_unique UNIQUE (clinic_id, day_of_week);
 
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique;
+ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone);
+
 -- Fotos antes/depois dos procedimentos
 CREATE INDEX IF NOT EXISTS idx_photos_proc ON procedure_photos(procedure_id);
 
