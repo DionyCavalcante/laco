@@ -26,11 +26,11 @@ router.get('/', async (req, res) => {
 
     if (status && status !== 'todos') {
       params.push(status)
-      q += ` AND l.status = ${params.length}`
+      q += ` AND l.status = $${params.length}`
     }
     if (req.query.date) {
       params.push(req.query.date)
-      q += ` AND a.scheduled_at::date = ${params.length}::date`
+      q += ` AND a.scheduled_at::date = $${params.length}::date`
     }
     if (search) {
       params.push(`%${search.toLowerCase()}%`)
