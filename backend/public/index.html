@@ -47,7 +47,6 @@ a{color:inherit;text-decoration:none}
 .stat-val.green{color:#2E8C66}
 .stat-val.amber{color:#9A6B10}
 .stat-val.red{color:#A32D2D}
-
 /* Toolbar */
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .search-wrap{flex:1;min-width:180px;position:relative}
@@ -162,6 +161,12 @@ a{color:inherit;text-decoration:none}
       <div class="stat-card"><div class="stat-label">Não agendaram</div><div class="stat-val amber" id="s-rejected">—</div></div>
       <div class="stat-card"><div class="stat-label">Link enviado</div><div class="stat-val purple" id="s-sent">—</div></div>
     </div>
+    <div class="stats-grid" style="margin-top:8px">
+      <div class="stat-card"><div class="stat-label">Em aberto</div><div class="stat-val purple" id="s-val-aberto">—</div></div>
+      <div class="stat-card"><div class="stat-label">Valor agendado</div><div class="stat-val green" id="s-val-agendado">—</div></div>
+      <div class="stat-card"><div class="stat-label">Valor realizado</div><div class="stat-val green" id="s-val-realizado">—</div></div>
+      <div class="stat-card"><div class="stat-label">Valor perdido</div><div class="stat-val" style="color:#A32D2D" id="s-val-perdido">—</div></div>
+    </div>
 
     <div class="toolbar">
       <div class="search-wrap">
@@ -259,17 +264,31 @@ async function init() {
   loadAppointments()
 }
 
+function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 async function loadStats() {
   try {
-    const r = await fetch(`${API}/api/leads/stats`, { headers: headers() })
-    if (!r.ok) return
-    const d = await r.json()
-    document.getElementById('s-total').textContent     = d.total     || 0
-    document.getElementById('s-scheduled').textContent = d.scheduled || 0
-    document.getElementById('s-rejected').textContent  = d.rejected  || 0
-    document.getElementById('s-sent').textContent      = d.link_sent || 0
+    const [lr, ar] = await Promise.all([
+      fetch(`${API}/api/leads/stats`, { headers: headers() }),
+      fetch(`${API}/api/appointments/stats`, { headers: headers() })
+    ])
+    if (lr.ok) {
+      const d = await lr.json()
+      document.getElementById('s-total').textContent     = d.total     || 0
+      document.getElementById('s-scheduled').textContent = d.scheduled || 0
+      document.getElementById('s-rejected').textContent  = d.rejected  || 0
+      document.getElementById('s-sent').textContent      = d.link_sent || 0
+      document.getElementById('s-val-aberto').textContent   = fmtBRL(d.valor_em_aberto)
+      document.getElementById('s-val-agendado').textContent = fmtBRL(d.valor_agendado)
+      document.getElementById('s-val-realizado').textContent= fmtBRL(d.valor_realizado)
+    }
+    if (ar.ok) {
+      const a = await ar.json()
+      document.getElementById('s-val-perdido').textContent = fmtBRL(a.valor_perdido)
+    }
   } catch(e) {}
 }
+
+
 
 async function loadLeads(search = '') {
   const list = document.getElementById('leads-list')
