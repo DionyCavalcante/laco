@@ -167,12 +167,6 @@ a{color:inherit;text-decoration:none}
       <div class="stat-card"><div class="stat-label">Valor realizado</div><div class="stat-val green" id="s-val-realizado">—</div></div>
       <div class="stat-card"><div class="stat-label">Valor perdido</div><div class="stat-val" style="color:#A32D2D" id="s-val-perdido">—</div></div>
     </div>
-    <div class="stats-grid" style="margin-top:8px">
-      <div class="stat-card"><div class="stat-label">Em aberto (potencial)</div><div class="stat-val purple" id="s-val-aberto">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor agendado</div><div class="stat-val green" id="s-val-agendado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor realizado</div><div class="stat-val green" id="s-val-realizado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor perdido</div><div class="stat-val red" id="s-val-perdido">—</div></div>
-    </div>
 
     <div class="toolbar">
       <div class="search-wrap">
@@ -294,10 +288,7 @@ async function loadStats() {
   } catch(e) {}
 }
 
-function fmtBRL(cents) {
-  if (!cents) return 'R$ 0'
-  return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-}
+
 
 async function loadLeads(search = '') {
   const list = document.getElementById('leads-list')
