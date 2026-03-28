@@ -171,6 +171,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="kpi"><div class="kpi-label">Pendentes</div><div class="kpi-val amber" id="k-pending">—</div></div>
     <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-val muted" id="k-done">—</div></div>
   </div>
+  <div class="kpi-row" style="margin-top:8px">
+    <div class="kpi"><div class="kpi-label">Valor esperado hoje</div><div class="kpi-val purple" id="k-val-esperado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor confirmado</div><div class="kpi-val green" id="k-val-confirmado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green" id="k-val-realizado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor cancelado</div><div class="kpi-val red" id="k-val-cancelado" style="color:#A32D2D">—</div></div>
+  </div>
 
   <div class="main-grid">
     <div class="timeline-card">
@@ -311,6 +317,22 @@ function updateKpis() {
   document.getElementById('k-confirmed').textContent = confirmed
   document.getElementById('k-pending').textContent   = pending
   document.getElementById('k-done').textContent      = done
+
+  // Valores financeiros do dia
+  const sum = (filter) => appointments.filter(filter).reduce((acc, a) => acc + (parseInt(a.price)||0), 0)
+  const esperado   = sum(a => a.status !== 'cancelled')
+  const confirmado = sum(a => a.status === 'confirmed')
+  const realizado  = sum(a => a.status === 'done')
+  const cancelado  = sum(a => a.status === 'cancelled')
+  document.getElementById('k-val-esperado').textContent   = fmtBRL(esperado)
+  document.getElementById('k-val-confirmado').textContent = fmtBRL(confirmado)
+  document.getElementById('k-val-realizado').textContent  = fmtBRL(realizado)
+  document.getElementById('k-val-cancelado').textContent  = fmtBRL(cancelado)
+}
+
+function fmtBRL(cents) {
+  if (!cents) return 'R$ 0'
+  return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
 function renderTimeline(apts) {

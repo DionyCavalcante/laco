@@ -2,6 +2,22 @@ const express = require('express')
 const router = express.Router()
 const db = require('../db')
 
+// GET /api/leads/:id — detalhe de um lead
+router.get('/:id', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT l.*, p.name AS procedure_name
+      FROM leads l
+      LEFT JOIN procedures p ON l.procedure_viewed = p.id
+      WHERE l.id = $1
+    `, [req.params.id])
+    if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
+    res.json(rows[0])
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar lead' })
+  }
+})
+
 // GET /api/leads — lista todos com filtros opcionais
 router.get('/', async (req, res) => {
   try {
@@ -43,16 +59,25 @@ router.get('/stats', async (req, res) => {
     const { rows } = await db.query(`
       SELECT
         COUNT(*)                                           AS total,
-        COUNT(*) FILTER (WHERE status = 'scheduled')      AS scheduled,
-        COUNT(*) FILTER (WHERE status = 'rejected')       AS rejected,
-        COUNT(*) FILTER (WHERE status = 'link_sent')      AS link_sent,
-        COUNT(*) FILTER (WHERE status = 'new')            AS new_leads
-      FROM leads
-      WHERE clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+        COUNT(*) FILTER (WHERE l.status = 'scheduled')    AS scheduled,
+        COUNT(*) FILTER (WHERE l.status = 'rejected')     AS rejected,
+        COUNT(*) FILTER (WHERE l.status = 'link_sent')    AS link_sent,
+        COUNT(*) FILTER (WHERE l.status = 'new')          AS new_leads,
+        -- Valor em aberto: leads com link enviado (potencial)
+        COALESCE(SUM(p.price) FILTER (WHERE l.status = 'link_sent'), 0)   AS valor_em_aberto,
+        -- Valor agendado: procedimentos agendados ainda não concluídos
+        COALESCE(SUM(p.price) FILTER (WHERE l.status = 'scheduled'), 0)   AS valor_agendado,
+        -- Valor realizado: agendamentos com status 'done'
+        COALESCE(SUM(p.price) FILTER (WHERE a.status = 'done'), 0)        AS valor_realizado
+      FROM leads l
+      LEFT JOIN procedures p ON l.procedure_viewed = p.id
+      LEFT JOIN appointments a ON a.lead_id = l.id AND a.status = 'done'
+      WHERE l.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
     `, [process.env.CLINIC_SLUG || 'bella-estetica'])
     res.json(rows[0])
   } catch (err) {
-    console.error('stats error:', err); res.status(500).json({ error: err.message })
+    console.error('stats error:', err.message)
+    res.status(500).json({ error: err.message })
   }
 })
 
@@ -99,24 +124,4 @@ router.patch('/:id/status', async (req, res) => {
   }
 })
 
-// GET /api/leads/:id — detalhe de um lead
-router.get('/:id', async (req, res) => {
-  try {
-    const { rows } = await db.query(`
-      SELECT l.*, p.name AS procedure_name
-      FROM leads l
-      LEFT JOIN procedures p ON l.procedure_viewed = p.id
-      WHERE l.id = $1
-    `, [req.params.id])
-    if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
-    res.json(rows[0])
-  } catch (err) {
-    console.error('STATS ERROR:', err.message, err.stack); res.status(500).json({ error: err.message })
-  }
-})
-
 module.exports = router
-
-// debug temp
-console.log('CLINIC_SLUG value:', JSON.stringify(process.env.CLINIC_SLUG))
-console.log('SLUG:', JSON.stringify(process.env.CLINIC_SLUG))

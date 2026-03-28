@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
         l.name  AS lead_name,
         l.phone AS lead_phone,
         p.name  AS procedure_name,
-        p.duration
+        p.duration,
+        p.price AS price
       FROM appointments a
       JOIN leads l      ON a.lead_id      = l.id
       JOIN procedures p ON a.procedure_id = p.id
@@ -46,13 +47,18 @@ router.get('/stats', async (req, res) => {
   try {
     const { rows } = await db.query(`
       SELECT
-        COUNT(*)                                              AS total,
-        COUNT(*) FILTER (WHERE status = 'confirmed')         AS confirmed,
-        COUNT(*) FILTER (WHERE status = 'pending')           AS pending,
-        COUNT(*) FILTER (WHERE status = 'done')              AS done,
-        COUNT(*) FILTER (WHERE source = 'system')            AS from_system
-      FROM appointments
-      WHERE clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+        COUNT(*)                                                AS total,
+        COUNT(*) FILTER (WHERE a.status = 'confirmed')         AS confirmed,
+        COUNT(*) FILTER (WHERE a.status = 'pending')           AS pending,
+        COUNT(*) FILTER (WHERE a.status = 'done')              AS done,
+        COUNT(*) FILTER (WHERE a.source = 'system')            AS from_system,
+        -- Valores financeiros
+        COALESCE(SUM(p.price) FILTER (WHERE a.status IN ('pending','confirmed')), 0)  AS valor_agendado,
+        COALESCE(SUM(p.price) FILTER (WHERE a.status = 'done'), 0)                    AS valor_realizado,
+        COALESCE(SUM(p.price) FILTER (WHERE a.status = 'cancelled'), 0)               AS valor_perdido
+      FROM appointments a
+      JOIN procedures p ON a.procedure_id = p.id
+      WHERE a.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
     `, [process.env.CLINIC_SLUG || 'bella-estetica'])
     res.json(rows[0])
   } catch (err) {

@@ -159,6 +159,12 @@ function render(ls, as_, leads, apts) {
       <div class="kpi"><div class="kpi-label">Não agendaram</div><div class="kpi-val red">${rejected}</div><div class="kpi-sub">${rejRate}% de recusa</div></div>
       <div class="kpi"><div class="kpi-label">Confirmados</div><div class="kpi-val purple">${parseInt(as_.confirmed)||0}</div><div class="kpi-sub">de ${parseInt(as_.total)||0} agendamentos</div></div>
     </div>
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi"><div class="kpi-label">Em aberto</div><div class="kpi-val purple">${fmtBRL(ls.valor_em_aberto)}</div><div class="kpi-sub">Potencial com link enviado</div></div>
+      <div class="kpi"><div class="kpi-label">Valor agendado</div><div class="kpi-val green">${fmtBRL(as_.valor_agendado)}</div><div class="kpi-sub">Pendente + confirmado</div></div>
+      <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green">${fmtBRL(as_.valor_realizado)}</div><div class="kpi-sub">Procedimentos concluídos</div></div>
+      <div class="kpi"><div class="kpi-label">Valor perdido</div><div class="kpi-val red">${fmtBRL(as_.valor_perdido)}</div><div class="kpi-sub">Cancelamentos</div></div>
+    </div>
 
     <div class="charts-row">
       <div class="chart-card">
@@ -260,6 +266,11 @@ function renderDonut(data, total) {
       <text x="50" y="47" text-anchor="middle" font-size="16" font-weight="500" fill="#111">${total}</text>
       <text x="50" y="59" text-anchor="middle" font-size="9" fill="#aaa">leads</text>
     </svg>`
+}
+
+function fmtBRL(cents) {
+  if (!cents) return 'R$ 0'
+  return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
