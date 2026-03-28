@@ -55,7 +55,16 @@ a{color:inherit;text-decoration:none}
 .search-wrap input:focus{border-color:#9B6FA5}
 .filter-pill{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;white-space:nowrap}
 .filter-pill.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
-.inline-sel{padding:4px 8px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:6px;background:white;color:#111;cursor:pointer;outline:none;max-width:120px}
+.inline-sel{padding:5px 10px;font-size:11px;font-weight:500;border:0.5px solid rgba(0,0,0,0.15);border-radius:20px;background:white;color:#555;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px;transition:border-color 0.15s}
+.inline-sel:hover{border-color:#C8A2C8;color:#7A4F7A}
+.inline-sel.s-new{border-color:#B5D4F4;color:#0C447C;background-color:#EEF4FE}
+.inline-sel.s-link_sent{border-color:#FAC775;color:#633806;background-color:#FEF3E2}
+.inline-sel.s-scheduled{border-color:#9FE1CB;color:#27500A;background-color:#E0F4EE}
+.inline-sel.s-rejected{border-color:#F5C4B3;color:#712B13;background-color:#FAECE7}
+.inline-sel.s-pending{border-color:#FAC775;color:#633806;background-color:#FEF3E2}
+.inline-sel.s-confirmed{border-color:#9FE1CB;color:#27500A;background-color:#E0F4EE}
+.inline-sel.s-done{border-color:#ccc;color:#555;background-color:#f5f5f5}
+.inline-sel.s-cancelled{border-color:#F5C4B3;color:#712B13;background-color:#FAECE7}
 .col-apt{flex:1;min-width:0;font-size:12px}
 
 /* Table */
@@ -343,14 +352,14 @@ function renderLead(l) {
       </div>
       <div class="col-proc">${esc(l.procedure_name || '—')}</div>
       <div class="col-status">
-        <select class="inline-sel" onchange="updateLeadStatus('${l.id}',this.value)" onclick="event.stopPropagation()">
+        <select class="inline-sel s-${l.status}" onchange="updateLeadStatus('${l.id}',this.value,this)" onclick="event.stopPropagation()">
           <option value="new" ${l.status==='new'?'selected':''}>Novo</option>
           <option value="link_sent" ${l.status==='link_sent'?'selected':''}>Link enviado</option>
           <option value="scheduled" ${l.status==='scheduled'?'selected':''}>Agendado</option>
           <option value="rejected" ${l.status==='rejected'?'selected':''}>Não agendou</option>
         </select>
       </div>
-      <div class="col-apt">${l.appointment_status ? ({pending:'<span class=\"badge b-link_sent\">Pendente</span>',confirmed:'<span class=\"badge b-scheduled\">Confirmado</span>',done:'<span class=\"badge\" style=\"background:#f0f0f0;color:#666\">Concluído</span>',cancelled:'<span class=\"badge b-rejected\">Cancelado</span>'}[l.appointment_status]||l.appointment_status) : '<span style=\"color:#ccc\">—</span>'}</div>
+      <div class="col-apt">${l.appointment_id ? `<select class="inline-sel s-${l.appointment_status||'pending'}" onchange="updateAptStatus('${l.appointment_id}',this.value,this)" onclick="event.stopPropagation()"><option value="pending" ${l.appointment_status==='pending'?'selected':''}>Pendente</option><option value="confirmed" ${l.appointment_status==='confirmed'?'selected':''}>Confirmado</option><option value="done" ${l.appointment_status==='done'?'selected':''}>Concluído</option><option value="cancelled" ${l.appointment_status==='cancelled'?'selected':''}>Cancelado</option></select>` : '<span style="color:#ccc;font-size:12px">—</span>'}</div>
       <div class="col-reason">${esc(reasonMap[l.reject_reason] || (l.reject_reason || '—'))}</div>
       <div class="col-date">${date}</div>
     </div>`
@@ -411,6 +420,16 @@ function renderApt(a) {
     </div>`
 }
 
+async function updateAptStatus(id, status, sel) {
+  if(sel){sel.className='inline-sel s-'+status}
+  try {
+    await fetch(API+'/api/appointments/'+id+'/status', {
+      method:'PATCH', headers:headers(), body:JSON.stringify({status})
+    })
+    loadStats()
+  } catch(e) {}
+}
+
 function setFilter(f, el) {
   currentFilter = f
   document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'))
@@ -418,7 +437,8 @@ function setFilter(f, el) {
   loadLeads(document.querySelector('.search-wrap input').value)
 }
 
-async function updateLeadStatus(id, status) {
+async function updateLeadStatus(id, status, sel) {
+  if(sel){sel.className='inline-sel s-'+status}
   try {
     await fetch(API+'/api/leads/'+id+'/status', {
       method:'PATCH', headers:headers(), body:JSON.stringify({status})
