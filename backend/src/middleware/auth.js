@@ -3,7 +3,7 @@ function requireAuth(req, res, next) {
   const publicPaths = ['/health', '/webhook']
   const isPublic = publicPaths.some(p => req.path.startsWith(p))
   const isPortal = req.path.startsWith('/portal')
-  const isPublicUpload = req.method === 'GET' && req.path.match(/^\/upload\/procedure\/\d+\/photos$/)
+  const isPublicUpload = req.method === 'GET' && req.path.match(/^\/upload\/procedure\/[^/]+\/photos$/)
   if (isPublic || isPortal || isPublicUpload) return next()
 
   const key = req.headers['x-api-key'] || req.query.api_key
