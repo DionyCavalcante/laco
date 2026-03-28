@@ -74,6 +74,22 @@ a{color:inherit;text-decoration:none}
 .inline-sel.s-done{border-color:#ccc;color:#555;background-color:#f5f5f5}
 .inline-sel.s-cancelled{border-color:#F5C4B3;color:#712B13;background-color:#FAECE7}
 .col-apt{flex:1;min-width:0;font-size:12px}
+.date-filter-wrap{position:relative;display:inline-block}
+.date-filter-btn{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.date-filter-btn.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.date-filter-btn svg{width:12px;height:12px}
+.date-picker-panel{display:none;position:absolute;top:calc(100% + 6px);right:0;background:white;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:14px;z-index:50;min-width:280px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+.date-picker-panel.on{display:block}
+.dp-shortcuts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:0.5px solid rgba(0,0,0,0.08)}
+.dp-shortcut{padding:4px 10px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white}
+.dp-shortcut:hover,.dp-shortcut.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.dp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dp-label{font-size:11px;color:#888;width:24px;flex-shrink:0}
+.dp-input{flex:1;padding:6px 10px;font-size:12px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#111;outline:none}
+.dp-input:focus{border-color:#9B6FA5}
+.dp-actions{display:flex;gap:6px;margin-top:10px}
+.dp-apply{flex:1;padding:7px;background:#9B6FA5;border:none;border-radius:8px;color:white;font-size:12px;font-weight:500;cursor:pointer}
+.dp-clear{padding:7px 12px;background:none;border:0.5px solid rgba(0,0,0,0.12);border-radius:8px;color:#666;font-size:12px;cursor:pointer}
 
 /* Table */
 .table-wrap{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);overflow:hidden}
@@ -195,7 +211,32 @@ a{color:inherit;text-decoration:none}
       <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
       <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
       <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
-      <div class="filter-pill" onclick="setFilter('hoje',this)">Hoje</div>
+      <div class="date-filter-wrap" id="date-filter-wrap">
+        <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+          <span id="date-filter-label">Período</span>
+        </button>
+        <div class="date-picker-panel" id="date-picker-panel">
+          <div class="dp-shortcuts">
+            <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
+            <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
+            <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
+            <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
+          </div>
+          <div class="dp-row">
+            <span class="dp-label">De</span>
+            <input type="date" class="dp-input" id="dp-from">
+          </div>
+          <div class="dp-row">
+            <span class="dp-label">Até</span>
+            <input type="date" class="dp-input" id="dp-to">
+          </div>
+          <div class="dp-actions">
+            <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+            <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="table-wrap">
@@ -248,6 +289,8 @@ const API = window.location.origin
 const API_KEY = localStorage.getItem('laco_api_key') || ''
 const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
 let currentFilter = 'todos'
+let dateFrom = null
+let dateTo = null
 let clinicData = null
 
 function headers() {
@@ -314,10 +357,9 @@ async function loadLeads(search = '') {
   list.innerHTML = '<div class="loading">Carregando...</div>'
   try {
     let url = `${API}/api/leads?`
-    if (currentFilter === 'hoje') {
-      const today = new Date().toISOString().slice(0,10)
-      url += `date=${today}&`
-    } else if (currentFilter !== 'todos') {
+    if (dateFrom) url += `date_from=${dateFrom}&`
+    if (dateTo) url += `date_to=${dateTo}&`
+    if (currentFilter !== 'todos') {
       url += `status=${currentFilter}&`
     }
     if (search) url += `search=${encodeURIComponent(search)}`
@@ -452,6 +494,66 @@ function setFilter(f, el) {
   el.classList.add('on')
   loadLeads(document.querySelector('.search-wrap input').value)
 }
+
+function toggleDatePicker() {
+  const panel = document.getElementById('date-picker-panel')
+  panel.classList.toggle('on')
+}
+
+function applyShortcut(type) {
+  const today = new Date()
+  const fmt = d => d.toISOString().slice(0,10)
+  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
+  event.target.classList.add('on')
+  if (type === 'hoje') {
+    document.getElementById('dp-from').value = fmt(today)
+    document.getElementById('dp-to').value   = fmt(today)
+  } else if (type === 'semana') {
+    const mon = new Date(today); mon.setDate(today.getDate() - today.getDay() + 1)
+    document.getElementById('dp-from').value = fmt(mon)
+    document.getElementById('dp-to').value   = fmt(today)
+  } else if (type === '15dias') {
+    const d15 = new Date(today); d15.setDate(today.getDate() - 14)
+    document.getElementById('dp-from').value = fmt(d15)
+    document.getElementById('dp-to').value   = fmt(today)
+  } else if (type === 'mes') {
+    const d1 = new Date(today.getFullYear(), today.getMonth(), 1)
+    document.getElementById('dp-from').value = fmt(d1)
+    document.getElementById('dp-to').value   = fmt(today)
+  }
+}
+
+function applyDateFilter() {
+  dateFrom = document.getElementById('dp-from').value || null
+  dateTo   = document.getElementById('dp-to').value   || null
+  document.getElementById('date-picker-panel').classList.remove('on')
+  const btn = document.getElementById('date-filter-btn')
+  const lbl = document.getElementById('date-filter-label')
+  if (dateFrom || dateTo) {
+    btn.classList.add('on')
+    lbl.textContent = (dateFrom||'') + ' → ' + (dateTo||'')
+  }
+  loadLeads(document.querySelector('.search-wrap input').value)
+}
+
+function clearDateFilter() {
+  dateFrom = null; dateTo = null
+  document.getElementById('dp-from').value = ''
+  document.getElementById('dp-to').value   = ''
+  document.getElementById('date-filter-btn').classList.remove('on')
+  document.getElementById('date-filter-label').textContent = 'Período'
+  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
+  document.getElementById('date-picker-panel').classList.remove('on')
+  loadLeads(document.querySelector('.search-wrap input').value)
+}
+
+// Fecha ao clicar fora
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('date-filter-wrap')
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('date-picker-panel').classList.remove('on')
+  }
+})
 
 async function updateLeadStatus(id, status, sel) {
   if(sel){sel.className='inline-sel s-'+status}

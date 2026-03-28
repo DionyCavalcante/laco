@@ -5,7 +5,7 @@ const db = require('../db')
 // GET /api/leads — lista todos com filtros opcionais
 router.get('/', async (req, res) => {
   try {
-    const { status, search } = req.query
+    const { status, search, date_from, date_to } = req.query
     let q = `
       SELECT
         l.*,
@@ -28,9 +28,13 @@ router.get('/', async (req, res) => {
       params.push(status)
       q += ` AND l.status = $${params.length}`
     }
-    if (req.query.date) {
-      params.push(req.query.date)
-      q += ` AND a.scheduled_at::date = $${params.length}::date`
+    if (date_from) {
+      params.push(date_from)
+      q += ` AND l.created_at::date >= $${params.length}::date`
+    }
+    if (date_to) {
+      params.push(date_to)
+      q += ` AND l.created_at::date <= $${params.length}::date`
     }
     if (search) {
       params.push(`%${search.toLowerCase()}%`)
