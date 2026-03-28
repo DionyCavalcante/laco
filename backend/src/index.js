@@ -79,7 +79,7 @@ app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada' }))
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err)
-  res.status(500).json({ error: 'Erro interno do servidor' })
+  console.error("INTERNAL:", err.stack); res.status(500).json({ error: err.message || "erro" })
 })
 
 const PORT = process.env.PORT || 3000
