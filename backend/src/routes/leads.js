@@ -10,6 +10,7 @@ router.get('/', async (req, res) => {
       SELECT
         l.*,
         p.name AS procedure_name,
+        a.id AS appointment_id,
         a.scheduled_at,
         a.status AS appointment_status
       FROM leads l
