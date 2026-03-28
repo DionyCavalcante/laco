@@ -15,7 +15,11 @@ router.get('/', async (req, res) => {
         a.status AS appointment_status
       FROM leads l
       LEFT JOIN procedures p ON l.procedure_viewed = p.id
-      LEFT JOIN appointments a ON a.lead_id = l.id
+      LEFT JOIN LATERAL (
+        SELECT id, status, scheduled_at FROM appointments
+        WHERE lead_id = l.id
+        ORDER BY created_at DESC LIMIT 1
+      ) a ON true
       WHERE l.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
     `
     const params = [process.env.CLINIC_SLUG || 'bella-estetica']
