@@ -55,6 +55,14 @@ a{color:inherit;text-decoration:none}
 .search-wrap input:focus{border-color:#9B6FA5}
 .filter-pill{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;white-space:nowrap}
 .filter-pill.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#e8e8e8;color:#888;font-size:9px;font-weight:600;cursor:help;margin-left:5px;flex-shrink:0;position:relative}
+.tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#111;color:white;font-size:11px;font-weight:400;padding:5px 9px;border-radius:7px;white-space:nowrap;z-index:99;pointer-events:none;line-height:1.4}
+.tip:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#111;z-index:99}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px;display:flex;align-items:center}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#e8e8e8;color:#888;font-size:9px;font-weight:600;cursor:help;margin-left:5px;flex-shrink:0;position:relative}
+.tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#111;color:white;font-size:11px;font-weight:400;padding:5px 9px;border-radius:7px;white-space:nowrap;z-index:99;pointer-events:none;line-height:1.4}
+.tip:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#111;z-index:99}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px;display:flex;align-items:center}
 .inline-sel{padding:5px 10px;font-size:11px;font-weight:500;border:0.5px solid rgba(0,0,0,0.15);border-radius:20px;background:white;color:#555;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px;transition:border-color 0.15s}
 .inline-sel:hover{border-color:#C8A2C8;color:#7A4F7A}
 .inline-sel.s-new{border-color:#B5D4F4;color:#0C447C;background-color:#EEF4FE}
@@ -172,11 +180,10 @@ a{color:inherit;text-decoration:none}
       <div class="stat-card"><div class="stat-label">Não agendaram</div><div class="stat-val amber" id="s-rejected">—</div></div>
       <div class="stat-card"><div class="stat-label">Link enviado</div><div class="stat-val purple" id="s-sent">—</div></div>
     </div>
-    <div class="stats-grid" style="margin-top:8px">
-      <div class="stat-card"><div class="stat-label">Em aberto</div><div class="stat-val purple" id="s-val-aberto">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor agendado</div><div class="stat-val green" id="s-val-agendado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor realizado</div><div class="stat-val green" id="s-val-realizado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor perdido</div><div class="stat-val" style="color:#A32D2D" id="s-val-perdido">—</div></div>
+    <div class="stats-grid" style="margin-top:8px;grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="stat-card"><div class="stat-label">Valor agendado<span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div><div class="stat-val green" id="s-val-agendado">—</div></div>
+      <div class="stat-card"><div class="stat-label">Valor confirmado<span class="tip" data-tip="Soma dos procedimentos já concluídos (realizados)">?</span></div><div class="stat-val green" id="s-val-realizado">—</div></div>
+      <div class="stat-card"><div class="stat-label">Valor perdido<span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div><div class="stat-val" style="color:#A32D2D" id="s-val-perdido">—</div></div>
     </div>
 
     <div class="toolbar">
