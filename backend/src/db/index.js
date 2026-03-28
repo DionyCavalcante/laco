@@ -5,8 +5,8 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 })
 
-pool.on('error', (err) => {
-  console.error('Erro inesperado no pool do banco:', err)
+pool.on('error', (err) => { console.error('POOL ERROR:', err.message)
+  console.error('POOL ERROR DETAIL:', err.stack)
 })
 
 async function query(text, params) {
@@ -20,3 +20,6 @@ async function query(text, params) {
 }
 
 module.exports = { query, pool }
+
+// Testa conexão ao iniciar
+pool.connect().then(c => { console.log('✅ Banco conectado!'); c.release() }).catch(e => console.error('❌ BANCO FALHOU:', e.message))
