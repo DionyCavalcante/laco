@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Agendamento</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--purple:#9B6FA5;--purple-light:#F3ECF6;--purple-dark:#7A4F7A;--green:#2E8C66;--green-light:#E0F4EE;--amber:#9A6B10;--amber-light:#FEF3E2;--gray:#f5f4f0;--border:rgba(0,0,0,0.09);--text:#111;--muted:#666;--hint:#aaa}
+html,body{height:100%;background:var(--gray)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* Header */
+.ph{background:var(--purple);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ph-logo{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;flex-shrink:0}
+.ph-name{font-size:15px;font-weight:500;color:white}
+.ph-sub{font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px}
+
+/* Screens */
+.screen{display:none;flex-direction:column;flex:1}
+.screen.on{display:flex}
+.screen-body{flex:1;overflow-y:auto;padding:20px 18px;background:white}
+.screen-foot{padding:14px 18px;background:white;border-top:0.5px solid var(--border);flex-shrink:0}
+
+/* Back */
+.back-bar{padding:10px 18px;border-bottom:0.5px solid var(--border);background:white;flex-shrink:0}
+.back-btn{background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;padding:0}
+
+/* CTA buttons */
+.cta{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.cta-primary{background:var(--purple);color:white}
+.cta-primary:active{background:var(--purple-dark)}
+.cta-outline{background:none;border:0.5px solid var(--border);color:var(--muted);margin-top:8px}
+.cta-outline:active{background:var(--gray)}
+
+/* Fields */
+.field{margin-bottom:16px}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500}
+.field input{width:100%;padding:12px 14px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:10px;color:var(--text);background:white;outline:none;-webkit-appearance:none}
+.field input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(155,111,165,0.12)}
+
+/* Entry screen */
+.entry-title{font-size:20px;font-weight:500;margin-bottom:6px;margin-top:4px}
+.entry-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+
+/* Proc list */
+.list-greeting{font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.list-greeting strong{color:var(--text)}
+.proc-card{border:0.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;cursor:pointer;background:white;-webkit-user-select:none;user-select:none}
+.proc-card:active{opacity:0.85;transform:scale(0.99)}
+.proc-imgs{height:120px;display:flex;position:relative;overflow:hidden}
+.img-half{flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;position:relative}
+.img-half.before{background:#F1EFE8;color:#888}
+.img-half.after{background:#E8D5E8;color:var(--purple-dark)}
+.img-half img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.img-lbl{position:absolute;bottom:6px;left:7px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;z-index:2}
+.img-half.before .img-lbl{background:rgba(255,255,255,0.85);color:#666}
+.img-half.after .img-lbl{background:rgba(155,111,165,0.25);color:var(--purple-dark)}
+.img-divider{width:2px;background:white;z-index:1;flex-shrink:0}
+
+/* Carousel dots */
+.carousel-wrap{position:relative}
+.carousel-track{display:flex;transition:transform 0.3s ease}
+.carousel-slide{min-width:100%;display:flex;height:120px}
+.carousel-dots{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:3}
+.cdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.45)}
+.cdot.on{background:white}
+.carr-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;z-index:4}
+.carr-btn.l{left:7px}.carr-btn.r{right:7px}
+
+.proc-foot{padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.proc-name{font-size:14px;font-weight:500}
+.proc-dur{font-size:11px;color:var(--muted);margin-top:2px}
+.proc-chevron{color:var(--hint);font-size:16px}
+
+/* Video screen */
+.video-box{background:#0a0a0a;position:relative;flex-shrink:0}
+.video-box iframe{display:block;width:100%;height:200px;border:none}
+.video-placeholder{height:200px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.play-btn{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center}
+.play-tri{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:20px solid white;margin-left:4px}
+.proc-detail{padding:16px 18px}
+.proc-detail-name{font-size:16px;font-weight:500;margin-bottom:4px}
+.proc-detail-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* Reveal */
+.reveal-zone{padding:16px 18px;border-top:0.5px solid var(--border);flex-shrink:0;background:white}
+.reveal-loading{display:flex;align-items:center;gap:10px;padding:8px 0}
+.rl-bar{flex:1;height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.rl-fill{height:100%;background:#C8A2C8;border-radius:2px;width:0}
+.rl-label{font-size:12px;color:var(--hint);white-space:nowrap;min-width:90px;text-align:right}
+.offer{display:none}
+.offer-tag{font-size:10px;color:var(--purple-dark);font-weight:600;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.offer-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block}
+.offer-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+.offer-old{font-size:16px;color:#bbb;text-decoration:line-through;font-weight:400}
+.offer-new{font-size:30px;font-weight:500;line-height:1}
+.offer-badge{display:inline-block;background:var(--amber-light);color:var(--amber);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:6px}
+.offer-cond{font-size:12px;color:var(--muted);margin-bottom:16px}
+.offer-btns{display:flex;flex-direction:column;gap:8px}
+
+/* Exit screen */
+.exit-title{font-size:16px;font-weight:500;margin-bottom:6px;margin-top:4px}
+.exit-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.exit-option{padding:14px;border:0.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;-webkit-user-select:none;user-select:none}
+.exit-option:active{background:var(--gray)}
+.exit-opt-title{font-size:14px;font-weight:500}
+.exit-opt-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.exit-chevron{color:var(--hint);font-size:18px;flex-shrink:0}
+
+/* Calendar */
+.proc-pill{display:inline-flex;align-items:center;gap:6px;background:var(--purple-light);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--purple-dark);margin-bottom:16px;flex-shrink:0}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.month-title{font-size:14px;font-weight:500}
+.mnav-btn{background:none;border:0.5px solid var(--border);border-radius:7px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:18px}
+.cal-hdr{font-size:10px;color:var(--hint);padding:4px 0}
+.cal-day{font-size:13px;padding:8px 0;border-radius:8px;cursor:pointer;color:var(--muted);position:relative}
+.cal-day.avail{color:var(--text)}
+.cal-day.avail:active{background:var(--gray)}
+.cal-day.sel{background:var(--purple);color:white;border-radius:8px}
+.cal-day.past,.cal-day.empty{color:#ddd;cursor:default}
+.slots-title{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:10px}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.slot{padding:10px 6px;text-align:center;font-size:13px;border:0.5px solid var(--border);border-radius:10px;cursor:pointer;color:var(--muted);background:white;-webkit-user-select:none;user-select:none}
+.slot:active:not(.taken){background:var(--gray)}
+.slot.sel{background:var(--purple);color:white;border-color:var(--purple)}
+.slot.taken{background:var(--gray);color:#ccc;cursor:default;text-decoration:line-through}
+.no-slots{padding:20px;text-align:center;font-size:13px;color:var(--hint)}
+
+/* Confirm */
+.confirm-card{background:var(--gray);border-radius:12px;padding:14px;margin-bottom:16px}
+.confirm-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,0.07)}
+.confirm-row:last-child{border:none}
+.confirm-label{color:var(--muted)}
+.confirm-val{font-weight:500}
+
+/* Success */
+.success-wrap{padding:32px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;flex:1}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.success-title{font-size:18px;font-weight:500;margin-bottom:8px}
+.success-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.success-card{width:100%;background:var(--gray);border-radius:12px;padding:14px;text-align:left;margin-bottom:20px}
+
+/* Loading spinner */
+.spinner{width:20px;height:20px;border:2px solid rgba(155,111,165,0.2);border-top-color:var(--purple);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{flex:1;display:flex;align-items:center;justify-content:center;background:white}
+
+/* Error */
+.error-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:white;padding:32px;text-align:center}
+.error-screen p{font-size:14px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+
+<div id="ph" class="ph">
+  <div class="ph-logo" id="ph-logo">?</div>
+  <div>
+    <div class="ph-name" id="ph-name">Carregando...</div>
+    <div class="ph-sub">Agende seu procedimento</div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="screen on" id="s-loading">
+  <div class="loading-screen"><div class="spinner"></div></div>
+</div>
+
+<!-- ERROR -->
+<div class="screen" id="s-error">
+  <div class="error-screen">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="#ddd"/></svg>
+    <p id="error-msg">Não foi possível carregar este portal.</p>
+  </div>
+</div>
+
+<!-- ENTRADA -->
+<div class="screen" id="s-entry">
+  <div class="screen-body">
+    <div class="entry-title">Olá! Bem-vinda</div>
+    <div class="entry-sub">Para continuar, nos diga como podemos te chamar e como entrar em contato.</div>
+    <div class="field"><label>Seu nome</label><input type="text" id="inp-nome" placeholder="Como você se chama?" autocomplete="given-name"></div>
+    <div class="field"><label>WhatsApp</label><input type="tel" id="inp-tel" placeholder="(11) 99999-9999" autocomplete="tel"></div>
+  </div>
+  <div class="screen-foot">
+    <button class="cta cta-primary" onclick="goToList()">Ver procedimentos →</button>
+  </div>
+</div>
+
+<!-- LISTA -->
+<div class="screen" id="s-lista">
+  <div class="screen-body">
+    <p class="list-greeting" id="list-greeting-text">Olá! Escolha o procedimento que te interessa:</p>
+    <div id="proc-list"></div>
+  </div>
+</div>
+
+<!-- VIDEO + REVEAL -->
+<div class="screen" id="s-proc">
+  <div class="back-bar"><button class="back-btn" onclick="go('s-lista')">← Voltar</button></div>
+  <div class="video-box" id="video-box">
+    <div class="video-placeholder" id="video-placeholder" onclick="playVideo()">
+      <div class="play-btn"><div class="play-tri"></div></div>
+    </div>
+  </div>
+  <div class="proc-detail">
+    <div class="proc-detail-name" id="proc-detail-name"></div>
+    <div class="proc-detail-desc">Entenda como o procedimento funciona e o que esperar do resultado. Realizado por profissionais certificados.</div>
+  </div>
+  <div class="reveal-zone" id="reveal-zone">
+    <div class="reveal-loading" id="reveal-loading">
+      <div class="rl-bar"><div class="rl-fill" id="rl-fill"></div></div>
+      <span class="rl-label" id="rl-label">Preparando oferta...</span>
+    </div>
+    <div class="offer" id="offer">
+      <div class="offer-tag">Oferta especial para você</div>
+      <div id="offer-price-zone">
+        <div class="offer-price-row">
+          <span class="offer-old" id="o-old"></span>
+          <span class="offer-new" id="o-new"></span>
+        </div>
+        <div class="offer-badge" id="o-badge"></div>
+        <div class="offer-cond" id="o-cond"></div>
+      </div>
+      <div class="offer-btns">
+        <button class="cta cta-primary" onclick="go('s-cal')">Agendar este procedimento →</button>
+        <button class="cta cta-outline" onclick="go('s-exit')">Escolher outro procedimento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SAÍDA -->
+<div class="screen" id="s-exit">
+  <div class="screen-body">
+    <div class="exit-title">Antes de continuar...</div>
+    <div class="exit-sub">Nos ajude a entender melhor. Por que você está saindo desta oferta?</div>
+    <div class="exit-option" onclick="exitReason('outro')">
+      <div><div class="exit-opt-title">Quero ver outro procedimento</div><div class="exit-opt-sub">Tenho interesse em outra opção</div></div>
+      <span class="exit-chevron">›</span>
+    </div>
+    <div class="exit-option" onclick="exitReason('orcamento')">
+      <div><div class="exit-opt-title">Fora do meu orçamento</div><div class="exit-opt-sub">O valor não cabe agora</div></div>
+      <span class="exit-chevron">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDÁRIO -->
+<div class="screen" id="s-cal">
+  <div class="back-bar"><button class="back-btn" onclick="go('s-proc')">← Voltar</button></div>
+  <div class="screen-body">
+    <div class="proc-pill" id="cal-pill">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 8 7 11 12 5"/></svg>
+      <span id="cal-proc-name"></span>
+    </div>
+    <div class="month-nav">
+      <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
+      <span class="month-title" id="month-title"></span>
+      <button class="mnav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="slots-title" id="slots-title" style="display:none">Horários disponíveis</div>
+    <div id="slots-wrap"></div>
+  </div>
+  <div class="screen-foot" id="cal-foot" style="display:none">
+    <button class="cta cta-primary" onclick="go('s-confirm')">Continuar →</button>
+  </div>
+</div>
+
+<!-- CONFIRMAÇÃO -->
+<div class="screen" id="s-confirm">
+  <div class="back-bar"><button class="back-btn" onclick="go('s-cal')">← Voltar</button></div>
+  <div class="screen-body">
+    <p style="font-size:16px;font-weight:500;margin-bottom:16px">Confirme seu agendamento</p>
+    <div class="confirm-card">
+      <div class="confirm-row"><span class="confirm-label">Procedimento</span><span class="confirm-val" id="cf-proc"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="cf-date"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Horário</span><span class="confirm-val" id="cf-time"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Valor</span><span class="confirm-val" style="color:var(--purple-dark)" id="cf-price"></span></div>
+    </div>
+    <div class="field"><label>Seu nome</label><input type="text" id="cf-nome" autocomplete="given-name"></div>
+    <div class="field"><label>WhatsApp</label><input type="tel" id="cf-tel" autocomplete="tel"></div>
+  </div>
+  <div class="screen-foot">
+    <button class="cta cta-primary" id="book-btn" onclick="book()">Confirmar agendamento</button>
+  </div>
+</div>
+
+<!-- SUCESSO -->
+<div class="screen" id="s-success">
+  <div class="success-wrap">
+    <div class="success-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2E8C66" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="success-title">Agendamento confirmado!</div>
+    <div class="success-sub">Você receberá uma mensagem no WhatsApp com todos os detalhes. Até breve!</div>
+    <div class="success-card">
+      <div class="confirm-row"><span class="confirm-label">Procedimento</span><span class="confirm-val" id="sc-proc"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="sc-date"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Horário</span><span class="confirm-val" id="sc-time"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Cliente</span><span class="confirm-val" id="sc-nome"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Extrai slug da URL: /bella-estetica/agendar
+const pathParts = window.location.pathname.split('/').filter(Boolean)
+const SLUG = pathParts[0] || 'bella-estetica'
+const API = window.location.origin
+
+let clinicData = null
+let procedures = []
+let selected = { proc: null, date: null, time: null }
+let revealTimer = null, revealTick = null
+let carousels = {}
+let calYear, calMonth
+let clientName = '', clientPhone = ''
+
+let portalSettings = { reveal_delay: 5, show_price: true, greeting_msg: 'Escolha o procedimento que te interessa:' }
+let procPhotos = {}  // { [procedure_id]: { before: [...urls], after: [...urls] } }
+
+/* ---- INIT ---- */
+async function init() {
+  try {
+    // Carrega clínica + procedimentos + settings em paralelo
+    const [portalRes, settingsRes] = await Promise.all([
+      fetch(`${API}/api/portal/${SLUG}`),
+      fetch(`${API}/api/settings?slug=${SLUG}`).catch(() => null)
+    ])
+
+    if (!portalRes.ok) throw new Error('not found')
+    const data = await portalRes.json()
+    clinicData = data.clinic
+    procedures = data.procedures || []
+
+    // Settings — usa defaults se falhar
+    if (settingsRes && settingsRes.ok) {
+      const s = await settingsRes.json()
+      portalSettings = {
+        reveal_delay: s.reveal_delay || 5,
+        show_price:   s.show_price !== false,
+        greeting_msg: s.greeting_msg || portalSettings.greeting_msg
+      }
+    }
+
+    // Header
+    const initials = clinicData.name.split(' ').filter(w => /^[A-ZÀ-Ú]/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join('')
+    document.getElementById('ph-logo').textContent = initials || 'C'
+    document.getElementById('ph-name').textContent = clinicData.name
+    document.title = clinicData.name + ' — Agendamento'
+
+    // Busca fotos de todos os procedimentos em paralelo (silenciosamente)
+    await loadAllPhotos()
+
+    go('s-entry')
+  } catch (e) {
+    document.getElementById('error-msg').textContent = 'Este link de agendamento não está disponível no momento.'
+    go('s-error')
+  }
+}
+
+async function loadAllPhotos() {
+  if (!procedures.length) return
+  const results = await Promise.allSettled(
+    procedures.map(p =>
+      fetch(`${API}/api/upload/procedure/${p.id}/photos`)
+        .then(r => r.ok ? r.json() : [])
+        .then(photos => ({ id: p.id, photos }))
+    )
+  )
+  results.forEach(r => {
+    if (r.status === 'fulfilled') {
+      const { id, photos } = r.value
+      procPhotos[id] = {
+        before: photos.filter(p => p.side === 'before').map(p => p.url),
+        after:  photos.filter(p => p.side === 'after').map(p => p.url)
+      }
+    }
+  })
+}
+
+/* ---- NAVIGATION ---- */
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'))
+  document.getElementById(id).classList.add('on')
+  window.scrollTo(0, 0)
+  if (id === 's-proc') startReveal()
+}
+
+function goToList() {
+  clientName = document.getElementById('inp-nome').value.trim()
+  clientPhone = document.getElementById('inp-tel').value.trim()
+  if (!clientName || !clientPhone) { alert('Preencha seu nome e WhatsApp para continuar.'); return }
+  // Saudação customizada
+  document.getElementById('list-greeting-text').innerHTML =
+    `Olá, <strong>${esc(clientName.split(' ')[0])}</strong>! ${esc(portalSettings.greeting_msg)}`
+  renderProcList()
+  go('s-lista')
+}
+
+/* ---- PROC LIST ---- */
+function renderProcList() {
+  const el = document.getElementById('proc-list')
+  if (!procedures.length) {
+    el.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:32px 0">Nenhum procedimento disponível.</p>'
+    return
+  }
+  el.innerHTML = procedures.map((p, i) => {
+    const cid = `c-${i}`
+    const photos = procPhotos[p.id] || { before: [], after: [] }
+
+    // Constrói slides com pares reais de fotos ou placeholder
+    const count = Math.max(photos.before.length, photos.after.length, 1)
+    const slides = Array.from({ length: count }, (_, idx) => {
+      const bUrl = photos.before[idx] ? `${API}${photos.before[idx]}` : null
+      const aUrl = photos.after[idx]  ? `${API}${photos.after[idx]}`  : null
+      return `
+        <div class="carousel-slide">
+          <div class="img-half before">
+            ${bUrl
+              ? `<img src="${bUrl}" alt="antes" loading="${idx === 0 ? 'eager' : 'lazy'}">`
+              : '<span style="font-size:11px;color:#aaa">Foto antes</span>'}
+            <span class="img-lbl">antes</span>
+          </div>
+          <div class="img-divider"></div>
+          <div class="img-half after">
+            ${aUrl
+              ? `<img src="${aUrl}" alt="depois" loading="${idx === 0 ? 'eager' : 'lazy'}">`
+              : '<span style="font-size:11px;color:#9B6FA5">Foto depois</span>'}
+            <span class="img-lbl">depois</span>
+          </div>
+        </div>`
+    }).join('')
+
+    const showNav = count > 1
+    const dots  = showNav ? `<div class="carousel-dots" id="dots-${cid}">${Array.from({length:count},(_,j)=>`<div class="cdot ${j===0?'on':''}"></div>`).join('')}</div>` : ''
+    const arrows = showNav
+      ? `<button class="carr-btn l" onclick="slideCar(event,'${cid}',-1,${count})">‹</button>
+         <button class="carr-btn r" onclick="slideCar(event,'${cid}',1,${count})">›</button>`
+      : ''
+
+    return `
+    <div class="proc-card" onclick="selectProc('${p.id}')">
+      <div class="carousel-wrap" id="${cid}">
+        <div class="carousel-track">${slides}</div>
+        ${arrows}${dots}
+      </div>
+      <div class="proc-foot">
+        <div>
+          <div class="proc-name">${esc(p.name)}</div>
+          <div class="proc-dur">${p.duration} min · Resultado comprovado</div>
+        </div>
+        <span class="proc-chevron">›</span>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function selectProc(id) {
+  selected.proc = procedures.find(p => p.id === id)
+  if (!selected.proc) return
+  document.getElementById('proc-detail-name').textContent = selected.proc.name
+  document.getElementById('cal-proc-name').textContent = selected.proc.name
+  // Confirm fields
+  document.getElementById('cf-proc').textContent = selected.proc.name
+  document.getElementById('cf-price').textContent = fmtPrice(selected.proc.price)
+  document.getElementById('cf-nome').value = clientName
+  document.getElementById('cf-tel').value = clientPhone
+  // Success fields
+  document.getElementById('sc-proc').textContent = selected.proc.name
+  // video
+  document.getElementById('video-placeholder').style.display = 'flex'
+  const iframe = document.getElementById('video-iframe')
+  if (iframe) iframe.remove()
+  go('s-proc')
+}
+
+/* ---- VIDEO ---- */
+function playVideo() {
+  const url = selected.proc?.video_url
+  if (!url) return
+  let embedUrl = url
+  const ytMatch = url.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]{11})/)
+  if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
+  if (vimeoMatch) embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`
+  const iframe = document.createElement('iframe')
+  iframe.id = 'video-iframe'
+  iframe.src = embedUrl
+  iframe.style.cssText = 'width:100%;height:200px;border:none;display:block'
+  iframe.allow = 'autoplay; fullscreen'
+  document.getElementById('video-placeholder').style.display = 'none'
+  document.getElementById('video-box').appendChild(iframe)
+}
+
+/* ---- REVEAL ---- */
+function startReveal() {
+  if (revealTimer) clearTimeout(revealTimer)
+  if (revealTick) clearInterval(revealTick)
+  const loading = document.getElementById('reveal-loading')
+  const offer   = document.getElementById('offer')
+  const fill    = document.getElementById('rl-fill')
+  const label   = document.getElementById('rl-label')
+  loading.style.display = 'flex'
+  offer.style.display   = 'none'
+  fill.style.transition = 'none'
+  fill.style.width      = '0'
+
+  // Delay vem das configurações do portal (API), com fallback pro valor do procedimento
+  const delaySecs = portalSettings.reveal_delay || selected.proc?.reveal_delay || 5
+  const delay = delaySecs * 1000
+
+  setTimeout(() => {
+    fill.style.transition = `width ${delay}ms linear`
+    fill.style.width = '100%'
+  }, 60)
+
+  let cd = delaySecs
+  label.textContent = `Preparando oferta em ${cd}s...`
+  revealTick = setInterval(() => {
+    cd--
+    if (cd > 0) label.textContent = `Preparando oferta em ${cd}s...`
+    else clearInterval(revealTick)
+  }, 1000)
+
+  revealTimer = setTimeout(() => {
+    loading.style.display = 'none'
+    offer.style.display   = 'block'
+    const p = selected.proc
+    if (!p) return
+
+    // Preço — respeita configuração show_price
+    const priceZone = document.getElementById('offer-price-zone')
+    if (portalSettings.show_price && p.price) {
+      document.getElementById('o-old').textContent = fmtPrice(p.price_old)
+      document.getElementById('o-new').textContent = fmtPrice(p.price)
+      if (p.price_old && p.price) {
+        const pct = Math.round((p.price_old - p.price) / p.price_old * 100)
+        document.getElementById('o-badge').textContent = `${pct}% de desconto hoje`
+        document.getElementById('o-badge').style.display = 'inline-block'
+      } else {
+        document.getElementById('o-badge').style.display = 'none'
+      }
+      document.getElementById('o-cond').textContent = p.payment_note || ''
+      if (priceZone) priceZone.style.display = 'block'
+    } else {
+      if (priceZone) priceZone.style.display = 'none'
+    }
+  }, delay)
+}
+
+/* ---- EXIT ---- */
+async function exitReason(reason) {
+  if (selected.proc) {
+    try {
+      await fetch(`${API}/api/portal/${SLUG}/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: clientName, phone: clientPhone, procedure_id: selected.proc.id, reject_reason: reason })
+      })
+    } catch (e) {}
+  }
+  go('s-lista')
+}
+
+/* ---- CALENDAR ---- */
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+const DAY_NAMES = ['D','S','T','Q','Q','S','S']
+
+function initCal() {
+  const now = new Date()
+  calYear = now.getFullYear()
+  calMonth = now.getMonth()
+  selected.date = null
+  selected.time = null
+  renderCal()
+  document.getElementById('slots-title').style.display = 'none'
+  document.getElementById('slots-wrap').innerHTML = ''
+  document.getElementById('cal-foot').style.display = 'none'
+}
+
+// Override go to init cal when entering s-cal
+const _go = go
+window.go = function(id) {
+  _go(id)
+  if (id === 's-cal') initCal()
+}
+// Re-assign to fix forward ref
+go = window.go
+
+function changeMonth(dir) {
+  calMonth += dir
+  if (calMonth > 11) { calMonth = 0; calYear++ }
+  if (calMonth < 0) { calMonth = 11; calYear-- }
+  renderCal()
+}
+
+function renderCal() {
+  document.getElementById('month-title').textContent = `${MONTH_NAMES[calMonth]} ${calYear}`
+  const grid = document.getElementById('cal-grid')
+  const today = new Date(); today.setHours(0,0,0,0)
+  const firstDay = new Date(calYear, calMonth, 1).getDay()
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  let html = DAY_NAMES.map(d => `<div class="cal-hdr">${d}</div>`).join('')
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>'
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dt = new Date(calYear, calMonth, d)
+    const isPast = dt < today
+    const isSel = selected.date === `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const cls = isPast ? 'past' : isSel ? 'sel avail' : 'avail'
+    const click = isPast ? '' : `onclick="selectDay(${calYear},${calMonth+1},${d})"`
+    html += `<div class="cal-day ${cls}" ${click}>${d}</div>`
+  }
+  grid.innerHTML = html
+}
+
+async function selectDay(y, m, d) {
+  selected.date = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+  selected.time = null
+  renderCal()
+  document.getElementById('cal-foot').style.display = 'none'
+  document.getElementById('slots-wrap').innerHTML = '<div class="no-slots"><div class="spinner" style="margin:0 auto"></div></div>'
+  document.getElementById('slots-title').style.display = 'block'
+  try {
+    const url = `${API}/api/portal/${SLUG}/slots?date=${selected.date}&procedure_id=${selected.proc?.id || ''}`
+    const r = await fetch(url)
+    const data = await r.json()
+    if (data.reason === 'closed' || !data.slots?.length) {
+      document.getElementById('slots-wrap').innerHTML = '<div class="no-slots">Sem horários disponíveis neste dia.</div>'
+      return
+    }
+    renderSlots(data.slots)
+  } catch {
+    document.getElementById('slots-wrap').innerHTML = '<div class="no-slots">Erro ao carregar horários.</div>'
+  }
+}
+
+function renderSlots(slots) {
+  document.getElementById('slots-wrap').innerHTML = `
+    <div class="slots-grid">
+      ${slots.map(s => `<div class="slot${s.taken?' taken':''}" ${s.taken?'':` onclick="selectSlot('${s.time}',this)"`}>${s.time}</div>`).join('')}
+    </div>`
+}
+
+function selectSlot(time, el) {
+  selected.time = time
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('sel'))
+  el.classList.add('sel')
+  document.getElementById('cal-foot').style.display = 'block'
+  // Update confirm
+  const d = new Date(selected.date + 'T12:00:00')
+  const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+  document.getElementById('cf-date').textContent = dateStr
+  document.getElementById('cf-time').textContent = time
+  document.getElementById('sc-date').textContent = dateStr
+  document.getElementById('sc-time').textContent = time
+}
+
+/* ---- BOOK ---- */
+async function book() {
+  const name = document.getElementById('cf-nome').value.trim()
+  const phone = document.getElementById('cf-tel').value.trim()
+  if (!name || !phone) { alert('Preencha seu nome e WhatsApp.'); return }
+  if (!selected.proc || !selected.date || !selected.time) { alert('Selecione data e horário.'); return }
+  const btn = document.getElementById('book-btn')
+  btn.textContent = 'Confirmando...'
+  btn.disabled = true
+  try {
+    const r = await fetch(`${API}/api/portal/${SLUG}/book`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, procedure_id: selected.proc.id, date: selected.date, time: selected.time })
+    })
+    if (!r.ok) throw new Error()
+    document.getElementById('sc-nome').textContent = name
+    go('s-success')
+  } catch {
+    alert('Erro ao confirmar agendamento. Tente novamente.')
+    btn.textContent = 'Confirmar agendamento'
+    btn.disabled = false
+  }
+}
+
+/* ---- HELPERS ---- */
+function fmtPrice(cents) {
+  if (!cents) return '—'
+  return 'R$ ' + (cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function slideCar(e, id, dir, total) {
+  e.stopPropagation()
+  if (!carousels[id]) carousels[id] = 0
+  const wrap = document.getElementById(id)
+  const n = total || wrap.querySelectorAll('.carousel-slide').length
+  carousels[id] = (carousels[id] + dir + n) % n
+  wrap.querySelector('.carousel-track').style.transform = `translateX(-${carousels[id] * 100}%)`
+  const dotsEl = wrap.querySelector('.carousel-dots')
+  if (dotsEl) dotsEl.querySelectorAll('.cdot').forEach((d,i) => d.classList.toggle('on', i === carousels[id]))
+}
+
+init()
+</script>
+</body>
+</html>
