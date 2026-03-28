@@ -273,6 +273,7 @@ function fmtBRL(cents) {
   return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
+function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
 load()

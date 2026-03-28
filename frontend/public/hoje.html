@@ -172,6 +172,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-val muted" id="k-done">—</div></div>
   </div>
   <div class="kpi-row" style="margin-top:8px">
+    <div class="kpi"><div class="kpi-label">Valor esperado</div><div class="kpi-val purple" id="k-val-esperado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor confirmado</div><div class="kpi-val green" id="k-val-confirmado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green" id="k-val-realizado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Valor cancelado</div><div class="kpi-val" style="color:#A32D2D" id="k-val-cancelado">—</div></div>
+  </div>
+  <div class="kpi-row" style="margin-top:8px">
     <div class="kpi"><div class="kpi-label">Valor esperado hoje</div><div class="kpi-val purple" id="k-val-esperado">—</div></div>
     <div class="kpi"><div class="kpi-label">Valor confirmado</div><div class="kpi-val green" id="k-val-confirmado">—</div></div>
     <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green" id="k-val-realizado">—</div></div>
@@ -308,6 +314,7 @@ function render() {
   renderSummary()
 }
 
+function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 function updateKpis() {
   const total     = appointments.length
   const confirmed = appointments.filter(a => a.status === 'confirmed').length

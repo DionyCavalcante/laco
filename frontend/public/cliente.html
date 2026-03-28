@@ -138,6 +138,7 @@ function fmtBRL(cents) {
   if (!cents) return 'R$ 0'
   return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
+function fmtBRL(c){if(!c)return"R$ 0";return"R$ "+(parseInt(c)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 function fmtDate(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) }
 function fmtDateTime(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) }
 
@@ -208,6 +209,7 @@ function render() {
       <div class="info-row"><span class="info-label">Procedimento visto</span><span class="info-val purple">${esc(lead.procedure_name||'—')}</span></div>
       <div class="info-row"><span class="info-label">Valor do procedimento</span><span class="info-val green">${lead.procedure_price ? fmtBRL(lead.procedure_price) : '—'}</span></div>
       <div class="info-row"><span class="info-label">Total gasto</span><span class="info-val green">${fmtBRL(appointments.reduce((s,a)=>s+(parseInt(a.price)||0),0))}</span></div>
+      <div class="info-row"><span class="info-label">Total gasto</span><span class="info-val" style="color:#2E8C66">${fmtBRL(appointments.reduce((s,a)=>s+(parseInt(a.price)||0),0))}</span></div>
       <div class="info-row"><span class="info-label">Motivo de recusa</span><span class="info-val ${lead.reject_reason?'red':''}">${esc(reasonLabels[lead.reject_reason]||lead.reject_reason||'—')}</span></div>
       <div class="info-row"><span class="info-label">Origem</span><span class="info-val">${esc(lead.source||'whatsapp')}</span></div>
       <div class="info-row"><span class="info-label">Entrou em</span><span class="info-val">${fmtDateTime(lead.created_at)}</span></div>
