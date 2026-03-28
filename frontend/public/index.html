@@ -426,6 +426,16 @@ function renderApt(a) {
     </div>`
 }
 
+async function deleteLead(id, e) {
+  e.stopPropagation()
+  if (!confirm('Excluir este cliente e todos os agendamentos dele?')) return
+  try {
+    await fetch(API+'/api/leads/'+id, { method:'DELETE', headers:headers() })
+    loadLeads(document.querySelector('.search-wrap input').value)
+    loadStats()
+  } catch(e) {}
+}
+
 async function updateAptStatus(id, status, sel) {
   if(sel){sel.className='inline-sel s-'+status}
   try {

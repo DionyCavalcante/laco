@@ -129,4 +129,15 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+// DELETE /api/leads/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM appointments WHERE lead_id = $1', [req.params.id])
+    await db.query('DELETE FROM leads WHERE id = $1', [req.params.id])
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao excluir cliente' })
+  }
+})
+
 module.exports = router
