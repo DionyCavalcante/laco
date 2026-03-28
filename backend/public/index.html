@@ -55,6 +55,8 @@ a{color:inherit;text-decoration:none}
 .search-wrap input:focus{border-color:#9B6FA5}
 .filter-pill{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;white-space:nowrap}
 .filter-pill.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.inline-sel{padding:4px 8px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:6px;background:white;color:#111;cursor:pointer;outline:none;max-width:120px}
+.col-apt{flex:1;min-width:0;font-size:12px}
 
 /* Table */
 .table-wrap{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);overflow:hidden}
@@ -177,6 +179,7 @@ a{color:inherit;text-decoration:none}
       <div class="filter-pill on" onclick="setFilter('rejected',this)">Não agendaram</div>
       <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
       <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
+      <div class="filter-pill" onclick="setFilter('hoje',this)">Hoje</div>
     </div>
 
     <div class="table-wrap">
@@ -184,7 +187,8 @@ a{color:inherit;text-decoration:none}
         <div style="width:34px;flex-shrink:0"></div>
         <div class="col-name">Cliente</div>
         <div class="col-proc">Procedimento visto</div>
-        <div class="col-status">Status</div>
+        <div class="col-status">Status lead</div>
+        <div class="col-apt">Agendamento</div>
         <div class="col-reason">Motivo</div>
         <div class="col-date">Data</div>
       </div>
@@ -295,7 +299,12 @@ async function loadLeads(search = '') {
   list.innerHTML = '<div class="loading">Carregando...</div>'
   try {
     let url = `${API}/api/leads?`
-    if (currentFilter !== 'todos') url += `status=${currentFilter}&`
+    if (currentFilter === 'hoje') {
+      const today = new Date().toISOString().slice(0,10)
+      url += `date=${today}&`
+    } else if (currentFilter !== 'todos') {
+      url += `status=${currentFilter}&`
+    }
     if (search) url += `search=${encodeURIComponent(search)}`
     const r = await fetch(url, { headers: headers() })
     if (!r.ok) { list.innerHTML = '<div class="empty">Erro ao carregar dados.</div>'; return }
@@ -333,7 +342,15 @@ function renderLead(l) {
         <div class="c-phone">${esc(l.phone)}</div>
       </div>
       <div class="col-proc">${esc(l.procedure_name || '—')}</div>
-      <div class="col-status">${badgeMap[l.status] || l.status}</div>
+      <div class="col-status">
+        <select class="inline-sel" onchange="updateLeadStatus('${l.id}',this.value)" onclick="event.stopPropagation()">
+          <option value="new" ${l.status==='new'?'selected':''}>Novo</option>
+          <option value="link_sent" ${l.status==='link_sent'?'selected':''}>Link enviado</option>
+          <option value="scheduled" ${l.status==='scheduled'?'selected':''}>Agendado</option>
+          <option value="rejected" ${l.status==='rejected'?'selected':''}>Não agendou</option>
+        </select>
+      </div>
+      <div class="col-apt">${l.appointment_status ? ({pending:'<span class=\"badge b-link_sent\">Pendente</span>',confirmed:'<span class=\"badge b-scheduled\">Confirmado</span>',done:'<span class=\"badge\" style=\"background:#f0f0f0;color:#666\">Concluído</span>',cancelled:'<span class=\"badge b-rejected\">Cancelado</span>'}[l.appointment_status]||l.appointment_status) : '<span style=\"color:#ccc\">—</span>'}</div>
       <div class="col-reason">${esc(reasonMap[l.reject_reason] || (l.reject_reason || '—'))}</div>
       <div class="col-date">${date}</div>
     </div>`
@@ -399,6 +416,16 @@ function setFilter(f, el) {
   document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'))
   el.classList.add('on')
   loadLeads(document.querySelector('.search-wrap input').value)
+}
+
+async function updateLeadStatus(id, status) {
+  try {
+    await fetch(API+'/api/leads/'+id+'/status', {
+      method:'PATCH', headers:headers(), body:JSON.stringify({status})
+    })
+    loadLeads(document.querySelector('.search-wrap input').value)
+    loadStats()
+  } catch(e) {}
 }
 
 function switchTab(name, el) {
