@@ -74,6 +74,10 @@ CREATE TABLE IF NOT EXISTS procedure_photos (
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE business_hours DROP CONSTRAINT IF EXISTS bh_clinic_day_unique;
+ALTER TABLE business_hours ADD CONSTRAINT bh_clinic_day_unique UNIQUE (clinic_id, day_of_week);
+
+-- Fotos antes/depois dos procedimentos
 CREATE INDEX IF NOT EXISTS idx_photos_proc ON procedure_photos(procedure_id);
 
 -- Configurações extras do portal (delay do reveal, etc.)
@@ -142,7 +146,7 @@ async function migrate() {
         await client.query(`
           INSERT INTO business_hours (clinic_id, day_of_week, open, start_time, end_time)
           VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT DO NOTHING
+          ON CONFLICT (clinic_id, day_of_week) DO NOTHING
         `, [clinic.id, dow, open, start, end])
       }
     }
