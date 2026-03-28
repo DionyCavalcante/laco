@@ -35,11 +35,11 @@ app.use('/webhook',          require('./routes/webhook'))
 
 // Serve arquivos de upload (fotos antes/depois)
 const path = require('path')
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')))
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
-  const pub = path.join(__dirname, '../../frontend/public')
+  const pub = path.join(__dirname, '../public')
   app.use(express.static(pub))
 
   // Portal do cliente: /:slug/agendar
