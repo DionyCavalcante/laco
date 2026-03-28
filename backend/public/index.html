@@ -297,9 +297,8 @@ async function loadStats() {
       document.getElementById('s-scheduled').textContent = d.scheduled || 0
       document.getElementById('s-rejected').textContent  = d.rejected  || 0
       document.getElementById('s-sent').textContent      = d.link_sent || 0
-      document.getElementById('s-val-aberto').textContent   = fmtBRL(d.valor_em_aberto)
       document.getElementById('s-val-agendado').textContent = fmtBRL(d.valor_agendado)
-      document.getElementById('s-val-realizado').textContent= fmtBRL(d.valor_realizado)
+      document.getElementById('s-val-realizado').textContent = fmtBRL(d.valor_realizado)
     }
     if (ar.ok) {
       const a = await ar.json()
