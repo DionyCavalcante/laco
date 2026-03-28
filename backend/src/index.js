@@ -39,7 +39,6 @@ app.use('/uploads', express.static(path.join(__dirname, '../../uploads')))
 
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
-  const path = require('path')
   const pub = path.join(__dirname, '../../frontend/public')
   app.use(express.static(pub))
 
