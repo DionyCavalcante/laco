@@ -119,3 +119,4 @@ module.exports = router
 
 // debug temp
 console.log('CLINIC_SLUG value:', JSON.stringify(process.env.CLINIC_SLUG))
+console.log('SLUG:', JSON.stringify(process.env.CLINIC_SLUG))
