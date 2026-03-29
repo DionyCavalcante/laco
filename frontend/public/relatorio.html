@@ -192,21 +192,26 @@ function render(ls, as_, leads, apts) {
       </div>
     </div>
 
-    ${Object.keys(reasons).length ? `
     <div class="reason-card">
       <div class="chart-title" style="margin-bottom:14px">Motivos de recusa</div>
-      ${Object.entries(reasons).map(([k,v]) => `
+      ${Object.keys(reasons).length ? Object.entries(reasons).map(([k,v]) => `
         <div class="reason-row">
           <span class="reason-name">${reasonLabels[k]||k}</span>
           <div class="reason-bar-wrap"><div class="reason-bar" style="width:${totalRejected>0?Math.round(v/totalRejected*100):0}%"></div></div>
           <span class="reason-pct">${totalRejected>0?Math.round(v/totalRejected*100):0}%</span>
-        </div>`).join('')}
-    </div>` : ''}
+        </div>`).join('') : '<div style="padding:16px 0;text-align:center;font-size:13px;color:#bbb">Nenhum motivo de recusa registrado ainda.</div>'}
+    </div>
 
-    ${procs.length ? `
     <div class="chart-card" style="background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px">
-      <div class="chart-title">Conversão por procedimento</div>
-      <table class="proc-table">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="chart-title" style="margin-bottom:0">Conversão por procedimento</div>
+        <div style="display:flex;gap:8px;font-size:11px">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#E0F4EE;border:1px solid #9FE1CB;display:inline-block"></span><span style="color:#27500A">≥50%</span></span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#FEF3E2;border:1px solid #FAC775;display:inline-block"></span><span style="color:#633806">25–49%</span></span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#FAECE7;border:1px solid #F5C4B3;display:inline-block"></span><span style="color:#712B13">&lt;25%</span></span>
+        </div>
+      </div>
+      ${procs.length ? `<table class="proc-table">
         <thead><tr>
           <th>Procedimento</th>
           <th>Visualizações</th>
@@ -228,8 +233,8 @@ function render(ls, as_, leads, apts) {
             </tr>`
           }).join('')}
         </tbody>
-      </table>
-    </div>` : ''}
+      </table>` : '<div style="padding:24px 0;text-align:center;font-size:13px;color:#bbb">Nenhum procedimento com dados ainda.</div>'}
+    </div>
   `
 }
 
@@ -273,7 +278,6 @@ function fmtBRL(cents) {
   return 'R$ ' + (parseInt(cents) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
-function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
 load()

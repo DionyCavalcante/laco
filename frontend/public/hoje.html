@@ -121,6 +121,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .da-cancel{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
 
 .loading{padding:40px;text-align:center;color:#aaa;font-size:13px}
+.empty-state{padding:40px 20px;text-align:center;color:#bbb;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty-state svg{opacity:0.3}
+.refresh-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity 0.3s}
+.refresh-indicator.show{opacity:1}
+.refresh-indicator .mini-spin{width:10px;height:10px;border:1.5px solid rgba(0,0,0,0.1);border-top-color:#9B6FA5;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .av-0{background:#F3ECF6;color:#7A4F7A}
 .av-1{background:#E0F4EE;color:#2E6647}
@@ -147,6 +153,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <span class="brand-name">Laço — Hoje</span>
   </div>
   <div class="topbar-right">
+    <div class="refresh-indicator" id="refresh-indicator"><div class="mini-spin"></div>Atualizando...</div>
     <a href="/" class="btn btn-ghost">← Dashboard</a>
     <button class="btn btn-ghost" onclick="reload()">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1 0 1.5-4"/><polyline points="2 2 2 6 6 6"/></svg>
@@ -176,12 +183,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="kpi"><div class="kpi-label">Valor confirmado</div><div class="kpi-val green" id="k-val-confirmado">—</div></div>
     <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green" id="k-val-realizado">—</div></div>
     <div class="kpi"><div class="kpi-label">Valor cancelado</div><div class="kpi-val" style="color:#A32D2D" id="k-val-cancelado">—</div></div>
-  </div>
-  <div class="kpi-row" style="margin-top:8px">
-    <div class="kpi"><div class="kpi-label">Valor esperado hoje</div><div class="kpi-val purple" id="k-val-esperado">—</div></div>
-    <div class="kpi"><div class="kpi-label">Valor confirmado</div><div class="kpi-val green" id="k-val-confirmado">—</div></div>
-    <div class="kpi"><div class="kpi-label">Valor realizado</div><div class="kpi-val green" id="k-val-realizado">—</div></div>
-    <div class="kpi"><div class="kpi-label">Valor cancelado</div><div class="kpi-val red" id="k-val-cancelado" style="color:#A32D2D">—</div></div>
   </div>
 
   <div class="main-grid">
@@ -283,7 +284,9 @@ function reload() { load() }
 
 /* ---- LOAD ---- */
 async function load() {
-  document.getElementById('timeline').innerHTML = '<div class="loading">Carregando...</div>'
+  const ri = document.getElementById('refresh-indicator')
+  ri.classList.add('show')
+  document.getElementById('timeline').innerHTML = '<div class="loading">Carregando agenda...</div>'
   document.getElementById('next-up').innerHTML  = '<div class="apt-empty">—</div>'
   try {
     const ds = dateStr(currentDate)
@@ -299,6 +302,8 @@ async function load() {
     render()
   } catch {
     document.getElementById('timeline').innerHTML = '<div class="loading">Erro ao carregar. Verifique o servidor.</div>'
+  } finally {
+    document.getElementById('refresh-indicator').classList.remove('show')
   }
 }
 
@@ -314,7 +319,6 @@ function render() {
   renderSummary()
 }
 
-function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 function updateKpis() {
   const total     = appointments.length
   const confirmed = appointments.filter(a => a.status === 'confirmed').length
@@ -345,7 +349,13 @@ function fmtBRL(cents) {
 function renderTimeline(apts) {
   const tl = document.getElementById('timeline')
   if (!apts.length) {
-    tl.innerHTML = `<div class="apt-empty" style="padding:32px">Nenhum agendamento${activeFilter !== 'todos' ? ' com este filtro' : ' para este dia'}.</div>`
+    const msg = activeFilter !== 'todos'
+      ? 'Nenhum agendamento com este filtro.'
+      : 'Nenhum agendamento para este dia.'
+    tl.innerHTML = `<div class="empty-state">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>${msg}</span>
+    </div>`
     return
   }
 
