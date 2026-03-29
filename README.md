@@ -11,36 +11,37 @@ Portal de autoatendimento + dashboard de gestão + webhook para Evolution (Whats
 laco/
 ├── backend/
 │   ├── src/
-│   │   ├── index.js                ← servidor Express (entrada)
+│   │   ├── index.js                ← servidor Express (entrada) + aplica constraints no startup
 │   │   ├── db/
 │   │   │   ├── index.js            ← pool de conexão PostgreSQL
-│   │   │   └── migrate.js          ← cria tabelas + seed inicial
+│   │   │   └── migrate.js          ← cria tabelas + seed inicial (rodar manualmente)
 │   │   ├── middleware/
-│   │   │   └── auth.js             ← proteção por API key
+│   │   │   └── auth.js             ← proteção por API key (rotas públicas: portal, upload GET)
 │   │   └── routes/
-│   │       ├── leads.js            ← clientes / leads
+│   │       ├── leads.js            ← clientes / leads (suporta filtro date_from/date_to)
 │   │       ├── appointments.js     ← agendamentos + slots
 │   │       ├── procedures.js       ← procedimentos da clínica
 │   │       ├── hours.js            ← horários de atendimento
-│   │       ├── upload.js           ← fotos antes/depois
+│   │       ├── upload.js           ← fotos antes/depois salvas como base64 no banco
 │   │       ├── settings.js         ← configurações do portal
-│   │       ├── portal.js           ← API pública (cliente)
+│   │       ├── portal.js           ← API pública (cliente): identify, track, book, slots
 │   │       └── webhook.js          ← eventos da Evolution
-│   ├── uploads/                    ← fotos salvas (gerado automaticamente)
 │   ├── .env.example
 │   └── package.json
 ├── frontend/
 │   └── public/
-│       ├── index.html              ← dashboard principal
+│       ├── index.html              ← dashboard principal (filtro de período com calendário)
 │       ├── login.html              ← tela de login
 │       ├── cliente.html            ← detalhe do cliente
 │       ├── relatorio.html          ← relatório de conversão
 │       ├── agendar.html            ← portal de agendamento (cliente)
 │       └── config/
-│           └── index.html          ← configurações da clínica
+│           └── index.html          ← configurações da clínica (fotos antes/depois)
 ├── railway.toml
 └── nixpacks.toml
 ```
+
+> **Importante:** `backend/public/` é cópia de `frontend/public/`. Sempre sincronize com `cp frontend/public/X backend/public/X` ao editar o frontend.
 
 ---
 
@@ -59,28 +60,49 @@ laco/
 
 ## API — endpoints
 
-Todas as rotas `/api/*` (exceto `/api/portal`) exigem header `x-api-key: <API_SECRET>`.
+Todas as rotas `/api/*` exigem header `x-api-key: <API_SECRET>`, **exceto** as rotas do portal e `GET /api/upload/procedure/:id/photos`.
 
 ### Leads
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | `/api/leads` | Lista leads (`?status=rejected&search=nome`) |
+| GET | `/api/leads` | Lista leads (`?status=&search=&date_from=YYYY-MM-DD&date_to=YYYY-MM-DD`) |
 | GET | `/api/leads/stats` | Contadores do topo |
 | GET | `/api/leads/:id` | Detalhe de um lead |
-| POST | `/api/leads` | Cria lead manualmente |
+| POST | `/api/leads` | Cria/atualiza lead por telefone (upsert) |
 | PATCH | `/api/leads/:id/status` | Atualiza status e motivo |
+| DELETE | `/api/leads/:id` | Remove lead |
 
-Status possíveis: `new` · `link_sent` · `scheduled` · `rejected`
+**Status possíveis do lead:**
+
+| Status | Significado | Quem define |
+|--------|-------------|-------------|
+| `captado` | Preencheu nome/WhatsApp no portal por conta própria | Portal (identify) |
+| `link_sent` | Clínica enviou o link de agendamento via WhatsApp | Clínica via API |
+| `scheduled` | Confirmou agendamento | Portal (book) |
+| `rejected` | Recusou a oferta | Portal (book com reject_reason) |
+
+**Criar lead via API ao enviar WhatsApp** (n8n, automação, etc.):
+```
+POST /api/leads
+x-api-key: <API_SECRET>
+Content-Type: application/json
+
+{ "name": "Joana Silva", "phone": "5511999999999", "source": "whatsapp", "status": "link_sent" }
+```
+Se o telefone já existir, atualiza nome e status (upsert por telefone).
 
 ### Agendamentos
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/appointments` | Lista (`?status=confirmed&lead_id=UUID`) |
 | GET | `/api/appointments/stats` | Contadores |
-| GET | `/api/appointments/slots` | Horários disponíveis (`?date=YYYY-MM-DD&procedure_id=UUID`) |
+| GET | `/api/appointments/slots` | Slots disponíveis (`?date=YYYY-MM-DD&procedure_id=UUID`) |
 | PATCH | `/api/appointments/:id/status` | Confirmar / cancelar |
 
 ### Procedimentos
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/procedures` | Lista procedimentos |
@@ -88,43 +110,65 @@ Status possíveis: `new` · `link_sent` · `scheduled` · `rejected`
 | PATCH | `/api/procedures/:id` | Atualiza (nome, preço, duração, ativo, etc.) |
 
 ### Horários
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/hours` | Horários de atendimento |
 | POST | `/api/hours` | Salva horários (array dos 7 dias) |
 
 ### Upload de fotos
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/upload/procedure/:id/photos` | Upload (campos `before` e/ou `after`) |
-| GET | `/api/upload/procedure/:id/photos` | Lista fotos do procedimento |
-| DELETE | `/api/upload/photo/:photoId` | Remove foto |
 
-Imagens são redimensionadas para 900px e convertidas para WebP automaticamente.
+| Método | Rota | Descrição | Auth |
+|--------|------|-----------|------|
+| POST | `/api/upload/procedure/:id/photos` | Upload (campos `before` e/ou `after`) | Sim |
+| GET | `/api/upload/procedure/:id/photos` | Lista fotos do procedimento | **Não** (público) |
+| DELETE | `/api/upload/photo/:photoId` | Remove foto | Sim |
+
+Imagens são redimensionadas para 900px, convertidas para WebP e **salvas como base64 diretamente no banco** (campo `url` da tabela `procedure_photos`). Não depende de filesystem — funciona no Railway sem volume.
 
 ### Configurações do portal
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/settings` | Lê configurações (delay, saudação, exibir preço) |
 | POST | `/api/settings` | Salva configurações |
 
 ### Portal (público — sem autenticação)
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/portal/:slug` | Info da clínica + procedimentos ativos |
 | GET | `/api/portal/:slug/slots` | Slots disponíveis por data |
+| POST | `/api/portal/:slug/identify` | Registra lead ao preencher nome/WhatsApp |
+| POST | `/api/portal/:slug/track` | Atualiza `procedure_viewed` ao clicar num procedimento |
 | POST | `/api/portal/:slug/book` | Finaliza agendamento ou registra recusa |
 
+**Fluxo do portal (agendar.html):**
+1. Pessoa preenche nome + WhatsApp → `POST /identify` → lead criado com `captado` (ou mantém status existente se já tinha `link_sent`)
+2. Clica num procedimento → `POST /track` → `procedure_viewed` atualizado (status não muda)
+3. Confirma agendamento → `POST /book` → status vai para `scheduled`
+4. Recusa → `POST /book` com `reject_reason` → status vai para `rejected`
+
 ### Webhook
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | POST | `/webhook/evolution` | Recebe eventos da Evolution API |
 
-### Utilitários
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/health` | Health check (usado pelo Railway) |
-| GET | `/uploads/:filename` | Serve fotos estáticas |
+---
+
+## Banco de dados — tabelas
+
+| Tabela | Descrição |
+|--------|-----------|
+| `clinics` | Clínicas (suporte multi-tenant futuro) |
+| `procedures` | Procedimentos com preço, duração, vídeo |
+| `procedure_photos` | Fotos antes/depois — campo `url` armazena data URI base64 |
+| `leads` | Clientes captados — `UNIQUE (clinic_id, phone)` aplicado no startup |
+| `appointments` | Agendamentos com data, status e origem |
+| `business_hours` | Horários de atendimento por dia da semana — `UNIQUE (clinic_id, day_of_week)` |
+| `portal_settings` | Configurações do portal (delay, saudação) |
+| `webhook_log` | Log de todos os payloads recebidos da Evolution |
 
 ---
 
@@ -166,23 +210,7 @@ Servidor em `http://localhost:3000`.
 
 ## Deploy no Railway
 
-### 1. Criar conta em railway.app
-
-### 2. Push no GitHub e conectar
-```bash
-git init
-git add .
-git commit -m "initial commit"
-git remote add origin https://github.com/seu-usuario/laco.git
-git push -u origin main
-```
-No Railway: New Project → Deploy from GitHub → selecione o repo
-
-### 3. Adicionar banco PostgreSQL
-No painel do projeto: New → Database → Add PostgreSQL
-O Railway injeta DATABASE_URL automaticamente.
-
-### 4. Configurar variáveis de ambiente no Railway
+### Variáveis de ambiente necessárias
 ```
 NODE_ENV=production
 API_SECRET=gere-com-openssl-rand-hex-32
@@ -191,13 +219,9 @@ CLINIC_NAME=Clínica Bella Estética
 FRONTEND_URL=https://seu-app.railway.app
 ```
 
-Gere uma chave segura:
-```bash
-openssl rand -hex 32
-```
+> Volumes **não são necessários** — fotos ficam salvas no banco de dados.
 
-### 5. Deploy automático
-O Railway detecta o nixpacks.toml, instala, roda migrations e sobe.
+> Migrations críticas (constraints) são aplicadas automaticamente no startup do servidor. Para criar as tabelas pela primeira vez, execute `npm run migrate` uma vez (via Railway shell ou localmente apontando para o banco de produção).
 
 ---
 
@@ -208,46 +232,17 @@ Configure o webhook na Evolution:
 POST https://seu-app.railway.app/webhook/evolution
 ```
 
-Fluxo:
+**Fluxo recomendado com automação (n8n):**
 1. Cliente manda mensagem → webhook → Laço cria lead automaticamente
-2. Evolution envia o link via automação
-3. Atualize o status: `PATCH /api/leads/:id/status { "status": "link_sent" }`
-4. Cliente abre o link → agenda → Laço registra tudo
-
-Para notificar a clínica quando chega novo agendamento, adicione em portal.js após criar o agendamento:
-```js
-await fetch(`${process.env.EVOLUTION_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
-  method: 'POST',
-  headers: { 'apikey': process.env.EVOLUTION_KEY, 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    number: process.env.CLINIC_PHONE,
-    text: `Novo agendamento!\nCliente: ${name}\nProcedimento: ${proc.name}\nData: ${date} às ${time}`
-  })
-})
-```
-
-Variáveis: `EVOLUTION_URL`, `EVOLUTION_INSTANCE`, `EVOLUTION_KEY`, `CLINIC_PHONE`
-
----
-
-## Banco de dados — tabelas
-
-| Tabela | Descrição |
-|--------|-----------|
-| `clinics` | Clínicas (suporte multi-tenant futuro) |
-| `procedures` | Procedimentos com preço, duração, vídeo |
-| `procedure_photos` | Fotos antes/depois por procedimento |
-| `leads` | Clientes captados com status e motivo de recusa |
-| `appointments` | Agendamentos com data, status e origem |
-| `business_hours` | Horários de atendimento por dia da semana |
-| `portal_settings` | Configurações do portal (delay, saudação) |
-| `webhook_log` | Log de todos os payloads recebidos da Evolution |
+2. Automação envia o link de agendamento via WhatsApp
+3. Após enviar, chama `POST /api/leads` para registrar com `status: link_sent`
+4. Cliente abre o link → preenche dados → agenda → Laço atualiza tudo automaticamente
 
 ---
 
 ## Segurança
 
 - `API_SECRET` protege todas as rotas do dashboard — nunca versione esse valor
-- Portal do cliente e webhook são públicos por design
+- Portal do cliente e `GET /api/upload/procedure/:id/photos` são públicos por design
 - HTTPS fornecido automaticamente pelo Railway
 - Sessão do dashboard armazenada em sessionStorage (expira ao fechar o navegador)
