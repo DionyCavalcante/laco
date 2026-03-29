@@ -475,19 +475,50 @@ select option{background:white;color:var(--t0)}
 .loading{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 .empty{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 
-/* Responsive */
+/* ── Responsive ── */
 @media(max-width:700px){
-  .navbar{padding:0 16px}
+  /* Navbar */
+  .navbar{padding:0 14px}
+  .nb-brand{margin-right:10px}
   .nb-nav .nb-link span{display:none}
-  .page{padding:20px 16px 40px}
-  .kpi-row{grid-template-columns:repeat(2,1fr)}
-  .kpi-row-3{grid-template-columns:repeat(3,1fr)}
-  .col-proc,.col-reason{display:none}
+  .clinic-pill{display:none}
+
+  /* Page */
+  .page{padding:16px 14px 40px}
   .page-header{flex-direction:column;gap:12px}
   .link-share{width:100%}
+
+  /* KPIs */
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-row-3{grid-template-columns:repeat(3,1fr)}
+  .kpi-val{font-size:18px;letter-spacing:-0.3px}
+  .kpi-label{font-size:9px}
+
+  /* Table → card layout on mobile */
+  .trow.head{display:none}
+  .trow{
+    display:grid;
+    grid-template-areas:"av name date" "av status .";
+    grid-template-columns:32px 1fr auto;
+    gap:5px 10px;
+    align-items:start;
+    padding:12px 14px;
+  }
+  .av{grid-area:av;margin-top:1px}
+  .col-name{grid-area:name;min-width:0}
+  .col-status{grid-area:status;min-width:0}
+  .col-date{
+    grid-area:date;
+    font-size:11px;color:var(--t2);
+    text-align:right;white-space:nowrap;
+    padding-top:2px;
+  }
+  .col-apt,.col-proc,.col-reason{display:none}
+  .inline-sel{font-size:11px;padding:3px 8px}
 }
 @media(max-width:480px){
   .kpi-row-3{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:16px}
 }
 </style>
 </head>
