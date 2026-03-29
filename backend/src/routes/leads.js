@@ -81,14 +81,18 @@ router.get('/stats', async (req, res) => {
 // POST /api/leads — cria lead manualmente
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, source = 'manual' } = req.body
+    const { name, phone, source = 'manual', status = 'link_sent' } = req.body
     if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' })
 
+    const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
+    // Upsert por telefone — se já existir, atualiza nome e status
     const { rows } = await db.query(`
-      INSERT INTO leads (clinic_id, name, phone, source)
-      VALUES ((SELECT id FROM clinics WHERE slug = $1), $2, $3, $4)
+      INSERT INTO leads (clinic_id, name, phone, source, status)
+      VALUES ((SELECT id FROM clinics WHERE slug = $1), $2, $3, $4, $5)
+      ON CONFLICT (clinic_id, phone)
+      DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status, updated_at = NOW()
       RETURNING *
-    `, [process.env.CLINIC_SLUG || 'bella-estetica', name, phone, source])
+    `, [clinicSlug, name, phone, source, status])
     res.status(201).json(rows[0])
   } catch (err) {
     console.error(err)

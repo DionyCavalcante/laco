@@ -125,7 +125,7 @@ router.post('/:slug/track', async (req, res) => {
     if (!lead_id || !procedure_id) return res.status(400).json({ error: 'Dados insuficientes' })
 
     await db.query(`
-      UPDATE leads SET procedure_viewed = $1, status = CASE WHEN status IN ('new', 'captado') THEN 'link_sent' ELSE status END, updated_at = NOW()
+      UPDATE leads SET procedure_viewed = $1, updated_at = NOW()
       WHERE id = $2
     `, [procedure_id, lead_id])
 
