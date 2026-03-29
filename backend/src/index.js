@@ -17,6 +17,13 @@ app.use(cors({
 app.use(express.json())
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 
+// Garante constraints críticas no banco (idempotente)
+const db = require('./db')
+db.query(`
+  ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique;
+  ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone);
+`).catch(e => console.warn('constraint migration:', e.message))
+
 // Health check — Railway usa isso
 app.get('/health', (req, res) => res.json({ ok: true, ts: new Date() }))
 

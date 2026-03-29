@@ -84,6 +84,23 @@ router.get('/:slug/slots', async (req, res) => {
   }
 })
 
+// Upsert de lead sem depender de constraint (compatível com qualquer estado do banco)
+async function upsertLead(clinicId, name, phone) {
+  const { rows: [existing] } = await db.query(
+    'SELECT id FROM leads WHERE clinic_id=$1 AND phone=$2 LIMIT 1', [clinicId, phone]
+  )
+  if (existing) {
+    await db.query('UPDATE leads SET name=$1, updated_at=NOW() WHERE id=$2', [name, existing.id])
+    return existing.id
+  }
+  const { rows: [lead] } = await db.query(
+    `INSERT INTO leads (clinic_id, name, phone, source, status)
+     VALUES ($1, $2, $3, 'link', 'new') RETURNING id`,
+    [clinicId, name, phone]
+  )
+  return lead.id
+}
+
 // POST /api/portal/:slug/identify — registra lead assim que informa nome e WhatsApp
 router.post('/:slug/identify', async (req, res) => {
   try {
@@ -93,15 +110,8 @@ router.post('/:slug/identify', async (req, res) => {
     const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [req.params.slug])
     if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
 
-    const { rows: [lead] } = await db.query(`
-      INSERT INTO leads (clinic_id, name, phone, source, status)
-      VALUES ($1, $2, $3, 'link', 'new')
-      ON CONFLICT (clinic_id, phone)
-      DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
-      RETURNING id
-    `, [clinic.id, name, phone])
-
-    res.json({ ok: true, lead_id: lead.id })
+    const leadId = await upsertLead(clinic.id, name, phone)
+    res.json({ ok: true, lead_id: leadId })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao registrar lead' })
@@ -133,14 +143,8 @@ router.post('/:slug/book', async (req, res) => {
     const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [req.params.slug])
     if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
 
-    // Upsert pelo telefone — nunca duplica
-    const { rows: [lead] } = await db.query(`
-      INSERT INTO leads (clinic_id, name, phone, source, status)
-      VALUES ($1, $2, $3, 'link', 'new')
-      ON CONFLICT (clinic_id, phone)
-      DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
-      RETURNING *
-    `, [clinic.id, name, phone])
+    const leadId = req.body.lead_id || await upsertLead(clinic.id, name, phone)
+    const { rows: [lead] } = await db.query('SELECT * FROM leads WHERE id=$1', [leadId])
 
     // Se o cliente recusou a oferta
     if (reject_reason) {
