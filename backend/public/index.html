@@ -4,283 +4,523 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;min-height:100vh;color:#111}
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0e13;
+  --bg2:#12131a;
+  --sidebar:#0c0d12;
+  --topbar:#0f1016;
+  --card:#161720;
+  --card-h:#1b1c27;
+  --b0:rgba(255,255,255,0.04);
+  --b1:rgba(255,255,255,0.07);
+  --b2:rgba(255,255,255,0.12);
+  --t0:#dde0ea;
+  --t1:#7e8196;
+  --t2:#4a4d5c;
+  --purple:#9B6FA5;
+  --purple-l:#C8A2C8;
+  --purple-dim:rgba(155,111,165,0.12);
+  --purple-glow:rgba(155,111,165,0.25);
+  --green:#4ead85;
+  --amber:#d4943a;
+  --red:#c94f4f;
+  --blue:#4a87d4;
+}
+body{font-family:'Outfit',-apple-system,sans-serif;background:var(--bg);color:var(--t0);min-height:100vh;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+select option{background:#1c1d26;color:var(--t0)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 
-/* Layout */
-.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.brand{display:flex;align-items:center;gap:8px}
-.brand-dot{width:26px;height:26px;border-radius:7px;background:#9B6FA5;display:flex;align-items:center;justify-content:center}
-.brand-dot svg{width:13px;height:13px;fill:white}
-.brand-name{font-size:14px;font-weight:500}
-.clinic-tag{font-size:11px;color:#888;background:#f5f4f0;padding:3px 10px;border-radius:20px;border:0.5px solid rgba(0,0,0,0.1)}
-.nav{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;display:flex;gap:2px;position:sticky;top:52px;z-index:9}
-.nav-tab{padding:0 16px;height:42px;display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
-.nav-tab svg{width:14px;height:14px;flex-shrink:0}
-.nav-tab.on{color:#9B6FA5;border-bottom-color:#9B6FA5;font-weight:500}
-.nav-tab:hover:not(.on){color:#111}
+/* ── Sidebar ── */
+.sidebar{
+  position:fixed;top:0;left:0;
+  width:56px;height:100vh;
+  background:var(--sidebar);
+  border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 0 12px;
+  z-index:100;gap:2px
+}
+.sb-logo{
+  width:32px;height:32px;border-radius:9px;
+  background:var(--purple);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+  box-shadow:0 0 20px var(--purple-glow);
+  flex-shrink:0
+}
+.sb-logo svg{width:15px;height:15px;fill:white}
+.sb-div{width:28px;height:1px;background:var(--b1);margin:5px 0}
+.sb-item{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--t2);
+  transition:background 0.15s,color 0.15s;
+  position:relative;background:none;border:none;
+  text-decoration:none
+}
+.sb-item svg{width:18px;height:18px;flex-shrink:0}
+.sb-item:hover{background:var(--b0);color:var(--t1)}
+.sb-item.active{background:var(--purple-dim);color:var(--purple-l);box-shadow:0 0 14px var(--purple-dim)}
+.sb-item::after{
+  content:attr(data-tip);
+  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+  background:#1e1f2a;color:var(--t0);
+  font-size:11px;font-weight:500;padding:5px 9px;
+  border-radius:6px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity 0.15s;
+  border:1px solid var(--b2);z-index:200
+}
+.sb-item:hover::after{opacity:1}
+.sb-spacer{flex:1}
+
+/* ── Main Layout ── */
+.main{margin-left:56px;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Topbar ── */
+.topbar{
+  height:52px;background:var(--topbar);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:sticky;top:0;z-index:50
+}
+.page-title{font-size:14px;font-weight:600;color:var(--t0)}
+.clinic-tag{
+  font-size:11px;color:var(--t1);
+  background:var(--b0);padding:3px 10px;
+  border-radius:20px;border:1px solid var(--b1);
+  display:flex;align-items:center;gap:5px
+}
+.clinic-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+
+/* ── Nav Tabs ── */
+.nav{background:var(--topbar);border-bottom:1px solid var(--b1);padding:0 24px;display:flex}
+.nav-tab{
+  padding:0 16px;height:40px;
+  display:flex;align-items:center;gap:7px;
+  font-size:12.5px;color:var(--t2);cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color 0.15s,border-color 0.15s;
+  font-weight:500;white-space:nowrap
+}
+.nav-tab svg{width:14px;height:14px}
+.nav-tab.on{color:var(--purple-l);border-bottom-color:var(--purple)}
+.nav-tab:hover:not(.on){color:var(--t1)}
 .panel{display:none}
 .panel.on{display:block}
-.page-inner{max-width:960px;margin:0 auto;padding:20px 24px}
+.page-inner{max-width:1020px;margin:0 auto;padding:24px}
 
-/* Link banner */
-.link-banner{background:white;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;gap:8px}
-.link-label{font-size:12px;color:#666;white-space:nowrap}
-.link-url{flex:1;min-width:180px;font-size:12px;font-family:monospace;color:#555;background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn{padding:7px 14px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:none}
-.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
-.btn-ghost:hover{background:#f5f4f0}
-.btn-ghost.done{background:#E0F4EE;border-color:#4A9C6A;color:#27500A}
-.btn-purple{background:#9B6FA5;color:white}
+/* ── Link Banner ── */
+.link-banner{
+  background:var(--card);border:1px solid var(--b1);border-radius:12px;
+  padding:12px 16px;display:flex;align-items:center;gap:8px;
+  margin-bottom:20px;flex-wrap:wrap
+}
+.link-label{font-size:11px;color:var(--t1);white-space:nowrap}
+.link-url{
+  flex:1;min-width:180px;
+  font-size:11.5px;font-family:'SF Mono','Fira Code',monospace;
+  color:var(--t1);background:var(--b0);border:1px solid var(--b1);
+  border-radius:8px;padding:7px 10px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+
+/* ── Buttons ── */
+.btn{
+  padding:7px 14px;font-size:12px;font-weight:500;
+  border-radius:8px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;
+  white-space:nowrap;border:none;font-family:inherit
+}
+.btn-ghost{
+  background:var(--b0);border:1px solid var(--b1);color:var(--t1);
+  transition:all 0.15s
+}
+.btn-ghost:hover{background:var(--b1);color:var(--t0)}
+.btn-ghost.done{background:rgba(78,173,133,0.15);border-color:rgba(78,173,133,0.3);color:var(--green)}
+.btn-purple{background:var(--purple);color:white;transition:all 0.15s;box-shadow:0 0 16px var(--purple-glow)}
 .btn-purple:hover{background:#8a5f94}
-.btn-green{background:#25D366;color:white}
+.btn-green{background:#25D366;color:white;transition:all 0.15s}
 .btn-green:hover{background:#1da855}
 
-/* Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
-.stat-card{background:white;border-radius:10px;padding:14px 16px;border:0.5px solid rgba(0,0,0,0.07)}
-.stat-label{font-size:11px;color:#888;margin-bottom:4px}
-.stat-val{font-size:22px;font-weight:500}
-.stat-val.purple{color:#9B6FA5}
-.stat-val.green{color:#2E8C66}
-.stat-val.amber{color:#9A6B10}
-.stat-val.red{color:#A32D2D}
-/* Toolbar */
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.search-wrap{flex:1;min-width:180px;position:relative}
-.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:#aaa}
-.search-wrap input{width:100%;padding:7px 10px 7px 28px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;background:white;color:#111;outline:none}
-.search-wrap input:focus{border-color:#9B6FA5}
-.filter-pill{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;white-space:nowrap}
-.filter-pill.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
-.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#e8e8e8;color:#888;font-size:9px;font-weight:600;cursor:help;margin-left:5px;flex-shrink:0;position:relative}
-.tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#111;color:white;font-size:11px;font-weight:400;padding:5px 9px;border-radius:7px;white-space:nowrap;z-index:99;pointer-events:none;line-height:1.4}
-.tip:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#111;z-index:99}
-.stat-label{font-size:11px;color:#888;margin-bottom:4px;display:flex;align-items:center}
-.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#e8e8e8;color:#888;font-size:9px;font-weight:600;cursor:help;margin-left:5px;flex-shrink:0;position:relative}
-.tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#111;color:white;font-size:11px;font-weight:400;padding:5px 9px;border-radius:7px;white-space:nowrap;z-index:99;pointer-events:none;line-height:1.4}
-.tip:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#111;z-index:99}
-.stat-label{font-size:11px;color:#888;margin-bottom:4px;display:flex;align-items:center}
-.inline-sel{padding:5px 10px;font-size:11px;font-weight:500;border:0.5px solid rgba(0,0,0,0.15);border-radius:20px;background:white;color:#555;cursor:pointer;outline:none;transition:border-color 0.15s}
-.inline-sel:hover{border-color:#C8A2C8;color:#7A4F7A}
-.inline-sel.s-new{border-color:#B5D4F4;color:#0C447C;background-color:#EEF4FE}
-.inline-sel.s-link_sent{border-color:#FAC775;color:#633806;background-color:#FEF3E2}
-.inline-sel.s-scheduled{border-color:#9FE1CB;color:#27500A;background-color:#E0F4EE}
-.inline-sel.s-rejected{border-color:#F5C4B3;color:#712B13;background-color:#FAECE7}
-.inline-sel.s-pending{border-color:#FAC775;color:#633806;background-color:#FEF3E2}
-.inline-sel.s-confirmed{border-color:#9FE1CB;color:#27500A;background-color:#E0F4EE}
-.inline-sel.s-done{border-color:#ccc;color:#555;background-color:#f5f5f5}
-.inline-sel.s-cancelled{border-color:#F5C4B3;color:#712B13;background-color:#FAECE7}
-.col-apt{flex:1;min-width:0;font-size:12px}
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.stat-card{
+  background:var(--card);border-radius:12px;padding:16px 18px;
+  border:1px solid var(--b1);
+  transition:border-color 0.2s,transform 0.2s
+}
+.stat-card:hover{border-color:var(--b2);transform:translateY(-1px)}
+.stat-label{
+  font-size:10px;color:var(--t2);margin-bottom:8px;
+  font-weight:600;text-transform:uppercase;letter-spacing:0.5px;
+  display:flex;align-items:center
+}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-val.purple{color:var(--purple-l)}
+.stat-val.green{color:var(--green)}
+.stat-val.amber{color:var(--amber)}
+.stat-val.red{color:var(--red)}
+
+/* ── Tooltip ── */
+.tip{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--b1);color:var(--t2);
+  font-size:8px;font-weight:700;cursor:help;
+  margin-left:5px;position:relative;flex-shrink:0
+}
+.tip:hover::after{
+  content:attr(data-tip);position:absolute;
+  bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#1e1f2a;color:var(--t0);font-size:11px;font-weight:400;
+  padding:5px 9px;border-radius:7px;white-space:nowrap;
+  z-index:99;pointer-events:none;line-height:1.4;
+  border:1px solid var(--b2)
+}
+.tip:hover::before{
+  content:'';position:absolute;
+  bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:#1e1f2a;z-index:99
+}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--t2)}
+.search-wrap input{
+  width:100%;padding:8px 10px 8px 30px;font-size:13px;
+  background:var(--card);border:1px solid var(--b1);
+  border-radius:9px;color:var(--t0);outline:none;
+  font-family:inherit;transition:border-color 0.15s
+}
+.search-wrap input::placeholder{color:var(--t2)}
+.search-wrap input:focus{border-color:var(--purple)}
+
+.filter-pill{
+  padding:6px 13px;font-size:12px;border:1px solid var(--b1);
+  border-radius:20px;cursor:pointer;color:var(--t1);
+  background:var(--card);white-space:nowrap;
+  transition:all 0.15s;font-weight:500
+}
+.filter-pill.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.35);color:var(--purple-l)}
+.filter-pill:hover:not(.on){border-color:var(--b2);color:var(--t0)}
+
+/* ── Date Filter ── */
 .date-filter-wrap{position:relative;display:inline-block}
-.date-filter-btn{padding:5px 12px;font-size:12px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white;display:flex;align-items:center;gap:5px;white-space:nowrap}
-.date-filter-btn.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.date-filter-btn{
+  padding:6px 13px;font-size:12px;border:1px solid var(--b1);
+  border-radius:20px;cursor:pointer;color:var(--t1);
+  background:var(--card);display:flex;align-items:center;gap:5px;
+  white-space:nowrap;font-family:inherit;transition:all 0.15s
+}
 .date-filter-btn svg{width:12px;height:12px}
-.date-picker-panel{display:none;position:absolute;top:calc(100% + 6px);right:0;background:white;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:14px;z-index:50;min-width:280px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+.date-filter-btn.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.35);color:var(--purple-l)}
+.date-picker-panel{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;
+  background:#1c1d26;border:1px solid var(--b2);border-radius:12px;
+  padding:14px;z-index:50;min-width:280px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4)
+}
 .date-picker-panel.on{display:block}
-.dp-shortcuts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:0.5px solid rgba(0,0,0,0.08)}
-.dp-shortcut{padding:4px 10px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;cursor:pointer;color:#666;background:white}
-.dp-shortcut:hover,.dp-shortcut.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.dp-shortcuts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.dp-shortcut{
+  padding:4px 10px;font-size:11px;border:1px solid var(--b1);
+  border-radius:20px;cursor:pointer;color:var(--t1);
+  background:var(--card);transition:all 0.15s;font-family:inherit
+}
+.dp-shortcut:hover,.dp-shortcut.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.3);color:var(--purple-l)}
 .dp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dp-label{font-size:11px;color:#888;width:24px;flex-shrink:0}
-.dp-input{flex:1;padding:6px 10px;font-size:12px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#111;outline:none}
-.dp-input:focus{border-color:#9B6FA5}
+.dp-label{font-size:11px;color:var(--t1);width:24px;flex-shrink:0}
+.dp-input{
+  flex:1;padding:6px 10px;font-size:12px;border:1px solid var(--b1);
+  border-radius:8px;background:var(--card);color:var(--t0);
+  outline:none;font-family:inherit
+}
+.dp-input:focus{border-color:var(--purple)}
 .dp-actions{display:flex;gap:6px;margin-top:10px}
-.dp-apply{flex:1;padding:7px;background:#9B6FA5;border:none;border-radius:8px;color:white;font-size:12px;font-weight:500;cursor:pointer}
-.dp-clear{padding:7px 12px;background:none;border:0.5px solid rgba(0,0,0,0.12);border-radius:8px;color:#666;font-size:12px;cursor:pointer}
+.dp-apply{flex:1;padding:7px;background:var(--purple);border:none;border-radius:8px;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.dp-clear{padding:7px 12px;background:none;border:1px solid var(--b1);border-radius:8px;color:var(--t1);font-size:12px;cursor:pointer;font-family:inherit}
 
-/* Table */
-.table-wrap{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);overflow:hidden}
-.trow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07)}
+/* ── Table ── */
+.table-wrap{background:var(--card);border-radius:14px;border:1px solid var(--b1);overflow:hidden}
+.trow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--b0);transition:background 0.1s}
 .trow:last-child{border:none}
-.trow:hover{background:#fafaf8}
-.trow.head{background:#fafaf8;font-size:11px;color:#aaa;font-weight:500;letter-spacing:0.3px;padding:8px 16px}
-.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.trow:hover{background:var(--card-h)}
+.trow.head{
+  background:rgba(255,255,255,0.02);
+  font-size:10px;color:var(--t2);font-weight:600;
+  letter-spacing:0.5px;padding:9px 16px;text-transform:uppercase
+}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.av-0{background:rgba(155,111,165,0.2);color:var(--purple-l)}
+.av-1{background:rgba(78,173,133,0.2);color:var(--green)}
+.av-2{background:rgba(212,148,58,0.2);color:var(--amber)}
+.av-3{background:rgba(201,79,79,0.2);color:#e07070}
+.av-4{background:rgba(74,135,212,0.2);color:var(--blue)}
+.av-5{background:rgba(140,140,160,0.2);color:#9b9db4}
 .col-name{flex:1.4;min-width:0}
-.col-proc{flex:1.2;min-width:0;font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-proc{flex:1.2;min-width:0;font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .col-status{flex:0.9;min-width:0;display:flex}
-.col-reason{flex:1.2;min-width:0;font-size:11px;color:#999}
-.col-date{flex:0.8;min-width:0;font-size:12px;color:#666;text-align:right;white-space:nowrap}
-.c-name{font-size:13px;font-weight:500}
-.c-phone{font-size:11px;color:#888;margin-top:1px}
-.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.b-scheduled{background:#E0F4EE;color:#27500A}
-.b-rejected{background:#FAECE7;color:#712B13}
-.b-link_sent{background:#FEF3E2;color:#633806}
-.b-new{background:#EEF4FE;color:#0C447C}
+.col-apt{flex:1;min-width:0;font-size:12px}
+.col-reason{flex:1.2;min-width:0;font-size:11px;color:var(--t2)}
+.col-date{flex:0.8;min-width:0;font-size:12px;color:var(--t1);text-align:right;white-space:nowrap}
+.c-name{font-size:13px;font-weight:500;color:var(--t0)}
+.c-phone{font-size:11px;color:var(--t1);margin-top:1px}
 
-/* Agenda */
-.apt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07)}
+/* ── Inline Status Selects ── */
+.inline-sel{
+  padding:4px 10px;font-size:11px;font-weight:500;
+  border:1px solid var(--b1);border-radius:20px;
+  background:var(--bg2);color:var(--t1);
+  cursor:pointer;outline:none;transition:border-color 0.15s;font-family:inherit
+}
+.inline-sel.s-new,.inline-sel.s-captado{border-color:rgba(74,135,212,0.4);color:#7aadea;background:rgba(74,135,212,0.1)}
+.inline-sel.s-link_sent{border-color:rgba(212,148,58,0.4);color:#e8b45a;background:rgba(212,148,58,0.1)}
+.inline-sel.s-scheduled{border-color:rgba(78,173,133,0.4);color:var(--green);background:rgba(78,173,133,0.1)}
+.inline-sel.s-rejected{border-color:rgba(201,79,79,0.4);color:#e07070;background:rgba(201,79,79,0.1)}
+.inline-sel.s-pending{border-color:rgba(212,148,58,0.4);color:#e8b45a;background:rgba(212,148,58,0.1)}
+.inline-sel.s-confirmed{border-color:rgba(78,173,133,0.4);color:var(--green);background:rgba(78,173,133,0.1)}
+.inline-sel.s-done{border-color:var(--b1);color:var(--t1);background:var(--b0)}
+.inline-sel.s-cancelled{border-color:rgba(201,79,79,0.4);color:#e07070;background:rgba(201,79,79,0.1)}
+
+/* ── Badges ── */
+.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.b-scheduled{background:rgba(78,173,133,0.15);color:var(--green);border:1px solid rgba(78,173,133,0.25)}
+.b-rejected{background:rgba(201,79,79,0.15);color:#e07070;border:1px solid rgba(201,79,79,0.25)}
+.b-link_sent{background:rgba(212,148,58,0.15);color:var(--amber);border:1px solid rgba(212,148,58,0.25)}
+.b-new{background:rgba(74,135,212,0.15);color:#7aadea;border:1px solid rgba(74,135,212,0.25)}
+
+/* ── Agenda Rows ── */
+.apt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b0);transition:background 0.1s}
 .apt-row:last-child{border:none}
-.apt-row:hover{background:#fafaf8}
+.apt-row:hover{background:var(--card-h)}
 .apt-time{width:52px;flex-shrink:0;text-align:right}
 .apt-time-main{font-size:13px;font-weight:500}
-.apt-time-date{font-size:10px;color:#aaa;margin-top:1px}
+.apt-time-date{font-size:10px;color:var(--t2);margin-top:1px}
 .apt-bar{width:3px;height:36px;border-radius:2px;flex-shrink:0}
 .apt-info{flex:1;min-width:0}
 .apt-name{font-size:13px;font-weight:500}
-.apt-proc{font-size:11px;color:#888;margin-top:1px}
+.apt-proc{font-size:11px;color:var(--t1);margin-top:1px}
 .apt-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.src-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:#F3ECF6;color:#7A4F7A}
-.s-confirmed{background:#E0F4EE;color:#27500A}
-.s-pending{background:#FEF3E2;color:#633806}
-.s-done{background:#f0f0f0;color:#666}
-.s-cancelled{background:#FAECE7;color:#712B13}
+.src-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-dim);color:var(--purple-l)}
+.s-confirmed{background:rgba(78,173,133,0.15);color:var(--green)}
+.s-pending{background:rgba(212,148,58,0.15);color:var(--amber)}
+.s-done{background:var(--b0);color:var(--t1)}
+.s-cancelled{background:rgba(201,79,79,0.15);color:#e07070}
 
-/* loading/empty */
-.loading{padding:40px;text-align:center;color:#aaa;font-size:13px}
-.empty{padding:40px;text-align:center;color:#aaa;font-size:13px}
+/* ── States ── */
+.loading{padding:48px;text-align:center;color:var(--t2);font-size:13px}
+.empty{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 
-/* Avatar colors */
-.av-0{background:#F3ECF6;color:#7A4F7A}
-.av-1{background:#E0F4EE;color:#2E6647}
-.av-2{background:#FEF3E2;color:#9A6B10}
-.av-3{background:#FAECE7;color:#A04830}
-.av-4{background:#F1EFE8;color:#5F5E5A}
-.av-5{background:#EEF4FE;color:#0C447C}
-
-@media(max-width:600px){
+/* ── Responsive ── */
+@media(max-width:640px){
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .col-proc,.col-reason{display:none}
   .page-inner{padding:16px}
+  .sidebar{width:48px}
+  .main{margin-left:48px}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-dot">
-      <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg>
-    </div>
-    <span class="brand-name">Laço</span>
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg>
   </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span class="clinic-tag" id="clinic-name">Carregando...</span>
-    <a href="/hoje" class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Hoje</a>
-    <a href="/relatorio.html" class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Relatório</a>
-    <a href="/config" class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Configurações</a>
-    <button onclick="logout()" class="btn btn-ghost" style="font-size:11px;padding:4px 10px">Sair</button>
+
+  <div class="sb-item active" data-tip="Painel">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="3" width="6" height="6" rx="1.5"/>
+      <rect x="11" y="3" width="6" height="6" rx="1.5"/>
+      <rect x="3" y="11" width="6" height="6" rx="1.5"/>
+      <rect x="11" y="11" width="6" height="6" rx="1.5"/>
+    </svg>
   </div>
-</div>
 
-<div class="nav">
-  <div class="nav-tab on" onclick="switchTab('clientes',this)">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="12" cy="7" r="2"/><path d="M10 14c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/></svg>
-    Clientes
-  </div>
-  <div class="nav-tab" onclick="switchTab('agenda',this)">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-    Agenda
-  </div>
-</div>
+  <a href="/hoje" class="sb-item" data-tip="Hoje">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="4" width="14" height="13" rx="2"/>
+      <line x1="7" y1="2" x2="7" y2="6"/>
+      <line x1="13" y1="2" x2="13" y2="6"/>
+      <line x1="3" y1="9" x2="17" y2="9"/>
+    </svg>
+  </a>
 
-<!-- CLIENTES -->
-<div class="panel on" id="panel-clientes">
-  <div class="page-inner">
-    <div class="link-banner">
-      <span class="link-label">Link de agendamento</span>
-      <div class="link-url" id="booking-link">...</div>
-      <button class="btn btn-ghost" id="copy-btn" onclick="copyLink()">Copiar link</button>
-      <button class="btn btn-green" onclick="shareWhatsApp()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Enviar no WhatsApp
-      </button>
+  <a href="/relatorio.html" class="sb-item" data-tip="Relatório">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <line x1="4" y1="16" x2="4" y2="10"/>
+      <line x1="8" y1="16" x2="8" y2="7"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="16" y1="16" x2="16" y2="4"/>
+      <line x1="2" y1="16" x2="18" y2="16"/>
+    </svg>
+  </a>
+
+  <div class="sb-div"></div>
+
+  <a href="/config" class="sb-item" data-tip="Configurações">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="10" cy="10" r="2.5"/>
+      <path d="M10 3.5V5M10 15V16.5M3.5 10H5M15 10h1.5M5.4 5.4l1.1 1.1M13.5 13.5l1.1 1.1M5.4 14.6l1.1-1.1M13.5 6.5l1.1-1.1"/>
+    </svg>
+  </a>
+
+  <div class="sb-spacer"></div>
+
+  <a href="/api-docs.html" class="sb-item" data-tip="API Docs">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <polyline points="6,8 2,10 6,12"/>
+      <polyline points="14,8 18,10 14,12"/>
+      <line x1="11" y1="6" x2="9" y2="14"/>
+    </svg>
+  </a>
+
+  <button onclick="logout()" class="sb-item" data-tip="Sair">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M13 7l3 3-3 3M16 10H8M8 4H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>
+    </svg>
+  </button>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <header class="topbar">
+    <span class="page-title">Painel</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="clinic-tag" id="clinic-name">Carregando...</span>
     </div>
+  </header>
 
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Total leads</div><div class="stat-val" id="s-total">—</div></div>
-      <div class="stat-card"><div class="stat-label">Agendados</div><div class="stat-val green" id="s-scheduled">—</div></div>
-      <div class="stat-card"><div class="stat-label">Não agendaram</div><div class="stat-val amber" id="s-rejected">—</div></div>
-      <div class="stat-card"><div class="stat-label">Link enviado</div><div class="stat-val purple" id="s-sent">—</div></div>
+  <nav class="nav">
+    <div class="nav-tab on" onclick="switchTab('clientes',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="12" cy="7" r="2"/><path d="M10 14c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/></svg>
+      Clientes
     </div>
-    <div class="stats-grid" style="margin-top:8px;grid-template-columns:repeat(3,minmax(0,1fr))">
-      <div class="stat-card"><div class="stat-label">Valor agendado<span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div><div class="stat-val green" id="s-val-agendado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor confirmado<span class="tip" data-tip="Soma dos procedimentos já concluídos (realizados)">?</span></div><div class="stat-val green" id="s-val-realizado">—</div></div>
-      <div class="stat-card"><div class="stat-label">Valor perdido<span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div><div class="stat-val" style="color:#A32D2D" id="s-val-perdido">—</div></div>
+    <div class="nav-tab" onclick="switchTab('agenda',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+      Agenda
     </div>
+  </nav>
 
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
-        <input type="text" placeholder="Buscar por nome ou telefone..." oninput="loadLeads(this.value)">
-      </div>
-      <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
-      <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
-      <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
-      <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
-      <div class="date-filter-wrap" id="date-filter-wrap">
-        <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-          <span id="date-filter-label">Período</span>
+  <!-- CLIENTES -->
+  <div class="panel on" id="panel-clientes">
+    <div class="page-inner">
+
+      <div class="link-banner">
+        <span class="link-label">Link de agendamento</span>
+        <div class="link-url" id="booking-link">...</div>
+        <button class="btn btn-ghost" id="copy-btn" onclick="copyLink()">Copiar link</button>
+        <button class="btn btn-green" onclick="shareWhatsApp()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Enviar no WhatsApp
         </button>
-        <div class="date-picker-panel" id="date-picker-panel">
-          <div class="dp-shortcuts">
-            <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
-            <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
-            <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
-            <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
-          </div>
-          <div class="dp-row">
-            <span class="dp-label">De</span>
-            <input type="date" class="dp-input" id="dp-from">
-          </div>
-          <div class="dp-row">
-            <span class="dp-label">Até</span>
-            <input type="date" class="dp-input" id="dp-to">
-          </div>
-          <div class="dp-actions">
-            <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-            <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total leads</div><div class="stat-val" id="s-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Agendados</div><div class="stat-val green" id="s-scheduled">—</div></div>
+        <div class="stat-card"><div class="stat-label">Não agendaram</div><div class="stat-val amber" id="s-rejected">—</div></div>
+        <div class="stat-card"><div class="stat-label">Link enviado</div><div class="stat-val purple" id="s-sent">—</div></div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="stat-card"><div class="stat-label">Valor agendado<span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div><div class="stat-val green" id="s-val-agendado">—</div></div>
+        <div class="stat-card"><div class="stat-label">Valor confirmado<span class="tip" data-tip="Soma dos procedimentos já concluídos (realizados)">?</span></div><div class="stat-val green" id="s-val-realizado">—</div></div>
+        <div class="stat-card"><div class="stat-label">Valor perdido<span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div><div class="stat-val" style="color:var(--red)" id="s-val-perdido">—</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+          <input type="text" placeholder="Buscar por nome ou telefone..." oninput="loadLeads(this.value)">
+        </div>
+        <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
+        <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
+        <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
+        <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
+        <div class="date-filter-wrap" id="date-filter-wrap">
+          <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+            <span id="date-filter-label">Período</span>
+          </button>
+          <div class="date-picker-panel" id="date-picker-panel">
+            <div class="dp-shortcuts">
+              <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
+              <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
+              <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
+              <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
+            </div>
+            <div class="dp-row">
+              <span class="dp-label">De</span>
+              <input type="date" class="dp-input" id="dp-from">
+            </div>
+            <div class="dp-row">
+              <span class="dp-label">Até</span>
+              <input type="date" class="dp-input" id="dp-to">
+            </div>
+            <div class="dp-actions">
+              <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+              <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="table-wrap">
-      <div class="trow head">
-        <div style="width:34px;flex-shrink:0"></div>
-        <div class="col-name">Cliente</div>
-        <div class="col-proc">Procedimento visto</div>
-        <div class="col-status">Status lead</div>
-        <div class="col-apt">Agendamento</div>
-        <div class="col-reason">Motivo</div>
-        <div class="col-date">Data</div>
+      <div class="table-wrap">
+        <div class="trow head">
+          <div style="width:32px;flex-shrink:0"></div>
+          <div class="col-name">Cliente</div>
+          <div class="col-proc">Procedimento visto</div>
+          <div class="col-status">Status lead</div>
+          <div class="col-apt">Agendamento</div>
+          <div class="col-reason">Motivo</div>
+          <div class="col-date">Data</div>
+        </div>
+        <div id="leads-list"><div class="loading">Carregando...</div></div>
       </div>
-      <div id="leads-list"><div class="loading">Carregando...</div></div>
+
     </div>
   </div>
-</div>
 
-<!-- AGENDA -->
-<div class="panel" id="panel-agenda">
-  <div class="page-inner">
-    <div class="link-banner">
-      <span class="link-label">Link de agendamento</span>
-      <div class="link-url" id="booking-link-2">...</div>
-      <button class="btn btn-ghost" id="copy-btn-2" onclick="copyLink2()">Copiar link</button>
-      <button class="btn btn-green" onclick="shareWhatsApp()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-        Enviar no WhatsApp
-      </button>
-    </div>
+  <!-- AGENDA -->
+  <div class="panel" id="panel-agenda">
+    <div class="page-inner">
 
-    <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-      <div class="stat-card"><div class="stat-label">Total agendamentos</div><div class="stat-val purple" id="a-total">—</div></div>
-      <div class="stat-card"><div class="stat-label">Confirmados</div><div class="stat-val green" id="a-confirmed">—</div></div>
-      <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-val amber" id="a-pending">—</div></div>
-    </div>
+      <div class="link-banner">
+        <span class="link-label">Link de agendamento</span>
+        <div class="link-url" id="booking-link-2">...</div>
+        <button class="btn btn-ghost" id="copy-btn-2" onclick="copyLink2()">Copiar link</button>
+        <button class="btn btn-green" onclick="shareWhatsApp()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Enviar no WhatsApp
+        </button>
+      </div>
 
-    <div class="table-wrap">
-      <div id="apt-list"><div class="loading">Carregando...</div></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="stat-card"><div class="stat-label">Total agendamentos</div><div class="stat-val purple" id="a-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Confirmados</div><div class="stat-val green" id="a-confirmed">—</div></div>
+        <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-val amber" id="a-pending">—</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <div id="apt-list"><div class="loading">Carregando...</div></div>
+      </div>
+
     </div>
   </div>
-</div>
+
+</div><!-- /.main -->
 
 <script>
-// Auth guard — redireciona para login se não autenticado
 if (!sessionStorage.getItem('laco_auth') && !localStorage.getItem('laco_api_key')) {
   window.location.href = '/login.html'
 }
@@ -308,7 +548,6 @@ function bookingLink() {
 }
 
 async function init() {
-  // Carrega dados da clínica
   try {
     const r = await fetch(`${API}/api/portal/${SLUG}`)
     if (r.ok) {
@@ -328,6 +567,7 @@ async function init() {
 }
 
 function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+
 async function loadStats() {
   try {
     const [lr, ar] = await Promise.all([
@@ -349,8 +589,6 @@ async function loadStats() {
     }
   } catch(e) {}
 }
-
-
 
 async function loadLeads(search = '') {
   const list = document.getElementById('leads-list')
@@ -407,7 +645,7 @@ function renderLead(l) {
           <option value="rejected" ${l.status==='rejected'?'selected':''}>Não agendou</option>
         </select>
       </div>
-      <div class="col-apt">${l.appointment_id ? `<select class="inline-sel s-${l.appointment_status||'pending'}" onchange="updateAptStatus('${l.appointment_id}',this.value,this)" onclick="event.stopPropagation()"><option value="pending" ${l.appointment_status==='pending'?'selected':''}>Pendente</option><option value="confirmed" ${l.appointment_status==='confirmed'?'selected':''}>Confirmado</option><option value="done" ${l.appointment_status==='done'?'selected':''}>Concluído</option><option value="cancelled" ${l.appointment_status==='cancelled'?'selected':''}>Cancelado</option></select>` : '<span style="color:#ccc;font-size:12px">—</span>'}</div>
+      <div class="col-apt">${l.appointment_id ? `<select class="inline-sel s-${l.appointment_status||'pending'}" onchange="updateAptStatus('${l.appointment_id}',this.value,this)" onclick="event.stopPropagation()"><option value="pending" ${l.appointment_status==='pending'?'selected':''}>Pendente</option><option value="confirmed" ${l.appointment_status==='confirmed'?'selected':''}>Confirmado</option><option value="done" ${l.appointment_status==='done'?'selected':''}>Concluído</option><option value="cancelled" ${l.appointment_status==='cancelled'?'selected':''}>Cancelado</option></select>` : '<span style="color:var(--t2);font-size:12px">—</span>'}</div>
       <div class="col-reason">${esc(reasonMap[l.reject_reason] || (l.reject_reason || '—'))}</div>
       <div class="col-date">${date}</div>
     </div>`
@@ -547,7 +785,6 @@ function clearDateFilter() {
   loadLeads(document.querySelector('.search-wrap input').value)
 }
 
-// Fecha ao clicar fora
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('date-filter-wrap')
   if (wrap && !wrap.contains(e.target)) {
