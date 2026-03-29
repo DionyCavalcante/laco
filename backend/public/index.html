@@ -5,36 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Plataforma</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d0e13;
-  --bg2:#12131a;
-  --sidebar:#0c0d12;
-  --topbar:#0f1016;
-  --card:#161720;
-  --card-h:#1b1c27;
+  --bg:#0F0D0C;
+  --bg2:#141210;
+  --sidebar:#0B0A09;
+  --topbar:#0F0D0C;
+  --card:#1C1917;
+  --card-h:#221E1B;
   --b0:rgba(255,255,255,0.04);
   --b1:rgba(255,255,255,0.07);
-  --b2:rgba(255,255,255,0.12);
-  --t0:#dde0ea;
-  --t1:#7e8196;
-  --t2:#4a4d5c;
-  --purple:#9B6FA5;
-  --purple-l:#C8A2C8;
-  --purple-dim:rgba(155,111,165,0.12);
-  --purple-glow:rgba(155,111,165,0.25);
+  --b2:rgba(255,255,255,0.13);
+  --t0:#EDE8E4;
+  --t1:#7D746E;
+  --t2:#4A4440;
+  --purple:#B8657A;
+  --purple-l:#D4899A;
+  --purple-dim:rgba(184,101,122,0.12);
+  --purple-glow:rgba(184,101,122,0.28);
+  --gold:#B8945A;
   --green:#4ead85;
   --amber:#d4943a;
   --red:#c94f4f;
   --blue:#4a87d4;
 }
-body{font-family:'Outfit',-apple-system,sans-serif;background:var(--bg);color:var(--t0);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t0);min-height:100vh;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit}
-select option{background:#1c1d26;color:var(--t0)}
+select option{background:#1C1917;color:var(--t0)}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 
 /* ── Sidebar ── */
@@ -71,7 +72,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .sb-item::after{
   content:attr(data-tip);
   position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
-  background:#1e1f2a;color:var(--t0);
+  background:#1C1512;color:var(--t0);
   font-size:11px;font-weight:500;padding:5px 9px;
   border-radius:6px;white-space:nowrap;pointer-events:none;
   opacity:0;transition:opacity 0.15s;
@@ -179,7 +180,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .tip:hover::after{
   content:attr(data-tip);position:absolute;
   bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-  background:#1e1f2a;color:var(--t0);font-size:11px;font-weight:400;
+  background:#1C1512;color:var(--t0);font-size:11px;font-weight:400;
   padding:5px 9px;border-radius:7px;white-space:nowrap;
   z-index:99;pointer-events:none;line-height:1.4;
   border:1px solid var(--b2)
@@ -224,7 +225,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .date-filter-btn.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.35);color:var(--purple-l)}
 .date-picker-panel{
   display:none;position:absolute;top:calc(100% + 6px);right:0;
-  background:#1c1d26;border:1px solid var(--b2);border-radius:12px;
+  background:#1C1917;border:1px solid var(--b2);border-radius:12px;
   padding:14px;z-index:50;min-width:280px;
   box-shadow:0 8px 32px rgba(0,0,0,0.4)
 }
@@ -676,7 +677,7 @@ async function loadAppointments() {
   }
 }
 
-const barColors = ['#C8A2C8','#5DCAA5','#EF9F27','#378ADD','#D85A30']
+const barColors = ['#D4899A','#5DCAA5','#EF9F27','#378ADD','#D85A30']
 function renderApt(a) {
   const dt = new Date(a.scheduled_at)
   const time = dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})

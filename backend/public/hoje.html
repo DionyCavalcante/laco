@@ -4,28 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Hoje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#111;min-height:100vh}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
 
 .topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
 .brand{display:flex;align-items:center;gap:8px}
-.brand-dot{width:26px;height:26px;border-radius:7px;background:#9B6FA5;display:flex;align-items:center;justify-content:center}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
 .brand-dot svg{width:13px;height:13px;fill:white}
-.brand-name{font-size:14px;font-weight:500}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .btn{padding:6px 12px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap;text-decoration:none}
 .btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
-.btn-ghost:hover{background:#f5f4f0}
+.btn-ghost:hover{background:#FAF7F5}
 
 .date-bar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.08);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
 .date-nav{display:flex;align-items:center;gap:12px}
 .date-nav-btn{width:30px;height:30px;border-radius:8px;background:none;border:0.5px solid rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
-.date-nav-btn:hover{background:#f5f4f0}
+.date-nav-btn:hover{background:#FAF7F5}
 .date-title{font-size:14px;font-weight:500;min-width:180px;text-align:center}
 .date-today-btn{padding:5px 12px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;background:none;cursor:pointer;color:#666}
-.date-today-btn:hover{background:#f5f4f0}
-.date-today-btn.active{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.date-today-btn:hover{background:#FAF7F5}
+.date-today-btn.active{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
 
 .page{max-width:900px;margin:0 auto;padding:16px 20px}
 
@@ -33,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi{background:white;border-radius:10px;border:0.5px solid rgba(0,0,0,0.07);padding:12px 14px}
 .kpi-label{font-size:11px;color:#888;margin-bottom:3px}
 .kpi-val{font-size:22px;font-weight:500}
-.kpi-val.purple{color:#9B6FA5}
+.kpi-val.purple{color:#B8657A}
 .kpi-val.green{color:#2E8C66}
 .kpi-val.amber{color:#9A6B10}
 .kpi-val.muted{color:#aaa}
@@ -46,16 +48,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tl-title{font-size:13px;font-weight:500}
 .tl-filter{display:flex;gap:4px}
 .filter-pill{padding:4px 10px;font-size:11px;border:0.5px solid rgba(0,0,0,0.1);border-radius:20px;cursor:pointer;color:#666;background:white}
-.filter-pill.on{background:#F3ECF6;border-color:#C8A2C8;color:#7A4F7A}
+.filter-pill.on{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
 
 .time-slots-wrap{padding:8px 0}
 .hour-row{display:flex;min-height:52px}
 .hour-label{width:52px;padding:6px 8px 0 16px;font-size:11px;color:#bbb;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
 .hour-col{flex:1;padding:2px 8px 2px 12px;border-left:0.5px solid rgba(0,0,0,0.06);position:relative}
-.hour-col.now{border-left-color:#9B6FA5}
-.now-line{position:absolute;left:0;right:0;top:50%;height:1.5px;background:#9B6FA5;opacity:0.4}
+.hour-col.now{border-left-color:#B8657A}
+.now-line{position:absolute;left:0;right:0;top:50%;height:1.5px;background:#B8657A;opacity:0.4}
 
-.apt-block{background:white;border-radius:8px;border:0.5px solid rgba(0,0,0,0.08);border-left:3px solid #C8A2C8;padding:8px 10px;margin-bottom:4px;cursor:pointer;transition:box-shadow 0.15s}
+.apt-block{background:white;border-radius:8px;border:0.5px solid rgba(0,0,0,0.08);border-left:3px solid #D4899A;padding:8px 10px;margin-bottom:4px;cursor:pointer;transition:box-shadow 0.15s}
 .apt-block:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08)}
 .apt-block.confirmed{border-left-color:#5DCAA5}
 .apt-block.done{border-left-color:#ccc;opacity:0.65}
@@ -69,7 +71,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .b-pending{background:#FEF3E2;color:#633806}
 .b-done{background:#f0f0f0;color:#666}
 .b-cancelled{background:#FCEBEB;color:#A32D2D}
-.b-system{background:#F3ECF6;color:#7A4F7A}
+.b-system{background:#FDEEF1;color:#8B3F52}
 .apt-empty{padding:16px;text-align:center;font-size:12px;color:#bbb}
 
 /* Sidebar */
@@ -82,7 +84,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* Next up */
 .next-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
 .next-item:last-child{border:none}
-.next-time{font-size:12px;font-weight:500;color:#9B6FA5;width:40px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.next-time{font-size:12px;font-weight:500;color:#B8657A;width:40px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .next-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
 .next-info{flex:1;min-width:0}
 .next-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -92,7 +94,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* Quick actions */
 .qa-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
 .qa-item:last-child{border:none}
-.qa-item:hover{background:#fafaf8}
+.qa-item:hover{background:#FBF8F6}
 .qa-label{font-size:12px;color:#555}
 .qa-val{font-size:12px;font-weight:500}
 .qa-val.green{color:#2E8C66}
@@ -116,13 +118,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .info-val{font-weight:500;text-align:right}
 .drawer-actions{padding:14px 18px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;gap:8px;flex-shrink:0}
 .da-btn{flex:1;padding:10px;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;text-align:center;border:none}
-.da-confirm{background:#9B6FA5;color:white}
+.da-confirm{background:#B8657A;color:white}
 .da-done{background:#2E8C66;color:white}
 .da-cancel{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
 
 .loading{padding:40px;text-align:center;color:#aaa;font-size:13px}
 
-.av-0{background:#F3ECF6;color:#7A4F7A}
+.av-0{background:#FDEEF1;color:#8B3F52}
 .av-1{background:#E0F4EE;color:#2E6647}
 .av-2{background:#FEF3E2;color:#9A6B10}
 .av-3{background:#FAECE7;color:#A04830}
@@ -226,7 +228,7 @@ function h() { return { 'Content-Type':'application/json', 'x-api-key': API_KEY 
 const HOURS = [8,9,10,11,12,13,14,15,16,17,18,19]
 const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
 const DAY_NAMES   = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
-const barColors   = ['#C8A2C8','#5DCAA5','#EF9F27','#378ADD','#D85A30']
+const barColors   = ['#D4899A','#5DCAA5','#EF9F27','#378ADD','#D85A30']
 const avColors    = ['av-0','av-1','av-2','av-3','av-4','av-5']
 
 let currentDate = new Date()
@@ -443,7 +445,7 @@ function openDrawer(id) {
         </select>
       </div>
     </div>
-    <a href="/cliente.html?id=${a.lead_id}" style="font-size:12px;color:#9B6FA5;display:flex;align-items:center;gap:4px">
+    <a href="/cliente.html?id=${a.lead_id}" style="font-size:12px;color:#B8657A;display:flex;align-items:center;gap:4px">
       Ver perfil completo do cliente →
     </a>`
 

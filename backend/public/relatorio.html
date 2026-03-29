@@ -4,15 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Relatório</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#111;min-height:100vh}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
 .topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
 .brand{display:flex;align-items:center;gap:8px}
-.brand-dot{width:26px;height:26px;border-radius:7px;background:#9B6FA5;display:flex;align-items:center;justify-content:center}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
 .brand-dot svg{width:13px;height:13px;fill:white}
-.brand-name{font-size:14px;font-weight:500}
-.back-btn{font-size:12px;color:#9B6FA5;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
+.back-btn{font-size:12px;color:#B8657A;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0}
 .back-btn:hover{text-decoration:underline}
 .page{max-width:900px;margin:0 auto;padding:24px}
 .page-title{font-size:18px;font-weight:500;margin-bottom:4px}
@@ -25,7 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi-val{font-size:26px;font-weight:500;line-height:1}
 .kpi-sub{font-size:11px;color:#aaa;margin-top:4px}
 .kpi-val.green{color:#2E8C66}
-.kpi-val.purple{color:#9B6FA5}
+.kpi-val.purple{color:#B8657A}
 .kpi-val.amber{color:#9A6B10}
 .kpi-val.red{color:#A32D2D}
 
@@ -38,7 +40,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .funnel{display:flex;flex-direction:column;gap:8px}
 .funnel-row{display:flex;align-items:center;gap:10px}
 .funnel-label{font-size:12px;color:#666;width:110px;flex-shrink:0;text-align:right}
-.funnel-bar-wrap{flex:1;height:28px;background:#f5f4f0;border-radius:6px;overflow:hidden;position:relative}
+.funnel-bar-wrap{flex:1;height:28px;background:#F0EBE8;border-radius:6px;overflow:hidden;position:relative}
 .funnel-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:500;color:white;white-space:nowrap;min-width:32px;transition:width 0.6s ease}
 .funnel-count{font-size:12px;font-weight:500;width:32px;text-align:right;flex-shrink:0}
 
@@ -55,7 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .reason-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .reason-row:last-child{margin:0}
 .reason-name{font-size:13px;flex:1}
-.reason-bar-wrap{flex:2;height:8px;background:#f5f4f0;border-radius:4px;overflow:hidden}
+.reason-bar-wrap{flex:2;height:8px;background:#F0EBE8;border-radius:4px;overflow:hidden}
 .reason-bar{height:100%;border-radius:4px;background:#F0997B}
 .reason-pct{font-size:12px;font-weight:500;color:#A04830;width:36px;text-align:right}
 
@@ -146,7 +148,7 @@ function render(ls, as_, leads, apts) {
 
   // Donut data
   const donutData = [
-    { label:'Agendados',    val: scheduled, color:'#9B6FA5' },
+    { label:'Agendados',    val: scheduled, color:'#B8657A' },
     { label:'Não agendaram',val: rejected,  color:'#F0997B' },
     { label:'Link enviado', val: linkSent,  color:'#EF9F27' },
     { label:'Novos',        val: newLeads,  color:'#ddd' },
@@ -164,8 +166,8 @@ function render(ls, as_, leads, apts) {
       <div class="chart-card">
         <div class="chart-title">Funil de conversão</div>
         <div class="funnel">
-          ${renderFunnelRow('Leads captados', total, total, '#9B6FA5')}
-          ${renderFunnelRow('Link enviado', linkSent + scheduled + rejected, total, '#C8A2C8')}
+          ${renderFunnelRow('Leads captados', total, total, '#B8657A')}
+          ${renderFunnelRow('Link enviado', linkSent + scheduled + rejected, total, '#D4899A')}
           ${renderFunnelRow('Visualizaram', rejected + scheduled, total, '#EF9F27')}
           ${renderFunnelRow('Agendaram', scheduled, total, '#2E8C66')}
         </div>
