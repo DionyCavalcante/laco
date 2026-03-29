@@ -792,8 +792,9 @@ document.getElementById('s-price-toggle').addEventListener('click', function() {
 const _switchTab = switchTab
 window.switchTab = function(name, el) {
   _switchTab(name, el)
-  if (name === 'fotos')  initPhotosPanel()
-  if (name === 'portal') loadSettings()
+  if (name === 'fotos')    initPhotosPanel()
+  if (name === 'portal')   loadSettings()
+  if (name === 'clinica')  initClinic()
 }
 
 loadProcs()
