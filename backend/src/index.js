@@ -60,6 +60,11 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(pub, 'config/index.html'))
   })
 
+  // Documentação da API
+  app.get('/api-docs', (req, res) => {
+    res.sendFile(path.join(pub, 'api-docs.html'))
+  })
+
   // Hoje — visão operacional
   app.get('/hoje', (req, res) => {
     res.sendFile(path.join(pub, 'hoje.html'))
