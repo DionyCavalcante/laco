@@ -35,7 +35,8 @@ app.use('/webhook',          require('./routes/webhook'))
 
 // Serve arquivos de upload (fotos antes/depois)
 const path = require('path')
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')
+app.use('/uploads', express.static(UPLOAD_DIR))
 
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {

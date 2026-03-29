@@ -421,14 +421,14 @@ function renderProcList() {
         <div class="carousel-slide">
           <div class="img-half before">
             ${bUrl
-              ? `<img src="${bUrl}" alt="antes" loading="${idx === 0 ? 'eager' : 'lazy'}">`
+              ? `<img src="${bUrl}" alt="antes" loading="${idx === 0 ? 'eager' : 'lazy'}" onerror="this.style.display='none'">`
               : '<span style="font-size:11px;color:#aaa">Foto antes</span>'}
             <span class="img-lbl">antes</span>
           </div>
           <div class="img-divider"></div>
           <div class="img-half after">
             ${aUrl
-              ? `<img src="${aUrl}" alt="depois" loading="${idx === 0 ? 'eager' : 'lazy'}">`
+              ? `<img src="${aUrl}" alt="depois" loading="${idx === 0 ? 'eager' : 'lazy'}" onerror="this.style.display='none'">`
               : '<span style="font-size:11px;color:#9B6FA5">Foto depois</span>'}
             <span class="img-lbl">depois</span>
           </div>
