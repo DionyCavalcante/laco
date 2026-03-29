@@ -529,7 +529,7 @@ async function saveHours(){
 }
 
 /* ---- CLÍNICA ---- */
-function initClinic(){
+async function initClinic(){
   const slug=SLUG
   document.getElementById('clinic-slug-input').value=slug
   document.getElementById('portal-link').value=`${window.location.origin}/${slug}/agendar`
@@ -538,9 +538,21 @@ function initClinic(){
     document.getElementById('slug-preview').textContent=`laço.app/${this.value}/agendar`
     document.getElementById('portal-link').value=`${window.location.origin}/${this.value}/agendar`
   })
+  try{
+    const r=await fetch(`${API}/api/settings/clinic`,{headers:h()})
+    if(r.ok){const d=await r.json();document.getElementById('clinic-name-input').value=d.name||''}
+  }catch{}
 }
 
-function saveClinic(){toast('Configurações salvas!')}
+async function saveClinic(){
+  const name=document.getElementById('clinic-name-input').value.trim()
+  if(!name){toast('Nome da clínica é obrigatório',false);return}
+  try{
+    const r=await fetch(`${API}/api/settings/clinic`,{method:'PATCH',headers:h(),body:JSON.stringify({name})})
+    if(r.ok)toast('Configurações salvas!')
+    else toast('Erro ao salvar',false)
+  }catch{toast('Erro ao salvar',false)}
+}
 
 function copyPortalLink(){
   navigator.clipboard.writeText(document.getElementById('portal-link').value)

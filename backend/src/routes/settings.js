@@ -45,4 +45,28 @@ router.post('/', async (req, res) => {
   }
 })
 
+// GET /api/settings/clinic
+router.get('/clinic', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT name, slug FROM clinics WHERE slug = $1', [SLUG()])
+    if (!rows.length) return res.status(404).json({ error: 'Clínica não encontrada' })
+    res.json(rows[0])
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar dados da clínica' })
+  }
+})
+
+// PATCH /api/settings/clinic
+router.patch('/clinic', async (req, res) => {
+  try {
+    const { name } = req.body
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nome é obrigatório' })
+    await db.query('UPDATE clinics SET name = $1 WHERE slug = $2', [name.trim(), SLUG()])
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao salvar dados da clínica' })
+  }
+})
+
 module.exports = router
