@@ -390,11 +390,23 @@ function go(id) {
   if (id === 's-proc') startReveal()
 }
 
-function goToList() {
+let currentLeadId = null
+
+async function goToList() {
   clientName = document.getElementById('inp-nome').value.trim()
   clientPhone = document.getElementById('inp-tel').value.trim()
   if (!clientName || !clientPhone) { alert('Preencha seu nome e WhatsApp para continuar.'); return }
-  // Saudação customizada
+
+  // Registra lead imediatamente, sem precisar agendar
+  try {
+    const r = await fetch(`${API}/api/portal/${SLUG}/identify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: clientName, phone: clientPhone })
+    })
+    if (r.ok) { const d = await r.json(); currentLeadId = d.lead_id }
+  } catch {}
+
   document.getElementById('list-greeting-text').innerHTML =
     `Olá, <strong>${esc(clientName.split(' ')[0])}</strong>! ${esc(portalSettings.greeting_msg)}`
   renderProcList()
@@ -476,6 +488,14 @@ function selectProc(id) {
   document.getElementById('video-placeholder').style.display = 'flex'
   const iframe = document.getElementById('video-iframe')
   if (iframe) iframe.remove()
+  // Rastreia procedimento visualizado
+  if (currentLeadId) {
+    fetch(`${API}/api/portal/${SLUG}/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: currentLeadId, procedure_id: selected.proc.id })
+    }).catch(() => {})
+  }
   go('s-proc')
 }
 

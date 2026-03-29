@@ -84,6 +84,47 @@ router.get('/:slug/slots', async (req, res) => {
   }
 })
 
+// POST /api/portal/:slug/identify — registra lead assim que informa nome e WhatsApp
+router.post('/:slug/identify', async (req, res) => {
+  try {
+    const { name, phone } = req.body
+    if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' })
+
+    const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [req.params.slug])
+    if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
+
+    const { rows: [lead] } = await db.query(`
+      INSERT INTO leads (clinic_id, name, phone, source, status)
+      VALUES ($1, $2, $3, 'link', 'new')
+      ON CONFLICT (clinic_id, phone)
+      DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
+      RETURNING id
+    `, [clinic.id, name, phone])
+
+    res.json({ ok: true, lead_id: lead.id })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao registrar lead' })
+  }
+})
+
+// POST /api/portal/:slug/track — rastreia procedimento visualizado
+router.post('/:slug/track', async (req, res) => {
+  try {
+    const { lead_id, procedure_id } = req.body
+    if (!lead_id || !procedure_id) return res.status(400).json({ error: 'Dados insuficientes' })
+
+    await db.query(`
+      UPDATE leads SET procedure_viewed = $1, status = CASE WHEN status = 'new' THEN 'link_sent' ELSE status END, updated_at = NOW()
+      WHERE id = $2
+    `, [procedure_id, lead_id])
+
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao rastrear' })
+  }
+})
+
 // POST /api/portal/:slug/book — cliente finaliza agendamento
 router.post('/:slug/book', async (req, res) => {
   try {
