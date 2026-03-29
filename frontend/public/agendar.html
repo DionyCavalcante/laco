@@ -415,8 +415,9 @@ function renderProcList() {
     // Constrói slides com pares reais de fotos ou placeholder
     const count = Math.max(photos.before.length, photos.after.length, 1)
     const slides = Array.from({ length: count }, (_, idx) => {
-      const bUrl = photos.before[idx] ? `${API}${photos.before[idx]}` : null
-      const aUrl = photos.after[idx]  ? `${API}${photos.after[idx]}`  : null
+      const toUrl = u => u ? (u.startsWith('data:') ? u : `${API}${u}`) : null
+      const bUrl = toUrl(photos.before[idx])
+      const aUrl = toUrl(photos.after[idx])
       return `
         <div class="carousel-slide">
           <div class="img-half before">

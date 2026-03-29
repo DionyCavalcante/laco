@@ -2,12 +2,7 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const sharp = require('sharp')
-const path = require('path')
-const fs = require('fs')
 const db = require('../db')
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -31,21 +26,18 @@ router.post('/procedure/:id/photos', upload.fields([
     for (const side of ['before', 'after']) {
       const files = req.files?.[side] || []
       for (const file of files) {
-        const filename = `${procId}_${side}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.webp`
-        const outPath = path.join(UPLOAD_DIR, filename)
-
-        await sharp(file.buffer)
+        const buffer = await sharp(file.buffer)
           .resize({ width: 900, withoutEnlargement: true })
           .webp({ quality: 82 })
-          .toFile(outPath)
+          .toBuffer()
 
-        const url = `/uploads/${filename}`
-        saved[side].push(url)
+        const dataUri = `data:image/webp;base64,${buffer.toString('base64')}`
+        saved[side].push(dataUri)
 
         await db.query(`
           INSERT INTO procedure_photos (procedure_id, side, url)
           VALUES ($1, $2, $3)
-        `, [procId, side, url])
+        `, [procId, side, dataUri])
       }
     }
 
@@ -60,7 +52,7 @@ router.post('/procedure/:id/photos', upload.fields([
 router.get('/procedure/:id/photos', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT * FROM procedure_photos
+      SELECT id, procedure_id, side, url, created_at FROM procedure_photos
       WHERE procedure_id = $1
       ORDER BY side, created_at
     `, [req.params.id])
@@ -74,12 +66,9 @@ router.get('/procedure/:id/photos', async (req, res) => {
 router.delete('/photo/:photoId', async (req, res) => {
   try {
     const { rows } = await db.query(
-      'SELECT url FROM procedure_photos WHERE id = $1', [req.params.photoId]
+      'SELECT id FROM procedure_photos WHERE id = $1', [req.params.photoId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
-
-    const filePath = path.join(__dirname, '../../../', rows[0].url)
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
 
     await db.query('DELETE FROM procedure_photos WHERE id = $1', [req.params.photoId])
     res.json({ ok: true })
