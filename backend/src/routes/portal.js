@@ -95,7 +95,7 @@ async function upsertLead(clinicId, name, phone) {
   }
   const { rows: [lead] } = await db.query(
     `INSERT INTO leads (clinic_id, name, phone, source, status)
-     VALUES ($1, $2, $3, 'link', 'new') RETURNING id`,
+     VALUES ($1, $2, $3, 'link', 'captado') RETURNING id`,
     [clinicId, name, phone]
   )
   return lead.id
@@ -125,7 +125,7 @@ router.post('/:slug/track', async (req, res) => {
     if (!lead_id || !procedure_id) return res.status(400).json({ error: 'Dados insuficientes' })
 
     await db.query(`
-      UPDATE leads SET procedure_viewed = $1, status = CASE WHEN status = 'new' THEN 'link_sent' ELSE status END, updated_at = NOW()
+      UPDATE leads SET procedure_viewed = $1, status = CASE WHEN status IN ('new', 'captado') THEN 'link_sent' ELSE status END, updated_at = NOW()
       WHERE id = $2
     `, [procedure_id, lead_id])
 

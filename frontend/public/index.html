@@ -401,7 +401,7 @@ function renderLead(l) {
       <div class="col-proc">${esc(l.procedure_name || '—')}</div>
       <div class="col-status">
         <select class="inline-sel s-${l.status}" onchange="updateLeadStatus('${l.id}',this.value,this)" onclick="event.stopPropagation()">
-          <option value="new" ${l.status==='new'?'selected':''}>Novo</option>
+          <option value="captado" ${l.status==='captado'||l.status==='new'?'selected':''}>Captado</option>
           <option value="link_sent" ${l.status==='link_sent'?'selected':''}>Link enviado</option>
           <option value="scheduled" ${l.status==='scheduled'?'selected':''}>Agendado</option>
           <option value="rejected" ${l.status==='rejected'?'selected':''}>Não agendou</option>
