@@ -3,484 +3,702 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laço — Plataforma</title>
+<title>Laço — Painel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Reset & Base ── */
+/* ── Reset ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0F0D0C;
-  --bg2:#141210;
-  --sidebar:#0B0A09;
-  --topbar:#0F0D0C;
-  --card:#1C1917;
-  --card-h:#221E1B;
-  --b0:rgba(255,255,255,0.04);
-  --b1:rgba(255,255,255,0.07);
-  --b2:rgba(255,255,255,0.13);
-  --t0:#EDE8E4;
-  --t1:#7D746E;
-  --t2:#4A4440;
-  --purple:#B8657A;
-  --purple-l:#D4899A;
-  --purple-dim:rgba(184,101,122,0.12);
-  --purple-glow:rgba(184,101,122,0.28);
-  --gold:#B8945A;
-  --green:#4ead85;
-  --amber:#d4943a;
-  --red:#c94f4f;
-  --blue:#4a87d4;
+  --bg:#FAF7F5;
+  --surface:#FFFFFF;
+  --surface2:#F5F1EE;
+  --border:rgba(0,0,0,0.07);
+  --border-m:rgba(0,0,0,0.11);
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  --shadow-hover:0 2px 8px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.06);
+
+  --brand:#B8657A;
+  --brand-h:#a85a6e;
+  --brand-dim:rgba(184,101,122,0.09);
+  --brand-ring:rgba(184,101,122,0.18);
+  --brand-l:#D4899A;
+
+  --green:#2D8C66;
+  --green-bg:rgba(45,140,102,0.09);
+  --amber:#9A6B10;
+  --amber-bg:rgba(154,107,16,0.09);
+  --red:#B03030;
+  --red-bg:rgba(176,48,48,0.09);
+  --blue:#3A7AC4;
+  --blue-bg:rgba(58,122,196,0.09);
+
+  --t0:#1A1614;
+  --t1:#6B5E59;
+  --t2:#A89890;
+  --t3:#D4CCC8;
 }
-body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t0);min-height:100vh;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--t0);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  font-size:14px;
+}
 a{color:inherit;text-decoration:none}
-button{font-family:inherit}
-select option{background:#1C1917;color:var(--t0)}
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+select option{background:white;color:var(--t0)}
 
-/* ── Sidebar ── */
-.sidebar{
-  position:fixed;top:0;left:0;
-  width:56px;height:100vh;
-  background:var(--sidebar);
-  border-right:1px solid var(--b1);
-  display:flex;flex-direction:column;align-items:center;
-  padding:14px 0 12px;
-  z-index:100;gap:2px
+/* ── Navbar ── */
+.navbar{
+  height:56px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 24px;gap:0;
+  position:sticky;top:0;z-index:100;
 }
-.sb-logo{
-  width:32px;height:32px;border-radius:9px;
-  background:var(--purple);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:14px;
-  box-shadow:0 0 20px var(--purple-glow);
-  flex-shrink:0
+
+.nb-brand{
+  display:flex;align-items:center;gap:9px;
+  margin-right:32px;flex-shrink:0;
 }
-.sb-logo svg{width:15px;height:15px;fill:white}
-.sb-div{width:28px;height:1px;background:var(--b1);margin:5px 0}
-.sb-item{
-  width:36px;height:36px;border-radius:10px;
+.nb-mark{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--brand);
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--t2);
+  box-shadow:0 2px 8px rgba(184,101,122,0.28);
+  flex-shrink:0;
+}
+.nb-mark svg{width:14px;height:14px;fill:white}
+.nb-logo-name{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:19px;font-weight:600;
+  color:var(--t0);letter-spacing:0.02em;line-height:1;
+}
+
+.nb-nav{display:flex;align-items:center;gap:2px}
+.nb-link{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:8px;
+  font-size:13px;font-weight:500;color:var(--t1);
   transition:background 0.15s,color 0.15s;
-  position:relative;background:none;border:none;
-  text-decoration:none
+  white-space:nowrap;
 }
-.sb-item svg{width:18px;height:18px;flex-shrink:0}
-.sb-item:hover{background:var(--b0);color:var(--t1)}
-.sb-item.active{background:var(--purple-dim);color:var(--purple-l);box-shadow:0 0 14px var(--purple-dim)}
-.sb-item::after{
-  content:attr(data-tip);
-  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
-  background:#1C1512;color:var(--t0);
-  font-size:11px;font-weight:500;padding:5px 9px;
-  border-radius:6px;white-space:nowrap;pointer-events:none;
-  opacity:0;transition:opacity 0.15s;
-  border:1px solid var(--b2);z-index:200
-}
-.sb-item:hover::after{opacity:1}
-.sb-spacer{flex:1}
+.nb-link svg{width:14px;height:14px;opacity:0.7}
+.nb-link:hover{background:var(--surface2);color:var(--t0)}
+.nb-link.active{background:var(--brand-dim);color:var(--brand)}
+.nb-link.active svg{opacity:1}
 
-/* ── Main Layout ── */
-.main{margin-left:56px;min-height:100vh;display:flex;flex-direction:column}
+.nb-spacer{flex:1}
 
-/* ── Topbar ── */
-.topbar{
-  height:52px;background:var(--topbar);
-  border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;position:sticky;top:0;z-index:50
+.nb-right{display:flex;align-items:center;gap:8px}
+.clinic-pill{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;color:var(--t1);
+  background:var(--surface2);
+  border:1px solid var(--border-m);
+  border-radius:20px;padding:5px 12px;
+  white-space:nowrap;
 }
-.page-title{font-size:14px;font-weight:600;color:var(--t0)}
-.clinic-tag{
-  font-size:11px;color:var(--t1);
-  background:var(--b0);padding:3px 10px;
-  border-radius:20px;border:1px solid var(--b1);
-  display:flex;align-items:center;gap:5px
+.clinic-pill::before{
+  content:'';width:7px;height:7px;border-radius:50%;
+  background:var(--green);flex-shrink:0;
 }
-.clinic-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+.nb-icon{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;color:var(--t2);
+  transition:background 0.15s,color 0.15s;
+}
+.nb-icon svg{width:16px;height:16px}
+.nb-icon:hover{background:var(--surface2);color:var(--t0)}
 
-/* ── Nav Tabs ── */
-.nav{background:var(--topbar);border-bottom:1px solid var(--b1);padding:0 24px;display:flex}
-.nav-tab{
-  padding:0 16px;height:40px;
-  display:flex;align-items:center;gap:7px;
-  font-size:12.5px;color:var(--t2);cursor:pointer;
-  border-bottom:2px solid transparent;
-  transition:color 0.15s,border-color 0.15s;
-  font-weight:500;white-space:nowrap
-}
-.nav-tab svg{width:14px;height:14px}
-.nav-tab.on{color:var(--purple-l);border-bottom-color:var(--purple)}
-.nav-tab:hover:not(.on){color:var(--t1)}
-.panel{display:none}
-.panel.on{display:block}
-.page-inner{max-width:1020px;margin:0 auto;padding:24px}
+/* ── Page shell ── */
+.page{max-width:1080px;margin:0 auto;padding:28px 24px 48px}
 
-/* ── Link Banner ── */
-.link-banner{
-  background:var(--card);border:1px solid var(--b1);border-radius:12px;
-  padding:12px 16px;display:flex;align-items:center;gap:8px;
-  margin-bottom:20px;flex-wrap:wrap
+/* ── Page header ── */
+.page-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;margin-bottom:24px;flex-wrap:wrap;
 }
-.link-label{font-size:11px;color:var(--t1);white-space:nowrap}
-.link-url{
-  flex:1;min-width:180px;
-  font-size:11.5px;font-family:'SF Mono','Fira Code',monospace;
-  color:var(--t1);background:var(--b0);border:1px solid var(--b1);
-  border-radius:8px;padding:7px 10px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+.ph-title{font-size:22px;font-weight:600;color:var(--t0);letter-spacing:-0.3px;line-height:1.2}
+.ph-sub{font-size:13px;color:var(--t2);margin-top:3px}
+
+.link-share{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface);
+  border:1px solid var(--border-m);
+  border-radius:12px;padding:7px 10px 7px 14px;
+  flex-wrap:wrap;
+  box-shadow:var(--shadow);
 }
+.ls-label{font-size:11px;color:var(--t2);font-weight:500;white-space:nowrap}
+.ls-url{
+  font-size:11px;font-family:'SF Mono','Fira Code',monospace;
+  color:var(--t1);max-width:220px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.ls-divider{width:1px;height:16px;background:var(--border-m)}
 
 /* ── Buttons ── */
 .btn{
-  padding:7px 14px;font-size:12px;font-weight:500;
-  border-radius:8px;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;
-  white-space:nowrap;border:none;font-family:inherit
+  padding:7px 14px;border-radius:9px;
+  font-size:12px;font-weight:500;white-space:nowrap;
+  border:none;transition:all 0.15s;
 }
 .btn-ghost{
-  background:var(--b0);border:1px solid var(--b1);color:var(--t1);
-  transition:all 0.15s
+  background:none;border:1px solid var(--border-m);
+  color:var(--t1);
 }
-.btn-ghost:hover{background:var(--b1);color:var(--t0)}
-.btn-ghost.done{background:rgba(78,173,133,0.15);border-color:rgba(78,173,133,0.3);color:var(--green)}
-.btn-purple{background:var(--purple);color:white;transition:all 0.15s;box-shadow:0 0 16px var(--purple-glow)}
-.btn-purple:hover{background:#8a5f94}
-.btn-green{background:#25D366;color:white;transition:all 0.15s}
-.btn-green:hover{background:#1da855}
+.btn-ghost:hover{background:var(--surface2);color:var(--t0)}
+.btn-ghost.done{background:var(--green-bg);border-color:rgba(45,140,102,0.25);color:var(--green)}
+.btn-brand{
+  background:var(--brand);color:white;
+  box-shadow:0 2px 8px rgba(184,101,122,0.24);
+}
+.btn-brand:hover{background:var(--brand-h)}
+.btn-wa{
+  background:#25D366;color:white;
+  box-shadow:0 2px 8px rgba(37,211,102,0.22);
+}
+.btn-wa:hover{background:#20b858}
+.btn-sm{padding:5px 10px;font-size:11px}
 
-/* ── Stats ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.stat-card{
-  background:var(--card);border-radius:12px;padding:16px 18px;
-  border:1px solid var(--b1);
-  transition:border-color 0.2s,transform 0.2s
+/* ── KPI section ── */
+.kpi-section{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:24px;
 }
-.stat-card:hover{border-color:var(--b2);transform:translateY(-1px)}
-.stat-label{
-  font-size:10px;color:var(--t2);margin-bottom:8px;
-  font-weight:600;text-transform:uppercase;letter-spacing:0.5px;
-  display:flex;align-items:center
-}
-.stat-val{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1}
-.stat-val.purple{color:var(--purple-l)}
-.stat-val.green{color:var(--green)}
-.stat-val.amber{color:var(--amber)}
-.stat-val.red{color:var(--red)}
+@media(max-width:760px){.kpi-section{grid-template-columns:1fr}}
 
-/* ── Tooltip ── */
-.tip{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:13px;height:13px;border-radius:50%;
-  background:var(--b1);color:var(--t2);
-  font-size:8px;font-weight:700;cursor:help;
-  margin-left:5px;position:relative;flex-shrink:0
+.kpi-group{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px 20px;
+  box-shadow:var(--shadow);
 }
-.tip:hover::after{
-  content:attr(data-tip);position:absolute;
-  bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-  background:#1C1512;color:var(--t0);font-size:11px;font-weight:400;
-  padding:5px 9px;border-radius:7px;white-space:nowrap;
-  z-index:99;pointer-events:none;line-height:1.4;
-  border:1px solid var(--b2)
+.kpi-group-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
 }
-.tip:hover::before{
-  content:'';position:absolute;
-  bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
-  border:4px solid transparent;border-top-color:#1e1f2a;z-index:99
+.kpi-group-title{
+  font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--t2);
 }
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+.kpi{
+  display:flex;flex-direction:column;gap:5px;
+  padding:10px 12px;
+  background:var(--bg);
+  border-radius:10px;
+  border:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+}
+.kpi::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:2px 2px 0 0;
+  background:var(--kpi-accent,var(--t3));
+}
+.kpi.brand{--kpi-accent:var(--brand)}
+.kpi.green{--kpi-accent:var(--green)}
+.kpi.amber{--kpi-accent:var(--amber)}
+.kpi.red{--kpi-accent:var(--red)}
+.kpi.blue{--kpi-accent:var(--blue)}
+
+.kpi-label{font-size:10px;color:var(--t2);font-weight:500;line-height:1.3}
+.kpi-val{
+  font-size:22px;font-weight:600;line-height:1;
+  color:var(--t0);letter-spacing:-0.5px;
+}
+.kpi.brand .kpi-val{color:var(--brand)}
+.kpi.green .kpi-val{color:var(--green)}
+.kpi.amber .kpi-val{color:var(--amber)}
+.kpi.red .kpi-val{color:var(--red)}
+.kpi.blue .kpi-val{color:var(--blue)}
+
+/* ── Content card ── */
+.content-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* ── Tabs ── */
+.tabs-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.tabs{display:flex;gap:0}
+.tab{
+  display:flex;align-items:center;gap:6px;
+  padding:0 18px;height:46px;
+  font-size:13px;font-weight:500;
+  color:var(--t2);background:none;border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;transition:color 0.15s,border-color 0.15s;
+  white-space:nowrap;
+}
+.tab svg{width:14px;height:14px}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+.tab:hover:not(.on){color:var(--t1)}
+
+/* ── Panel body ── */
+.panel{display:none}
+.panel.on{display:block}
 
 /* ── Toolbar ── */
-.toolbar{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
 .search-wrap{flex:1;min-width:200px;position:relative}
-.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--t2)}
+.search-wrap svg{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  width:13px;height:13px;color:var(--t2);pointer-events:none;
+}
 .search-wrap input{
-  width:100%;padding:8px 10px 8px 30px;font-size:13px;
-  background:var(--card);border:1px solid var(--b1);
+  width:100%;padding:8px 12px 8px 32px;
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  background:var(--bg);border:1px solid var(--border-m);
   border-radius:9px;color:var(--t0);outline:none;
-  font-family:inherit;transition:border-color 0.15s
+  transition:border-color 0.15s,box-shadow 0.15s;
 }
 .search-wrap input::placeholder{color:var(--t2)}
-.search-wrap input:focus{border-color:var(--purple)}
-
-.filter-pill{
-  padding:6px 13px;font-size:12px;border:1px solid var(--b1);
-  border-radius:20px;cursor:pointer;color:var(--t1);
-  background:var(--card);white-space:nowrap;
-  transition:all 0.15s;font-weight:500
+.search-wrap input:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px var(--brand-ring);
+  background:white;
 }
-.filter-pill.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.35);color:var(--purple-l)}
-.filter-pill:hover:not(.on){border-color:var(--b2);color:var(--t0)}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.filter-pill{
+  padding:5px 12px;font-size:12px;font-weight:500;
+  border:1px solid var(--border-m);border-radius:20px;
+  cursor:pointer;color:var(--t1);background:white;
+  white-space:nowrap;transition:all 0.15s;
+}
+.filter-pill:hover:not(.on){background:var(--surface2)}
+.filter-pill.on{
+  background:var(--brand-dim);
+  border-color:rgba(184,101,122,0.25);
+  color:var(--brand);font-weight:600;
+}
 
-/* ── Date Filter ── */
+/* Date filter */
 .date-filter-wrap{position:relative;display:inline-block}
 .date-filter-btn{
-  padding:6px 13px;font-size:12px;border:1px solid var(--b1);
-  border-radius:20px;cursor:pointer;color:var(--t1);
-  background:var(--card);display:flex;align-items:center;gap:5px;
-  white-space:nowrap;font-family:inherit;transition:all 0.15s
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;font-size:12px;font-weight:500;
+  border:1px solid var(--border-m);border-radius:20px;
+  cursor:pointer;color:var(--t1);background:white;
+  font-family:'DM Sans',sans-serif;
+  white-space:nowrap;transition:all 0.15s;
 }
 .date-filter-btn svg{width:12px;height:12px}
-.date-filter-btn.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.35);color:var(--purple-l)}
+.date-filter-btn:hover{background:var(--surface2)}
+.date-filter-btn.on{background:var(--brand-dim);border-color:rgba(184,101,122,0.25);color:var(--brand)}
 .date-picker-panel{
   display:none;position:absolute;top:calc(100% + 6px);right:0;
-  background:#1C1917;border:1px solid var(--b2);border-radius:12px;
-  padding:14px;z-index:50;min-width:280px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4)
+  background:white;border:1px solid var(--border-m);border-radius:14px;
+  padding:16px;z-index:50;min-width:280px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
 }
 .date-picker-panel.on{display:block}
-.dp-shortcuts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.dp-shortcuts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 .dp-shortcut{
-  padding:4px 10px;font-size:11px;border:1px solid var(--b1);
-  border-radius:20px;cursor:pointer;color:var(--t1);
-  background:var(--card);transition:all 0.15s;font-family:inherit
+  padding:4px 10px;font-size:11px;border:1px solid var(--border-m);
+  border-radius:20px;cursor:pointer;color:var(--t1);background:var(--bg);
+  transition:all 0.15s;font-family:'DM Sans',sans-serif;
 }
-.dp-shortcut:hover,.dp-shortcut.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.3);color:var(--purple-l)}
+.dp-shortcut:hover,.dp-shortcut.on{background:var(--brand-dim);border-color:rgba(184,101,122,0.25);color:var(--brand)}
 .dp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dp-label{font-size:11px;color:var(--t1);width:24px;flex-shrink:0}
+.dp-label{font-size:11px;color:var(--t1);width:24px;flex-shrink:0;font-weight:500}
 .dp-input{
-  flex:1;padding:6px 10px;font-size:12px;border:1px solid var(--b1);
-  border-radius:8px;background:var(--card);color:var(--t0);
-  outline:none;font-family:inherit
+  flex:1;padding:7px 10px;font-size:12px;border:1px solid var(--border-m);
+  border-radius:8px;background:var(--bg);color:var(--t0);
+  outline:none;font-family:'DM Sans',sans-serif;
 }
-.dp-input:focus{border-color:var(--purple)}
+.dp-input:focus{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-ring)}
 .dp-actions{display:flex;gap:6px;margin-top:10px}
-.dp-apply{flex:1;padding:7px;background:var(--purple);border:none;border-radius:8px;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
-.dp-clear{padding:7px 12px;background:none;border:1px solid var(--b1);border-radius:8px;color:var(--t1);font-size:12px;cursor:pointer;font-family:inherit}
+.dp-apply{
+  flex:1;padding:8px;background:var(--brand);
+  border:none;border-radius:9px;color:white;
+  font-size:12px;font-weight:500;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
+.dp-clear{
+  padding:8px 12px;background:none;border:1px solid var(--border-m);
+  border-radius:9px;color:var(--t1);font-size:12px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
 
 /* ── Table ── */
-.table-wrap{background:var(--card);border-radius:14px;border:1px solid var(--b1);overflow:hidden}
-.trow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--b0);transition:background 0.1s}
-.trow:last-child{border:none}
-.trow:hover{background:var(--card-h)}
-.trow.head{
-  background:rgba(255,255,255,0.02);
-  font-size:10px;color:var(--t2);font-weight:600;
-  letter-spacing:0.5px;padding:9px 16px;text-transform:uppercase
+.table-wrap{overflow-x:auto}
+.trow{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 20px;
+  border-bottom:1px solid var(--border);
+  transition:background 0.1s;cursor:pointer;
 }
+.trow:last-child{border:none}
+.trow:hover{background:#FBF8F6}
+.trow.head{
+  background:var(--bg);cursor:default;
+  font-size:10px;color:var(--t2);
+  font-weight:600;letter-spacing:0.07em;
+  text-transform:uppercase;padding:9px 20px;
+}
+.trow.head:hover{background:var(--bg)}
+
 .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
-.av-0{background:rgba(155,111,165,0.2);color:var(--purple-l)}
-.av-1{background:rgba(78,173,133,0.2);color:var(--green)}
-.av-2{background:rgba(212,148,58,0.2);color:var(--amber)}
-.av-3{background:rgba(201,79,79,0.2);color:#e07070}
-.av-4{background:rgba(74,135,212,0.2);color:var(--blue)}
-.av-5{background:rgba(140,140,160,0.2);color:#9b9db4}
+.av-0{background:var(--brand-dim);color:var(--brand)}
+.av-1{background:var(--green-bg);color:var(--green)}
+.av-2{background:var(--amber-bg);color:var(--amber)}
+.av-3{background:var(--red-bg);color:var(--red)}
+.av-4{background:var(--blue-bg);color:var(--blue)}
+.av-5{background:rgba(140,130,120,0.1);color:var(--t1)}
+
 .col-name{flex:1.4;min-width:0}
 .col-proc{flex:1.2;min-width:0;font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .col-status{flex:0.9;min-width:0;display:flex}
 .col-apt{flex:1;min-width:0;font-size:12px}
-.col-reason{flex:1.2;min-width:0;font-size:11px;color:var(--t2)}
+.col-reason{flex:1.1;min-width:0;font-size:11px;color:var(--t2)}
 .col-date{flex:0.8;min-width:0;font-size:12px;color:var(--t1);text-align:right;white-space:nowrap}
 .c-name{font-size:13px;font-weight:500;color:var(--t0)}
-.c-phone{font-size:11px;color:var(--t1);margin-top:1px}
+.c-phone{font-size:11px;color:var(--t2);margin-top:1px}
 
-/* ── Inline Status Selects ── */
+/* Inline selects */
 .inline-sel{
   padding:4px 10px;font-size:11px;font-weight:500;
-  border:1px solid var(--b1);border-radius:20px;
-  background:var(--bg2);color:var(--t1);
-  cursor:pointer;outline:none;transition:border-color 0.15s;font-family:inherit
+  border:1px solid var(--border-m);border-radius:20px;
+  background:var(--bg);color:var(--t1);
+  cursor:pointer;outline:none;transition:all 0.15s;
+  font-family:'DM Sans',sans-serif;
 }
-.inline-sel.s-new,.inline-sel.s-captado{border-color:rgba(74,135,212,0.4);color:#7aadea;background:rgba(74,135,212,0.1)}
-.inline-sel.s-link_sent{border-color:rgba(212,148,58,0.4);color:#e8b45a;background:rgba(212,148,58,0.1)}
-.inline-sel.s-scheduled{border-color:rgba(78,173,133,0.4);color:var(--green);background:rgba(78,173,133,0.1)}
-.inline-sel.s-rejected{border-color:rgba(201,79,79,0.4);color:#e07070;background:rgba(201,79,79,0.1)}
-.inline-sel.s-pending{border-color:rgba(212,148,58,0.4);color:#e8b45a;background:rgba(212,148,58,0.1)}
-.inline-sel.s-confirmed{border-color:rgba(78,173,133,0.4);color:var(--green);background:rgba(78,173,133,0.1)}
-.inline-sel.s-done{border-color:var(--b1);color:var(--t1);background:var(--b0)}
-.inline-sel.s-cancelled{border-color:rgba(201,79,79,0.4);color:#e07070;background:rgba(201,79,79,0.1)}
+.inline-sel.s-new,.inline-sel.s-captado{border-color:rgba(58,122,196,0.3);color:var(--blue);background:var(--blue-bg)}
+.inline-sel.s-link_sent{border-color:rgba(154,107,16,0.3);color:var(--amber);background:var(--amber-bg)}
+.inline-sel.s-scheduled{border-color:rgba(45,140,102,0.3);color:var(--green);background:var(--green-bg)}
+.inline-sel.s-rejected{border-color:rgba(176,48,48,0.3);color:var(--red);background:var(--red-bg)}
+.inline-sel.s-pending{border-color:rgba(154,107,16,0.3);color:var(--amber);background:var(--amber-bg)}
+.inline-sel.s-confirmed{border-color:rgba(45,140,102,0.3);color:var(--green);background:var(--green-bg)}
+.inline-sel.s-done{border-color:var(--border-m);color:var(--t1);background:var(--bg)}
+.inline-sel.s-cancelled{border-color:rgba(176,48,48,0.3);color:var(--red);background:var(--red-bg)}
 
-/* ── Badges ── */
-.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.b-scheduled{background:rgba(78,173,133,0.15);color:var(--green);border:1px solid rgba(78,173,133,0.25)}
-.b-rejected{background:rgba(201,79,79,0.15);color:#e07070;border:1px solid rgba(201,79,79,0.25)}
-.b-link_sent{background:rgba(212,148,58,0.15);color:var(--amber);border:1px solid rgba(212,148,58,0.25)}
-.b-new{background:rgba(74,135,212,0.15);color:#7aadea;border:1px solid rgba(74,135,212,0.25)}
+/* Badges */
+.badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;letter-spacing:0.02em}
+.b-scheduled{background:var(--green-bg);color:var(--green)}
+.b-rejected{background:var(--red-bg);color:var(--red)}
+.b-link_sent{background:var(--amber-bg);color:var(--amber)}
+.b-new{background:var(--blue-bg);color:var(--blue)}
 
-/* ── Agenda Rows ── */
-.apt-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b0);transition:background 0.1s}
+/* Agenda rows */
+.apt-row{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 20px;
+  border-bottom:1px solid var(--border);
+  transition:background 0.1s;
+}
 .apt-row:last-child{border:none}
-.apt-row:hover{background:var(--card-h)}
+.apt-row:hover{background:#FBF8F6}
 .apt-time{width:52px;flex-shrink:0;text-align:right}
-.apt-time-main{font-size:13px;font-weight:500}
+.apt-time-main{font-size:13px;font-weight:600;color:var(--t0)}
 .apt-time-date{font-size:10px;color:var(--t2);margin-top:1px}
-.apt-bar{width:3px;height:36px;border-radius:2px;flex-shrink:0}
+.apt-bar{width:3px;height:36px;border-radius:3px;flex-shrink:0}
 .apt-info{flex:1;min-width:0}
-.apt-name{font-size:13px;font-weight:500}
-.apt-proc{font-size:11px;color:var(--t1);margin-top:1px}
+.apt-name{font-size:13px;font-weight:500;color:var(--t0)}
+.apt-proc{font-size:11px;color:var(--t2);margin-top:2px}
 .apt-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.src-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-dim);color:var(--purple-l)}
-.s-confirmed{background:rgba(78,173,133,0.15);color:var(--green)}
-.s-pending{background:rgba(212,148,58,0.15);color:var(--amber)}
-.s-done{background:var(--b0);color:var(--t1)}
-.s-cancelled{background:rgba(201,79,79,0.15);color:#e07070}
+.src-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--brand-dim);color:var(--brand)}
+.s-confirmed{background:var(--green-bg);color:var(--green)}
+.s-pending{background:var(--amber-bg);color:var(--amber)}
+.s-done{background:var(--surface2);color:var(--t1)}
+.s-cancelled{background:var(--red-bg);color:var(--red)}
 
-/* ── States ── */
+/* Agenda stats */
+.agenda-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;border-bottom:1px solid var(--border);
+}
+.ags{
+  padding:16px 20px;text-align:center;
+  border-right:1px solid var(--border);
+}
+.ags:last-child{border-right:none}
+.ags-label{font-size:10px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.ags-val{font-size:24px;font-weight:600;letter-spacing:-0.5px}
+.ags-val.purple{color:var(--brand)}
+.ags-val.green{color:var(--green)}
+.ags-val.amber{color:var(--amber)}
+
+/* Tooltip */
+.tip{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--surface2);color:var(--t2);
+  font-size:8px;font-weight:700;cursor:help;
+  margin-left:4px;position:relative;flex-shrink:0;
+  border:1px solid var(--border-m);
+}
+.tip:hover::after{
+  content:attr(data-tip);position:absolute;
+  bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--t0);color:white;font-size:11px;font-weight:400;
+  padding:6px 10px;border-radius:8px;white-space:nowrap;
+  z-index:99;pointer-events:none;line-height:1.4;
+  font-family:'DM Sans',sans-serif;
+}
+.tip:hover::before{
+  content:'';position:absolute;
+  bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--t0);z-index:99;
+}
+
+/* States */
 .loading{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 .empty{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 
-/* ── Responsive ── */
-@media(max-width:640px){
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
+/* Responsive */
+@media(max-width:700px){
+  .navbar{padding:0 16px}
+  .nb-nav .nb-link span{display:none}
+  .page{padding:20px 16px 40px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-row-3{grid-template-columns:repeat(3,1fr)}
   .col-proc,.col-reason{display:none}
-  .page-inner{padding:16px}
-  .sidebar{width:48px}
-  .main{margin-left:48px}
+  .page-header{flex-direction:column;gap:12px}
+  .link-share{width:100%}
+}
+@media(max-width:480px){
+  .kpi-row-3{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
-<aside class="sidebar">
-  <div class="sb-logo">
-    <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg>
+<!-- ═══ NAVBAR ═══ -->
+<header class="navbar">
+  <div class="nb-brand">
+    <div class="nb-mark">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3.2"/><path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg>
+    </div>
+    <span class="nb-logo-name">Laço</span>
   </div>
 
-  <div class="sb-item active" data-tip="Painel">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <rect x="3" y="3" width="6" height="6" rx="1.5"/>
-      <rect x="11" y="3" width="6" height="6" rx="1.5"/>
-      <rect x="3" y="11" width="6" height="6" rx="1.5"/>
-      <rect x="11" y="11" width="6" height="6" rx="1.5"/>
-    </svg>
-  </div>
-
-  <a href="/hoje" class="sb-item" data-tip="Hoje">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <rect x="3" y="4" width="14" height="13" rx="2"/>
-      <line x1="7" y1="2" x2="7" y2="6"/>
-      <line x1="13" y1="2" x2="13" y2="6"/>
-      <line x1="3" y1="9" x2="17" y2="9"/>
-    </svg>
-  </a>
-
-  <a href="/relatorio.html" class="sb-item" data-tip="Relatório">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <line x1="4" y1="16" x2="4" y2="10"/>
-      <line x1="8" y1="16" x2="8" y2="7"/>
-      <line x1="12" y1="16" x2="12" y2="12"/>
-      <line x1="16" y1="16" x2="16" y2="4"/>
-      <line x1="2" y1="16" x2="18" y2="16"/>
-    </svg>
-  </a>
-
-  <div class="sb-div"></div>
-
-  <a href="/config" class="sb-item" data-tip="Configurações">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <circle cx="10" cy="10" r="2.5"/>
-      <path d="M10 3.5V5M10 15V16.5M3.5 10H5M15 10h1.5M5.4 5.4l1.1 1.1M13.5 13.5l1.1 1.1M5.4 14.6l1.1-1.1M13.5 6.5l1.1-1.1"/>
-    </svg>
-  </a>
-
-  <div class="sb-spacer"></div>
-
-  <a href="/api-docs.html" class="sb-item" data-tip="API Docs">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <polyline points="6,8 2,10 6,12"/>
-      <polyline points="14,8 18,10 14,12"/>
-      <line x1="11" y1="6" x2="9" y2="14"/>
-    </svg>
-  </a>
-
-  <button onclick="logout()" class="sb-item" data-tip="Sair">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <path d="M13 7l3 3-3 3M16 10H8M8 4H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>
-    </svg>
-  </button>
-</aside>
-
-<!-- ═══ MAIN ═══ -->
-<div class="main">
-
-  <header class="topbar">
-    <span class="page-title">Painel</span>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="clinic-tag" id="clinic-name">Carregando...</span>
-    </div>
-  </header>
-
-  <nav class="nav">
-    <div class="nav-tab on" onclick="switchTab('clientes',this)">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/><circle cx="12" cy="7" r="2"/><path d="M10 14c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/></svg>
-      Clientes
-    </div>
-    <div class="nav-tab" onclick="switchTab('agenda',this)">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-      Agenda
-    </div>
+  <nav class="nb-nav">
+    <span class="nb-link active">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/>
+        <rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>
+      </svg>
+      <span>Painel</span>
+    </span>
+    <a href="/hoje" class="nb-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/>
+        <line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/>
+      </svg>
+      <span>Hoje</span>
+    </a>
+    <a href="/relatorio.html" class="nb-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/>
+        <line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/>
+        <line x1="1" y1="13" x2="15" y2="13"/>
+      </svg>
+      <span>Relatório</span>
+    </a>
   </nav>
 
-  <!-- CLIENTES -->
-  <div class="panel on" id="panel-clientes">
-    <div class="page-inner">
+  <div class="nb-spacer"></div>
 
-      <div class="link-banner">
-        <span class="link-label">Link de agendamento</span>
-        <div class="link-url" id="booking-link">...</div>
-        <button class="btn btn-ghost" id="copy-btn" onclick="copyLink()">Copiar link</button>
-        <button class="btn btn-green" onclick="shareWhatsApp()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-          Enviar no WhatsApp
+  <div class="nb-right">
+    <span class="clinic-pill" id="clinic-name">Carregando...</span>
+    <a href="/config" class="nb-icon" title="Configurações">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="2.2"/>
+        <path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/>
+      </svg>
+    </a>
+    <a href="/api-docs.html" class="nb-icon" title="API Docs">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <polyline points="5,6 2,8 5,10"/><polyline points="11,6 14,8 11,10"/>
+        <line x1="9" y1="4.5" x2="7" y2="11.5"/>
+      </svg>
+    </a>
+    <button onclick="logout()" class="nb-icon" title="Sair">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ PAGE ═══ -->
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <div class="ph-title">Painel</div>
+      <div class="ph-sub">Gestão de leads e agendamentos da clínica</div>
+    </div>
+    <div class="link-share">
+      <span class="ls-label">Link de agendamento</span>
+      <span class="ls-divider"></span>
+      <span class="ls-url" id="booking-link">carregando...</span>
+      <button class="btn btn-ghost btn-sm" id="copy-btn" onclick="copyLink()">Copiar</button>
+      <button class="btn btn-wa btn-sm" onclick="shareWhatsApp()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-section">
+    <!-- Funil de leads -->
+    <div class="kpi-group">
+      <div class="kpi-group-head">
+        <span class="kpi-group-title">Funil de leads</span>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi blue">
+          <div class="kpi-label">Total captados</div>
+          <div class="kpi-val" id="s-total">—</div>
+        </div>
+        <div class="kpi brand">
+          <div class="kpi-label">Link enviado</div>
+          <div class="kpi-val" id="s-sent">—</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Agendados</div>
+          <div class="kpi-val" id="s-scheduled">—</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-label">Não agendaram</div>
+          <div class="kpi-val" id="s-rejected">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financeiro -->
+    <div class="kpi-group">
+      <div class="kpi-group-head">
+        <span class="kpi-group-title">Valores</span>
+      </div>
+      <div class="kpi-row-3">
+        <div class="kpi green">
+          <div class="kpi-label">Valor agendado <span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div>
+          <div class="kpi-val" id="s-val-agendado">—</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Valor realizado <span class="tip" data-tip="Soma dos procedimentos já concluídos">?</span></div>
+          <div class="kpi-val" id="s-val-realizado">—</div>
+        </div>
+        <div class="kpi red">
+          <div class="kpi-label">Valor perdido <span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div>
+          <div class="kpi-val" id="s-val-perdido">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content card -->
+  <div class="content-card">
+
+    <!-- Tabs bar -->
+    <div class="tabs-bar">
+      <div class="tabs">
+        <button class="tab on" onclick="switchTab('clientes',this)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5"/>
+            <circle cx="12" cy="7" r="2"/><path d="M10 14c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/>
+          </svg>
+          Clientes
+        </button>
+        <button class="tab" onclick="switchTab('agenda',this)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+            <line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/>
+            <line x1="2" y1="7" x2="14" y2="7"/>
+          </svg>
+          Agenda
         </button>
       </div>
+    </div>
 
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Total leads</div><div class="stat-val" id="s-total">—</div></div>
-        <div class="stat-card"><div class="stat-label">Agendados</div><div class="stat-val green" id="s-scheduled">—</div></div>
-        <div class="stat-card"><div class="stat-label">Não agendaram</div><div class="stat-val amber" id="s-rejected">—</div></div>
-        <div class="stat-card"><div class="stat-label">Link enviado</div><div class="stat-val purple" id="s-sent">—</div></div>
-      </div>
-      <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-        <div class="stat-card"><div class="stat-label">Valor agendado<span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div><div class="stat-val green" id="s-val-agendado">—</div></div>
-        <div class="stat-card"><div class="stat-label">Valor confirmado<span class="tip" data-tip="Soma dos procedimentos já concluídos (realizados)">?</span></div><div class="stat-val green" id="s-val-realizado">—</div></div>
-        <div class="stat-card"><div class="stat-label">Valor perdido<span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div><div class="stat-val" style="color:var(--red)" id="s-val-perdido">—</div></div>
-      </div>
-
+    <!-- ── PANEL CLIENTES ── -->
+    <div class="panel on" id="panel-clientes">
+      <!-- Toolbar -->
       <div class="toolbar">
         <div class="search-wrap">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6.5" cy="6.5" r="4"/><line x1="10" y1="10" x2="14" y2="14"/>
+          </svg>
           <input type="text" placeholder="Buscar por nome ou telefone..." oninput="loadLeads(this.value)">
         </div>
-        <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
-        <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
-        <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
-        <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
-        <div class="date-filter-wrap" id="date-filter-wrap">
-          <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-            <span id="date-filter-label">Período</span>
-          </button>
-          <div class="date-picker-panel" id="date-picker-panel">
-            <div class="dp-shortcuts">
-              <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
-              <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
-              <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
-              <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
-            </div>
-            <div class="dp-row">
-              <span class="dp-label">De</span>
-              <input type="date" class="dp-input" id="dp-from">
-            </div>
-            <div class="dp-row">
-              <span class="dp-label">Até</span>
-              <input type="date" class="dp-input" id="dp-to">
-            </div>
-            <div class="dp-actions">
-              <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-              <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+        <div class="filters">
+          <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
+          <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
+          <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
+          <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
+          <div class="date-filter-wrap" id="date-filter-wrap">
+            <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+                <line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/>
+                <line x1="2" y1="7" x2="14" y2="7"/>
+              </svg>
+              <span id="date-filter-label">Período</span>
+            </button>
+            <div class="date-picker-panel" id="date-picker-panel">
+              <div class="dp-shortcuts">
+                <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
+                <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
+                <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
+                <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
+              </div>
+              <div class="dp-row">
+                <span class="dp-label">De</span>
+                <input type="date" class="dp-input" id="dp-from">
+              </div>
+              <div class="dp-row">
+                <span class="dp-label">Até</span>
+                <input type="date" class="dp-input" id="dp-to">
+              </div>
+              <div class="dp-actions">
+                <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+                <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Table -->
       <div class="table-wrap">
         <div class="trow head">
           <div style="width:32px;flex-shrink:0"></div>
           <div class="col-name">Cliente</div>
-          <div class="col-proc">Procedimento visto</div>
+          <div class="col-proc">Procedimento</div>
           <div class="col-status">Status lead</div>
           <div class="col-apt">Agendamento</div>
           <div class="col-reason">Motivo</div>
@@ -488,38 +706,34 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
         </div>
         <div id="leads-list"><div class="loading">Carregando...</div></div>
       </div>
-
     </div>
-  </div>
 
-  <!-- AGENDA -->
-  <div class="panel" id="panel-agenda">
-    <div class="page-inner">
-
-      <div class="link-banner">
-        <span class="link-label">Link de agendamento</span>
-        <div class="link-url" id="booking-link-2">...</div>
-        <button class="btn btn-ghost" id="copy-btn-2" onclick="copyLink2()">Copiar link</button>
-        <button class="btn btn-green" onclick="shareWhatsApp()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-          Enviar no WhatsApp
-        </button>
+    <!-- ── PANEL AGENDA ── -->
+    <div class="panel" id="panel-agenda">
+      <!-- Quick stats -->
+      <div class="agenda-stats">
+        <div class="ags">
+          <div class="ags-label">Total</div>
+          <div class="ags-val purple" id="a-total">—</div>
+        </div>
+        <div class="ags">
+          <div class="ags-label">Confirmados</div>
+          <div class="ags-val green" id="a-confirmed">—</div>
+        </div>
+        <div class="ags">
+          <div class="ags-label">Pendentes</div>
+          <div class="ags-val amber" id="a-pending">—</div>
+        </div>
       </div>
-
-      <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-        <div class="stat-card"><div class="stat-label">Total agendamentos</div><div class="stat-val purple" id="a-total">—</div></div>
-        <div class="stat-card"><div class="stat-label">Confirmados</div><div class="stat-val green" id="a-confirmed">—</div></div>
-        <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-val amber" id="a-pending">—</div></div>
-      </div>
-
-      <div class="table-wrap">
-        <div id="apt-list"><div class="loading">Carregando...</div></div>
-      </div>
-
+      <!-- List -->
+      <div id="apt-list"><div class="loading">Carregando...</div></div>
     </div>
-  </div>
 
-</div><!-- /.main -->
+  </div><!-- /.content-card -->
+</div><!-- /.page -->
+
+<!-- hidden for JS compat -->
+<span id="booking-link-2" style="display:none"></span>
 
 <script>
 if (!sessionStorage.getItem('laco_auth') && !localStorage.getItem('laco_api_key')) {
@@ -805,7 +1019,7 @@ async function updateLeadStatus(id, status, sel) {
 }
 
 function switchTab(name, el) {
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'))
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'))
   el.classList.add('on')
   document.getElementById('panel-' + name).classList.add('on')
@@ -816,15 +1030,13 @@ function copyLink() {
     const btn = document.getElementById('copy-btn')
     btn.textContent = 'Copiado!'
     btn.classList.add('done')
-    setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('done') }, 2000)
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('done') }, 2000)
   })
 }
 function copyLink2() {
   navigator.clipboard.writeText(bookingLink()).then(() => {
     const btn = document.getElementById('copy-btn-2')
-    btn.textContent = 'Copiado!'
-    btn.classList.add('done')
-    setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('done') }, 2000)
+    if(btn){ btn.textContent = 'Copiado!'; btn.classList.add('done'); setTimeout(()=>{btn.textContent='Copiar link';btn.classList.remove('done')},2000) }
   })
 }
 function shareWhatsApp() {
