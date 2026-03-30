@@ -122,6 +122,76 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 }
 .page-title{font-size:14px;font-weight:600;color:var(--t0)}
 
+/* ── Global Date Bar ── */
+.gdate-bar{
+  background:var(--topbar);
+  border-bottom:1px solid var(--b1);
+  padding:0 24px;
+  position:sticky;top:52px;z-index:49;
+  display:flex;align-items:center;gap:12px;
+  flex-wrap:wrap;min-height:44px;
+}
+.gdate-label{
+  font-size:10px;font-weight:700;color:var(--t2);
+  text-transform:uppercase;letter-spacing:0.7px;
+  white-space:nowrap;flex-shrink:0;
+}
+.gdate-pills{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.gdate-pill{
+  padding:5px 12px;font-size:11.5px;font-weight:500;
+  border:1px solid var(--b1);border-radius:20px;
+  cursor:pointer;color:var(--t1);background:none;
+  transition:all 0.12s;font-family:inherit;white-space:nowrap;
+}
+.gdate-pill:hover:not(.on){border-color:var(--b2);color:var(--t0)}
+.gdate-pill.on{
+  background:var(--purple-dim);border-color:rgba(155,111,165,0.4);
+  color:var(--purple-l);
+}
+.gdate-custom{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;font-size:11.5px;font-weight:500;
+  border:1px solid var(--b1);border-radius:20px;
+  cursor:pointer;color:var(--t1);background:none;
+  transition:all 0.12s;font-family:inherit;white-space:nowrap;
+  position:relative;
+}
+.gdate-custom svg{width:12px;height:12px}
+.gdate-custom:hover{border-color:var(--b2);color:var(--t0)}
+.gdate-custom.on{background:var(--purple-dim);border-color:rgba(155,111,165,0.4);color:var(--purple-l)}
+.gdate-sep{width:1px;height:16px;background:var(--b1);flex-shrink:0}
+.gdate-active{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--t1);white-space:nowrap;
+}
+.gdate-active-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--purple-l);flex-shrink:0;
+  box-shadow:0 0 6px var(--purple-glow);
+}
+.gdate-active-txt{font-weight:500;color:var(--t0)}
+.gdate-active-none{color:var(--t2);font-size:11px}
+
+/* ── Custom date picker (global) ── */
+.gdate-picker{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:#1c1d26;border:1px solid var(--b2);border-radius:12px;
+  padding:14px;z-index:200;min-width:270px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+.gdate-picker.on{display:block}
+.gdp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.gdp-label{font-size:11px;color:var(--t1);width:24px;flex-shrink:0}
+.gdp-input{
+  flex:1;padding:6px 10px;font-size:12px;border:1px solid var(--b1);
+  border-radius:8px;background:var(--card);color:var(--t0);
+  outline:none;font-family:inherit;
+}
+.gdp-input:focus{border-color:var(--purple)}
+.gdp-actions{display:flex;gap:6px;margin-top:10px}
+.gdp-apply{flex:1;padding:7px;background:var(--purple);border:none;border-radius:8px;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.gdp-clear{padding:7px 12px;background:none;border:1px solid var(--b1);border-radius:8px;color:var(--t1);font-size:12px;cursor:pointer;font-family:inherit}
+
 /* ── Panel ── */
 .panel{display:none}
 .panel.on{display:block}
@@ -442,6 +512,40 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
     <span class="page-title" id="page-title">Clientes</span>
   </header>
 
+  <!-- ═══ DATE BAR ═══ -->
+  <div class="gdate-bar">
+    <span class="gdate-label">Período</span>
+    <div class="gdate-pills">
+      <button class="gdate-pill" onclick="setGlobalShortcut('hoje',this)">Hoje</button>
+      <button class="gdate-pill" onclick="setGlobalShortcut('semana',this)">Esta semana</button>
+      <button class="gdate-pill" onclick="setGlobalShortcut('15d',this)">Últimos 15d</button>
+      <button class="gdate-pill" onclick="setGlobalShortcut('30d',this)">Últimos 30d</button>
+      <button class="gdate-pill" onclick="setGlobalShortcut('ano',this)">Ano todo</button>
+    </div>
+    <div class="gdate-custom" id="gdate-custom-btn" onclick="toggleGlobalPicker()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+      Personalizado
+      <div class="gdate-picker" id="gdate-picker" onclick="event.stopPropagation()">
+        <div class="gdp-row">
+          <span class="gdp-label">De</span>
+          <input type="date" class="gdp-input" id="gdp-from">
+        </div>
+        <div class="gdp-row">
+          <span class="gdp-label">Até</span>
+          <input type="date" class="gdp-input" id="gdp-to">
+        </div>
+        <div class="gdp-actions">
+          <button class="gdp-clear" onclick="clearGlobalDate()">Limpar</button>
+          <button class="gdp-apply" onclick="applyGlobalCustom()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+    <div class="gdate-sep"></div>
+    <div class="gdate-active" id="gdate-active">
+      <span class="gdate-active-none">Todos os dados</span>
+    </div>
+  </div>
+
   <!-- CLIENTES -->
   <div class="panel on" id="panel-clientes">
     <div class="page-inner">
@@ -477,32 +581,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
         <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
         <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
         <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
-        <div class="date-filter-wrap" id="date-filter-wrap">
-          <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="5" y1="2" x2="5" y2="4"/><line x1="11" y1="2" x2="11" y2="4"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-            <span id="date-filter-label">Período</span>
-          </button>
-          <div class="date-picker-panel" id="date-picker-panel">
-            <div class="dp-shortcuts">
-              <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
-              <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
-              <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
-              <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
-            </div>
-            <div class="dp-row">
-              <span class="dp-label">De</span>
-              <input type="date" class="dp-input" id="dp-from">
-            </div>
-            <div class="dp-row">
-              <span class="dp-label">Até</span>
-              <input type="date" class="dp-input" id="dp-to">
-            </div>
-            <div class="dp-actions">
-              <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-              <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="table-wrap">
@@ -606,11 +684,24 @@ async function init() {
 
 function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 
+function buildDateParams() {
+  const p = []
+  if (dateFrom) p.push(`date_from=${dateFrom}`)
+  if (dateTo)   p.push(`date_to=${dateTo}`)
+  return p.length ? '?' + p.join('&') : ''
+}
+
+async function reloadAll() {
+  const search = document.querySelector('.search-wrap input')?.value || ''
+  await Promise.all([loadStats(), loadLeads(search), loadAptStats(), loadAppointments()])
+}
+
 async function loadStats() {
   try {
+    const dp = buildDateParams()
     const [lr, ar] = await Promise.all([
-      fetch(`${API}/api/leads/stats`, { headers: headers() }),
-      fetch(`${API}/api/appointments/stats`, { headers: headers() })
+      fetch(`${API}/api/leads/stats${dp}`, { headers: headers() }),
+      fetch(`${API}/api/appointments/stats${dp}`, { headers: headers() })
     ])
     if (lr.ok) {
       const d = await lr.json()
@@ -704,7 +795,7 @@ async function loadAppointments() {
   const list = document.getElementById('apt-list')
   list.innerHTML = '<div class="loading">Carregando...</div>'
   try {
-    const r = await fetch(`${API}/api/appointments`, { headers: headers() })
+    const r = await fetch(`${API}/api/appointments${buildDateParams()}`, { headers: headers() })
     if (!r.ok) { list.innerHTML = '<div class="empty">Erro ao carregar.</div>'; return }
     const apts = await r.json()
     if (!apts.length) { list.innerHTML = '<div class="empty">Nenhum agendamento ainda.</div>'; return }
@@ -772,62 +863,79 @@ function setFilter(f, el) {
   loadLeads(document.querySelector('.search-wrap input').value)
 }
 
-function toggleDatePicker() {
-  const panel = document.getElementById('date-picker-panel')
-  panel.classList.toggle('on')
-}
+// ── Global Date Filter ──
+const fmtDate = d => d.toISOString().slice(0,10)
+const fmtLabel = d => new Date(d + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})
 
-function applyShortcut(type) {
+function setGlobalShortcut(type, el) {
   const today = new Date()
-  const fmt = d => d.toISOString().slice(0,10)
-  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
-  event.target.classList.add('on')
+  let from, to
   if (type === 'hoje') {
-    document.getElementById('dp-from').value = fmt(today)
-    document.getElementById('dp-to').value   = fmt(today)
+    from = to = fmtDate(today)
   } else if (type === 'semana') {
-    const mon = new Date(today); mon.setDate(today.getDate() - today.getDay() + 1)
-    document.getElementById('dp-from').value = fmt(mon)
-    document.getElementById('dp-to').value   = fmt(today)
-  } else if (type === '15dias') {
-    const d15 = new Date(today); d15.setDate(today.getDate() - 14)
-    document.getElementById('dp-from').value = fmt(d15)
-    document.getElementById('dp-to').value   = fmt(today)
-  } else if (type === 'mes') {
-    const d1 = new Date(today.getFullYear(), today.getMonth(), 1)
-    document.getElementById('dp-from').value = fmt(d1)
-    document.getElementById('dp-to').value   = fmt(today)
+    const mon = new Date(today)
+    mon.setDate(today.getDate() - ((today.getDay() + 6) % 7))
+    from = fmtDate(mon); to = fmtDate(today)
+  } else if (type === '15d') {
+    const d = new Date(today); d.setDate(today.getDate() - 14)
+    from = fmtDate(d); to = fmtDate(today)
+  } else if (type === '30d') {
+    const d = new Date(today); d.setDate(today.getDate() - 29)
+    from = fmtDate(d); to = fmtDate(today)
+  } else if (type === 'ano') {
+    from = today.getFullYear() + '-01-01'; to = fmtDate(today)
   }
+  dateFrom = from; dateTo = to
+  document.querySelectorAll('.gdate-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('gdate-custom-btn').classList.remove('on')
+  el.classList.add('on')
+  updateGdateActive()
+  reloadAll()
 }
 
-function applyDateFilter() {
-  dateFrom = document.getElementById('dp-from').value || null
-  dateTo   = document.getElementById('dp-to').value   || null
-  document.getElementById('date-picker-panel').classList.remove('on')
-  const btn = document.getElementById('date-filter-btn')
-  const lbl = document.getElementById('date-filter-label')
-  if (dateFrom || dateTo) {
-    btn.classList.add('on')
-    lbl.textContent = (dateFrom||'') + ' → ' + (dateTo||'')
-  }
-  loadLeads(document.querySelector('.search-wrap input').value)
+function toggleGlobalPicker() {
+  document.getElementById('gdate-picker').classList.toggle('on')
 }
 
-function clearDateFilter() {
+function applyGlobalCustom() {
+  const from = document.getElementById('gdp-from').value
+  const to   = document.getElementById('gdp-to').value
+  if (!from && !to) return
+  dateFrom = from || null; dateTo = to || null
+  document.querySelectorAll('.gdate-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('gdate-custom-btn').classList.add('on')
+  document.getElementById('gdate-picker').classList.remove('on')
+  updateGdateActive()
+  reloadAll()
+}
+
+function clearGlobalDate() {
   dateFrom = null; dateTo = null
-  document.getElementById('dp-from').value = ''
-  document.getElementById('dp-to').value   = ''
-  document.getElementById('date-filter-btn').classList.remove('on')
-  document.getElementById('date-filter-label').textContent = 'Período'
-  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
-  document.getElementById('date-picker-panel').classList.remove('on')
-  loadLeads(document.querySelector('.search-wrap input').value)
+  document.getElementById('gdp-from').value = ''
+  document.getElementById('gdp-to').value   = ''
+  document.querySelectorAll('.gdate-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('gdate-custom-btn').classList.remove('on')
+  document.getElementById('gdate-picker').classList.remove('on')
+  updateGdateActive()
+  reloadAll()
+}
+
+function updateGdateActive() {
+  const el = document.getElementById('gdate-active')
+  if (!dateFrom && !dateTo) {
+    el.innerHTML = '<span class="gdate-active-none">Todos os dados</span>'
+  } else {
+    const from = dateFrom ? fmtLabel(dateFrom) : '…'
+    const to   = dateTo   ? fmtLabel(dateTo)   : '…'
+    const range = from === to ? from : `${from} → ${to}`
+    el.innerHTML = `<span class="gdate-active-dot"></span><span class="gdate-active-txt">${range}</span>`
+  }
 }
 
 document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('date-filter-wrap')
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('date-picker-panel').classList.remove('on')
+  const btn = document.getElementById('gdate-custom-btn')
+  if (btn && !btn.contains(e.target)) {
+    document.getElementById('gdate-picker').classList.remove('on')
   }
 })
 
