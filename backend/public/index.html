@@ -475,6 +475,92 @@ select option{background:white;color:var(--t0)}
 .loading{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 .empty{padding:48px;text-align:center;color:var(--t2);font-size:13px}
 
+/* ── Period Command Bar ── */
+.period-cmd-bar{
+  background:var(--surface);
+  border-bottom:2px solid var(--border-m);
+  position:sticky;top:56px;z-index:90;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+}
+/* accent line at very top */
+.period-cmd-bar::before{
+  content:'';display:block;
+  height:2px;
+  background:linear-gradient(90deg,var(--brand) 0%,var(--brand-l) 60%,transparent 100%);
+  opacity:0.5;
+}
+.period-cmd-inner{
+  max-width:1080px;margin:0 auto;
+  padding:0 24px;
+  height:50px;
+  display:flex;align-items:center;gap:0;
+}
+.pcb-status{
+  display:flex;align-items:center;gap:9px;
+  flex-shrink:0;
+  padding-right:20px;
+  margin-right:16px;
+  border-right:1px solid var(--border-m);
+}
+.pcb-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--t3);
+  transition:background 0.25s,box-shadow 0.25s;
+  flex-shrink:0;
+}
+.pcb-dot.live{
+  background:var(--brand);
+  box-shadow:0 0 0 3px var(--brand-ring);
+}
+.pcb-info{display:flex;flex-direction:column;gap:1px;line-height:1}
+.pcb-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.08em;color:var(--t2);
+}
+.pcb-range{
+  font-size:12.5px;font-weight:600;
+  color:var(--brand);letter-spacing:-0.1px;
+  white-space:nowrap;
+}
+.pcb-pills{
+  display:flex;gap:2px;flex:1;
+  align-items:center;flex-wrap:nowrap;
+  overflow-x:auto;scrollbar-width:none;
+}
+.pcb-pills::-webkit-scrollbar{display:none}
+.pcb-pill{
+  padding:5px 13px;font-size:11.5px;font-weight:500;
+  border:1px solid transparent;border-radius:20px;
+  cursor:pointer;color:var(--t1);background:none;
+  white-space:nowrap;transition:all 0.12s;
+  font-family:'DM Sans',sans-serif;flex-shrink:0;
+}
+.pcb-pill:hover:not(.on){background:var(--surface2);color:var(--t0)}
+.pcb-pill.on{
+  background:var(--brand-dim);
+  border-color:rgba(184,101,122,0.22);
+  color:var(--brand);font-weight:600;
+}
+.pcb-sep{width:1px;height:20px;background:var(--border-m);flex-shrink:0;margin:0 12px}
+.pcb-custom-wrap{position:relative;flex-shrink:0}
+.pcb-custom{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 13px;font-size:11.5px;font-weight:500;
+  border:1px dashed var(--border-m);border-radius:20px;
+  cursor:pointer;color:var(--t2);background:none;
+  font-family:'DM Sans',sans-serif;transition:all 0.12s;
+}
+.pcb-custom:hover{
+  background:var(--surface2);color:var(--t1);
+  border-color:var(--brand-l);border-style:solid;
+}
+.pcb-custom.on{
+  background:var(--brand-dim);
+  border-color:rgba(184,101,122,0.25);
+  color:var(--brand);border-style:solid;
+}
+.pcb-custom svg{width:11px;height:11px}
+
 /* ── Responsive ── */
 @media(max-width:700px){
   /* Navbar */
@@ -581,6 +667,52 @@ select option{background:white;color:var(--t0)}
     </button>
   </div>
 </header>
+
+<!-- ═══ PERIOD COMMAND BAR ═══ -->
+<div class="period-cmd-bar">
+  <div class="period-cmd-inner">
+    <div class="pcb-status">
+      <div class="pcb-dot" id="pcb-dot"></div>
+      <div class="pcb-info">
+        <span class="pcb-label">Exibindo dados de</span>
+        <span class="pcb-range" id="period-display">Todos os períodos</span>
+      </div>
+    </div>
+    <div class="pcb-pills">
+      <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
+      <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
+      <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
+      <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
+      <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
+    </div>
+    <div class="pcb-sep"></div>
+    <div class="pcb-custom-wrap" id="date-filter-wrap">
+      <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+          <line x1="5" y1="1.5" x2="5" y2="4.5"/>
+          <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+          <line x1="2" y1="7" x2="14" y2="7"/>
+        </svg>
+        Personalizar
+      </button>
+      <div class="date-picker-panel" id="date-picker-panel">
+        <div class="dp-row">
+          <span class="dp-label">De</span>
+          <input type="date" class="dp-input" id="dp-from">
+        </div>
+        <div class="dp-row">
+          <span class="dp-label">Até</span>
+          <input type="date" class="dp-input" id="dp-to">
+        </div>
+        <div class="dp-actions">
+          <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+          <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ PAGE ═══ -->
 <div class="page">
@@ -691,36 +823,6 @@ select option{background:white;color:var(--t0)}
           <div class="filter-pill" onclick="setFilter('rejected',this)">Não agendaram</div>
           <div class="filter-pill" onclick="setFilter('link_sent',this)">Link enviado</div>
           <div class="filter-pill" onclick="setFilter('scheduled',this)">Agendados</div>
-          <div class="date-filter-wrap" id="date-filter-wrap">
-            <button class="date-filter-btn" id="date-filter-btn" onclick="toggleDatePicker()">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="3" width="12" height="11" rx="1.5"/>
-                <line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/>
-                <line x1="2" y1="7" x2="14" y2="7"/>
-              </svg>
-              <span id="date-filter-label">Período</span>
-            </button>
-            <div class="date-picker-panel" id="date-picker-panel">
-              <div class="dp-shortcuts">
-                <div class="dp-shortcut" onclick="applyShortcut('hoje')">Hoje</div>
-                <div class="dp-shortcut" onclick="applyShortcut('semana')">Esta semana</div>
-                <div class="dp-shortcut" onclick="applyShortcut('15dias')">Últimos 15 dias</div>
-                <div class="dp-shortcut" onclick="applyShortcut('mes')">Este mês</div>
-              </div>
-              <div class="dp-row">
-                <span class="dp-label">De</span>
-                <input type="date" class="dp-input" id="dp-from">
-              </div>
-              <div class="dp-row">
-                <span class="dp-label">Até</span>
-                <input type="date" class="dp-input" id="dp-to">
-              </div>
-              <div class="dp-actions">
-                <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-                <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -806,19 +908,72 @@ async function init() {
   document.getElementById('booking-link').textContent = link
   document.getElementById('booking-link-2').textContent = link
 
-  loadStats()
-  loadLeads()
-  loadAptStats()
-  loadAppointments()
+  quickPeriod('30dias', document.getElementById('pcb-30'))
 }
 
 function fmtBRL(cents){if(!cents)return"R$ 0";return"R$ "+(parseInt(cents)/100).toLocaleString("pt-BR",{minimumFractionDigits:2})}
 
+// ── Date helpers ──
+const fmtISO = d => d.toISOString().slice(0,10)
+const fmtPT  = s => new Date(s + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})
+
+function buildDateParams() {
+  const p = []
+  if (dateFrom) p.push(`date_from=${dateFrom}`)
+  if (dateTo)   p.push(`date_to=${dateTo}`)
+  return p.length ? '?' + p.join('&') : ''
+}
+
+function quickPeriod(type, el) {
+  const today = new Date()
+  let from, to, label
+  if (type === 'hoje') {
+    from = to = fmtISO(today); label = 'Hoje'
+  } else if (type === 'semana') {
+    const mon = new Date(today)
+    mon.setDate(today.getDate() - ((today.getDay() + 6) % 7))
+    from = fmtISO(mon); to = fmtISO(today); label = 'Esta semana'
+  } else if (type === '15dias') {
+    const d = new Date(today); d.setDate(today.getDate() - 14)
+    from = fmtISO(d); to = fmtISO(today); label = 'Últimos 15 dias'
+  } else if (type === '30dias') {
+    const d = new Date(today); d.setDate(today.getDate() - 29)
+    from = fmtISO(d); to = fmtISO(today); label = 'Últimos 30 dias'
+  } else if (type === 'ano') {
+    from = today.getFullYear() + '-01-01'; to = fmtISO(today); label = 'Ano todo'
+  }
+  dateFrom = from; dateTo = to
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('date-filter-btn').classList.remove('on')
+  if (el) el.classList.add('on')
+  updatePeriodDisplay(label, from, to)
+  reloadAll()
+}
+
+function updatePeriodDisplay(label, from, to) {
+  const dot = document.getElementById('pcb-dot')
+  const display = document.getElementById('period-display')
+  if (!from && !to) {
+    dot && dot.classList.remove('live')
+    display && (display.textContent = 'Todos os períodos')
+  } else {
+    dot && dot.classList.add('live')
+    const range = from === to ? fmtPT(from) : `${fmtPT(from)} → ${fmtPT(to)}`
+    display && (display.textContent = label ? `${label}  ·  ${range}` : range)
+  }
+}
+
+function reloadAll() {
+  const search = document.querySelector('.search-wrap input')?.value || ''
+  loadStats(); loadLeads(search); loadAptStats(); loadAppointments()
+}
+
 async function loadStats() {
   try {
+    const dp = buildDateParams()
     const [lr, ar] = await Promise.all([
-      fetch(`${API}/api/leads/stats`, { headers: headers() }),
-      fetch(`${API}/api/appointments/stats`, { headers: headers() })
+      fetch(`${API}/api/leads/stats${dp}`, { headers: headers() }),
+      fetch(`${API}/api/appointments/stats${dp}`, { headers: headers() })
     ])
     if (lr.ok) {
       const d = await lr.json()
@@ -912,7 +1067,7 @@ async function loadAppointments() {
   const list = document.getElementById('apt-list')
   list.innerHTML = '<div class="loading">Carregando...</div>'
   try {
-    const r = await fetch(`${API}/api/appointments`, { headers: headers() })
+    const r = await fetch(`${API}/api/appointments${buildDateParams()}`, { headers: headers() })
     if (!r.ok) { list.innerHTML = '<div class="empty">Erro ao carregar.</div>'; return }
     const apts = await r.json()
     if (!apts.length) { list.innerHTML = '<div class="empty">Nenhum agendamento ainda.</div>'; return }
@@ -980,44 +1135,17 @@ function setFilter(f, el) {
 }
 
 function toggleDatePicker() {
-  const panel = document.getElementById('date-picker-panel')
-  panel.classList.toggle('on')
-}
-
-function applyShortcut(type) {
-  const today = new Date()
-  const fmt = d => d.toISOString().slice(0,10)
-  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
-  event.target.classList.add('on')
-  if (type === 'hoje') {
-    document.getElementById('dp-from').value = fmt(today)
-    document.getElementById('dp-to').value   = fmt(today)
-  } else if (type === 'semana') {
-    const mon = new Date(today); mon.setDate(today.getDate() - today.getDay() + 1)
-    document.getElementById('dp-from').value = fmt(mon)
-    document.getElementById('dp-to').value   = fmt(today)
-  } else if (type === '15dias') {
-    const d15 = new Date(today); d15.setDate(today.getDate() - 14)
-    document.getElementById('dp-from').value = fmt(d15)
-    document.getElementById('dp-to').value   = fmt(today)
-  } else if (type === 'mes') {
-    const d1 = new Date(today.getFullYear(), today.getMonth(), 1)
-    document.getElementById('dp-from').value = fmt(d1)
-    document.getElementById('dp-to').value   = fmt(today)
-  }
+  document.getElementById('date-picker-panel').classList.toggle('on')
 }
 
 function applyDateFilter() {
   dateFrom = document.getElementById('dp-from').value || null
   dateTo   = document.getElementById('dp-to').value   || null
   document.getElementById('date-picker-panel').classList.remove('on')
-  const btn = document.getElementById('date-filter-btn')
-  const lbl = document.getElementById('date-filter-label')
-  if (dateFrom || dateTo) {
-    btn.classList.add('on')
-    lbl.textContent = (dateFrom||'') + ' → ' + (dateTo||'')
-  }
-  loadLeads(document.querySelector('.search-wrap input').value)
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('date-filter-btn').classList.toggle('on', !!(dateFrom || dateTo))
+  updatePeriodDisplay('Personalizado', dateFrom, dateTo)
+  reloadAll()
 }
 
 function clearDateFilter() {
@@ -1025,10 +1153,10 @@ function clearDateFilter() {
   document.getElementById('dp-from').value = ''
   document.getElementById('dp-to').value   = ''
   document.getElementById('date-filter-btn').classList.remove('on')
-  document.getElementById('date-filter-label').textContent = 'Período'
-  document.querySelectorAll('.dp-shortcut').forEach(s => s.classList.remove('on'))
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
   document.getElementById('date-picker-panel').classList.remove('on')
-  loadLeads(document.querySelector('.search-wrap input').value)
+  updatePeriodDisplay(null, null, null)
+  reloadAll()
 }
 
 document.addEventListener('click', function(e) {
