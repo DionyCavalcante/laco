@@ -8,9 +8,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+:root{--sb-width:220px}
 body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:#eeebe5;color:#111;min-height:100vh}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
+/* ── Laço Sidebar ── */
+.laco-sidebar{
+  position:fixed;top:0;left:0;width:var(--sb-width);height:100vh;
+  background:#0c0d12;border-right:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;z-index:200;overflow-y:auto;overflow-x:hidden;
+  font-family:'Plus Jakarta Sans',-apple-system,sans-serif;
+}
+.lsb-brand{padding:22px 16px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.lsb-logo{width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#9B6FA5,#7A4F7A);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(155,111,165,0.25);font-size:17px;font-weight:700;color:white;letter-spacing:-0.5px;overflow:hidden}
+.lsb-logo img{width:100%;height:100%;object-fit:cover;border-radius:13px}
+.lsb-name{font-size:12px;font-weight:600;color:#dde0ea;text-align:center;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lsb-status{display:flex;align-items:center;gap:5px;font-size:10px;color:#7e8196}
+.lsb-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ead85;flex-shrink:0}
+.lsb-nav{flex:1;padding:10px 10px;display:flex;flex-direction:column;gap:1px}
+.lsb-group{font-size:9px;font-weight:700;color:#4a4d5c;text-transform:uppercase;letter-spacing:1px;padding:10px 8px 4px}
+.lsb-group:first-child{padding-top:4px}
+.lsb-link{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13px;color:#7e8196;cursor:pointer;transition:background 0.12s,color 0.12s;text-decoration:none;border:none;background:none;font-family:inherit;font-weight:500;width:100%;text-align:left;white-space:nowrap}
+.lsb-link svg{width:16px;height:16px;flex-shrink:0;opacity:0.6;transition:opacity 0.12s}
+.lsb-link:hover{background:rgba(255,255,255,0.04);color:#dde0ea}
+.lsb-link:hover svg{opacity:1}
+.lsb-link.active{background:rgba(155,111,165,0.12);color:#C8A2C8}
+.lsb-link.active svg{opacity:1}
+.lsb-link.danger{color:rgba(201,79,79,0.7)}
+.lsb-link.danger:hover{background:rgba(201,79,79,0.08);color:#e07070}
+.lsb-footer{padding:10px;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+@media(max-width:900px){
+  :root{--sb-width:56px}
+  .lsb-brand{padding:10px 0;border-bottom:none;gap:4px}
+  .lsb-logo{width:32px;height:32px;border-radius:9px;font-size:13px}
+  .lsb-name,.lsb-status,.lsb-group{display:none}
+  .lsb-link{padding:8px;justify-content:center;gap:0;font-size:0}
+  .lsb-link svg{width:18px;height:18px}
+  .lsb-footer{padding:8px}
+}
+
+.laco-main{margin-left:var(--sb-width)}
 .topbar{background:white;border-bottom:none;box-shadow:0 1px 0 rgba(0,0,0,0.07),0 2px 16px rgba(0,0,0,0.05);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;overflow:visible}
 .topbar::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,#7A4F7A 0%,#C8A2C8 50%,#9B6FA5 100%)}
 .brand{display:flex;align-items:center;gap:9px}
@@ -157,14 +194,53 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 </head>
 <body>
 
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="laco-sidebar">
+  <div class="lsb-brand">
+    <div class="lsb-logo" id="lsb-logo">L</div>
+    <div class="lsb-name" id="lsb-name">Carregando...</div>
+    <div class="lsb-status">Online</div>
+  </div>
+  <nav class="lsb-nav">
+    <div class="lsb-group">Gestão</div>
+    <a href="/" class="lsb-link">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="6" r="3"/><path d="M1 18c0-3.3 2.7-6 6-6"/><circle cx="14" cy="8" r="2.5"/><path d="M12 18c0-2.2 1-4 2-4s2 1.8 2 4"/></svg>
+      Clientes
+    </a>
+    <a href="/" class="lsb-link">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="3" y1="9" x2="17" y2="9"/></svg>
+      Agenda
+    </a>
+    <div class="lsb-group">Analytics</div>
+    <a href="/hoje" class="lsb-link active">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><polyline points="10,6 10,10 13,12"/></svg>
+      Hoje
+    </a>
+    <a href="/relatorio.html" class="lsb-link">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="16" x2="4" y2="10"/><line x1="8" y1="16" x2="8" y2="7"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="16" y1="16" x2="16" y2="4"/><line x1="2" y1="16" x2="18" y2="16"/></svg>
+      Relatório
+    </a>
+    <div class="lsb-group">Sistema</div>
+    <a href="/config" class="lsb-link">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.5"/><path d="M10 3.5V5M10 15V16.5M3.5 10H5M15 10h1.5M5.4 5.4l1.1 1.1M13.5 13.5l1.1 1.1M5.4 14.6l1.1-1.1M13.5 6.5l1.1-1.1"/></svg>
+      Configurações
+    </a>
+  </nav>
+  <div class="lsb-footer">
+    <button onclick="sessionStorage.removeItem('laco_auth');localStorage.removeItem('laco_api_key');window.location.href='/login.html'" class="lsb-link danger">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 7l3 3-3 3M16 10H8M8 4H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>
+      Sair
+    </button>
+  </div>
+</aside>
+
+<div class="laco-main">
 <div class="topbar">
   <div class="brand">
-    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
-    <span class="brand-name">Laço — Hoje</span>
+    <span class="brand-name">Hoje</span>
   </div>
   <div class="topbar-right">
     <div class="refresh-indicator" id="refresh-indicator"><div class="mini-spin"></div>Atualizando...</div>
-    <a href="/" class="btn btn-ghost">← Dashboard</a>
     <button class="btn btn-ghost" onclick="reload()">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1 0 1.5-4"/><polyline points="2 2 2 6 6 6"/></svg>
       Atualizar
@@ -224,6 +300,8 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 </div>
 
 <!-- Detail drawer -->
+</div><!-- /.laco-main -->
+
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-head">
@@ -560,7 +638,26 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // Auto-refresh a cada 2 minutos
 setInterval(load, 120000)
 
+async function loadClinic() {
+  try {
+    const r = await fetch(`${API}/api/portal/${SLUG}`)
+    if (r.ok) {
+      const d = await r.json()
+      const name = d.clinic.name
+      document.getElementById('lsb-name').textContent = name
+      const initials = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()
+      const logoEl = document.getElementById('lsb-logo')
+      if (d.clinic.logo_url) {
+        logoEl.innerHTML = `<img src="${d.clinic.logo_url}" alt="">`
+      } else {
+        logoEl.textContent = initials
+      }
+    }
+  } catch(e) {}
+}
+
 updateDateTitle()
+loadClinic()
 load()
 </script>
 </body>
