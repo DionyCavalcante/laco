@@ -2,7 +2,8 @@ const { Pool } = require('pg')
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 10000,
 })
 
 pool.on('error', (err) => { console.error('POOL ERROR:', err.message)
