@@ -2,641 +2,222 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#B8657A">
-<title>Agendar — Laço</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendamento</title>
 <style>
-/* ── Reset ── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --brand:#B8657A;
-  --brand-h:#a85a6e;
-  --brand-deep:#8B3F52;
-  --brand-dim:rgba(184,101,122,0.10);
-  --brand-ring:rgba(184,101,122,0.22);
-  --brand-glow:rgba(184,101,122,0.18);
-  --gold:#B8945A;
-  --green:#2E8C66;
-  --green-bg:#E4F4EE;
-  --amber:#9A6B10;
-  --amber-bg:#FEF3E2;
-  --bg:#FAF7F5;
-  --surface:#FFFFFF;
-  --border:rgba(0,0,0,0.08);
-  --border-m:rgba(0,0,0,0.13);
-  --shadow:0 2px 12px rgba(0,0,0,0.07);
-  --shadow-md:0 4px 24px rgba(0,0,0,0.10);
-  --t0:#1A1614;
-  --t1:#6B5E59;
-  --t2:#A89890;
-  --t3:#D4CCC8;
-}
-html,body{height:100%;background:var(--bg)}
-body{
-  font-family:'DM Sans',-apple-system,sans-serif;
-  color:var(--t0);
-  max-width:430px;
-  margin:0 auto;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  -webkit-font-smoothing:antialiased;
-  font-size:15px;
-}
+:root{--purple:#9B6FA5;--purple-light:#F3ECF6;--purple-dark:#7A4F7A;--green:#2E8C66;--green-light:#E0F4EE;--amber:#9A6B10;--amber-light:#FEF3E2;--gray:#f5f4f0;--border:rgba(0,0,0,0.09);--text:#111;--muted:#666;--hint:#aaa}
+html,body{height:100%;background:var(--gray)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
-/* ── Screens ── */
-.screen{display:none;flex-direction:column;flex:1;min-height:0}
+/* Header */
+.ph{background:var(--purple);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ph-logo{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;flex-shrink:0}
+.ph-name{font-size:15px;font-weight:500;color:white}
+.ph-sub{font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px}
+
+/* Screens */
+.screen{display:none;flex-direction:column;flex:1}
 .screen.on{display:flex}
-.screen-body{flex:1;overflow-y:auto;padding:20px 20px 24px;background:var(--surface)}
-.screen-foot{
-  padding:16px 20px;
-  padding-bottom:calc(16px + env(safe-area-inset-bottom));
-  background:var(--surface);
-  border-top:1px solid var(--border);
-  flex-shrink:0;
-}
+.screen-body{flex:1;overflow-y:auto;padding:20px 18px;background:white}
+.screen-foot{padding:14px 18px;background:white;border-top:0.5px solid var(--border);flex-shrink:0}
 
-/* ── Header ── */
-.ph{
-  background:var(--brand);
-  padding:16px 20px 18px;
-  display:flex;align-items:center;gap:12px;
-  flex-shrink:0;
-  position:relative;overflow:hidden;
-}
-.ph::after{
-  content:'';position:absolute;
-  bottom:-30px;right:-20px;
-  width:120px;height:120px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.07);
-}
-.ph::before{
-  content:'';position:absolute;
-  top:-20px;right:30px;
-  width:80px;height:80px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.05);
-}
-.ph-mark{
-  width:44px;height:44px;border-radius:12px;
-  background:rgba(255,255,255,0.22);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Cormorant Garamond',serif;
-  font-size:15px;font-weight:600;color:white;
-  flex-shrink:0;letter-spacing:0.03em;
-  position:relative;z-index:1;
-  overflow:hidden;
-}
-.ph-mark img{
-  width:100%;height:100%;
-  object-fit:cover;
-  display:block;
-}
-.ph-text{position:relative;z-index:1}
-.ph-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:20px;font-weight:600;color:white;
-  letter-spacing:0.02em;line-height:1.1;
-}
-.ph-sub{
-  font-size:11px;color:rgba(255,255,255,0.72);
-  margin-top:3px;font-weight:400;letter-spacing:0.02em;
-}
+/* Back */
+.back-bar{padding:10px 18px;border-bottom:0.5px solid var(--border);background:white;flex-shrink:0}
+.back-btn{background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;padding:0}
 
-/* ── Back bar ── */
-.back-bar{
-  padding:12px 20px;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.back-btn{
-  background:none;border:none;
-  font-size:13px;font-weight:500;color:var(--t1);
-  cursor:pointer;
-  display:inline-flex;align-items:center;gap:5px;
-  padding:2px 0;
-  font-family:'DM Sans',sans-serif;
-}
-.back-btn svg{width:14px;height:14px}
-.back-btn:active{opacity:0.6}
+/* CTA buttons */
+.cta{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.cta-primary{background:var(--purple);color:white}
+.cta-primary:active{background:var(--purple-dark)}
+.cta-outline{background:none;border:0.5px solid var(--border);color:var(--muted);margin-top:8px}
+.cta-outline:active{background:var(--gray)}
 
-/* ── CTA buttons ── */
-.cta{
-  width:100%;padding:16px;border:none;border-radius:14px;
-  font-size:15px;font-weight:600;
-  font-family:'DM Sans',sans-serif;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:transform 0.1s,box-shadow 0.15s;
-  letter-spacing:0.01em;
-}
-.cta:active{transform:scale(0.98)}
-.cta-primary{
-  background:var(--brand);color:white;
-  box-shadow:0 4px 16px rgba(184,101,122,0.30);
-}
-.cta-primary:active{background:var(--brand-h)}
-.cta-outline{
-  background:none;border:1px solid var(--border-m);
-  color:var(--t1);margin-top:10px;
-}
-.cta-outline:active{background:var(--bg)}
+/* Fields */
+.field{margin-bottom:16px}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500}
+.field input{width:100%;padding:12px 14px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:10px;color:var(--text);background:white;outline:none;-webkit-appearance:none}
+.field input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(155,111,165,0.12)}
 
-/* ── Fields ── */
-.field{margin-bottom:18px}
-.field label{
-  font-size:11px;font-weight:600;color:var(--t1);
-  display:block;margin-bottom:7px;
-  text-transform:uppercase;letter-spacing:0.06em;
-}
-.field input{
-  width:100%;padding:14px 16px;
-  font-size:16px;/* 16px prevents iOS zoom */
-  font-family:'DM Sans',sans-serif;
-  border:1px solid var(--border-m);
-  border-radius:12px;
-  color:var(--t0);background:var(--bg);
-  outline:none;-webkit-appearance:none;
-  transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;
-}
-.field input:focus{
-  background:white;
-  border-color:var(--brand);
-  box-shadow:0 0 0 3px var(--brand-ring);
-}
-.field input::placeholder{color:var(--t3)}
+/* Entry screen */
+.entry-title{font-size:20px;font-weight:500;margin-bottom:6px;margin-top:4px}
+.entry-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
 
-/* ── Loading / Error ── */
-.loading-screen{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  background:var(--surface);gap:14px;
-}
-.spinner{
-  width:22px;height:22px;
-  border:2px solid var(--brand-dim);
-  border-top-color:var(--brand);
-  border-radius:50%;
-  animation:spin 0.7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-msg{font-size:13px;color:var(--t2)}
+/* Proc list */
+.list-greeting{font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.list-greeting strong{color:var(--text)}
+.proc-card{border:0.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;cursor:pointer;background:white;-webkit-user-select:none;user-select:none}
+.proc-card:active{opacity:0.85;transform:scale(0.99)}
+.proc-imgs{height:120px;display:flex;position:relative;overflow:hidden}
+.img-half{flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;position:relative}
+.img-half.before{background:#F1EFE8;color:#888}
+.img-half.after{background:#E8D5E8;color:var(--purple-dark)}
+.img-half img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.img-lbl{position:absolute;bottom:6px;left:7px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;z-index:2}
+.img-half.before .img-lbl{background:rgba(255,255,255,0.85);color:#666}
+.img-half.after .img-lbl{background:rgba(155,111,165,0.25);color:var(--purple-dark)}
+.img-divider{width:2px;background:white;z-index:1;flex-shrink:0}
 
-.error-screen{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  background:var(--surface);padding:32px;text-align:center;
-}
-.error-screen svg{margin-bottom:12px}
-.error-screen p{font-size:14px;color:var(--t2);line-height:1.6}
-
-/* ── ENTRY SCREEN ── */
-.entry-hero{
-  text-align:center;
-  padding:28px 0 24px;
-  margin-bottom:8px;
-}
-.entry-icon{
-  width:64px;height:64px;border-radius:20px;
-  background:var(--brand-dim);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 16px;
-}
-.entry-icon svg{width:28px;height:28px}
-.entry-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:28px;font-weight:600;
-  color:var(--t0);letter-spacing:0.01em;
-  margin-bottom:8px;line-height:1.2;
-}
-.entry-sub{
-  font-size:14px;color:var(--t1);
-  line-height:1.6;max-width:280px;margin:0 auto;
-  font-weight:300;
-}
-
-/* ── PROC LIST ── */
-.list-hero{
-  padding:20px 0 4px;
-  margin-bottom:16px;
-}
-.list-greeting{
-  font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:600;
-  color:var(--t0);line-height:1.3;
-  margin-bottom:4px;
-}
-.list-sub{font-size:13px;color:var(--t2);font-weight:300}
-
-.proc-card{
-  border:1px solid var(--border);
-  border-radius:18px;overflow:hidden;
-  margin-bottom:14px;cursor:pointer;
-  background:white;
-  box-shadow:var(--shadow);
-  transition:transform 0.15s,box-shadow 0.15s;
-  -webkit-user-select:none;user-select:none;
-}
-.proc-card:active{transform:scale(0.985);box-shadow:none}
-
-/* Carousel */
+/* Carousel dots */
 .carousel-wrap{position:relative}
 .carousel-track{display:flex;transition:transform 0.3s ease}
-.carousel-slide{min-width:100%;display:flex;height:150px}
-.carousel-dots{
-  position:absolute;bottom:9px;left:50%;transform:translateX(-50%);
-  display:flex;gap:5px;z-index:3;
-}
-.cdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.45);transition:all 0.2s}
-.cdot.on{background:white;width:16px;border-radius:3px}
-.carr-btn{
-  position:absolute;top:50%;transform:translateY(-50%);
-  width:28px;height:28px;border-radius:50%;
-  background:rgba(255,255,255,0.90);
-  border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;color:var(--t0);z-index:4;
-  box-shadow:0 1px 6px rgba(0,0,0,0.12);
-}
-.carr-btn.l{left:8px}.carr-btn.r{right:8px}
+.carousel-slide{min-width:100%;display:flex;height:120px}
+.carousel-dots{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:3}
+.cdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.45)}
+.cdot.on{background:white}
+.carr-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;z-index:4}
+.carr-btn.l{left:7px}.carr-btn.r{right:7px}
 
-.img-half{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.img-half.before{background:#F0EBE8}
-.img-half.after{background:#FDEEF1}
-.img-half img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.img-lbl{
-  position:absolute;bottom:8px;left:8px;
-  font-size:9px;font-weight:700;
-  padding:3px 8px;border-radius:6px;
-  letter-spacing:0.5px;z-index:2;
-  text-transform:uppercase;
-}
-.img-half.before .img-lbl{background:rgba(255,255,255,0.90);color:var(--t1)}
-.img-half.after .img-lbl{background:rgba(184,101,122,0.18);color:var(--brand-deep)}
-.img-divider{width:2px;background:white;z-index:1;flex-shrink:0}
-.img-placeholder-txt{font-size:11px;color:var(--t2);font-weight:500;position:relative;z-index:1}
+.proc-foot{padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.proc-name{font-size:14px;font-weight:500}
+.proc-dur{font-size:11px;color:var(--muted);margin-top:2px}
+.proc-chevron{color:var(--hint);font-size:16px}
 
-.proc-foot{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.proc-foot-left{flex:1;min-width:0}
-.proc-name{font-size:16px;font-weight:600;color:var(--t0);margin-bottom:3px}
-.proc-meta{display:flex;align-items:center;gap:8px}
-.proc-dur-pill{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:12px;font-weight:400;
-  color:var(--t2);
-  font-family:'Cormorant Garamond',serif;
-  font-style:italic;
-  letter-spacing:0.01em;
-}
-.proc-cta-arrow{
-  width:34px;height:34px;border-radius:50%;
-  background:var(--brand-dim);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;color:var(--brand);font-size:16px;
-}
-
-/* ── PROC DETAIL ── */
-.video-box{background:#111;position:relative;flex-shrink:0}
-.video-box iframe{display:block;width:100%;height:210px;border:none}
-.video-placeholder{
-  height:210px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;
-  background:linear-gradient(135deg,#1a1214 0%,#2a1a20 100%);
-}
-.play-ring{
-  width:60px;height:60px;border-radius:50%;
-  background:rgba(255,255,255,0.12);
-  border:1.5px solid rgba(255,255,255,0.35);
-  display:flex;align-items:center;justify-content:center;
-  transition:background 0.2s,transform 0.2s;
-}
-.video-placeholder:active .play-ring{background:rgba(255,255,255,0.22);transform:scale(0.95)}
-.play-tri{width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:22px solid white;margin-left:5px}
-.no-video-msg{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,0.4)}
-
-.proc-detail{padding:18px 20px 0}
-.proc-detail-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:600;
-  color:var(--t0);margin-bottom:7px;line-height:1.2;
-}
-.proc-detail-desc{font-size:13px;color:var(--t1);line-height:1.65;font-weight:300}
+/* Video screen */
+.video-box{background:#0a0a0a;position:relative;flex-shrink:0}
+.video-box iframe{display:block;width:100%;height:200px;border:none}
+.video-placeholder{height:200px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.play-btn{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center}
+.play-tri{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:20px solid white;margin-left:4px}
+.proc-detail{padding:16px 18px}
+.proc-detail-name{font-size:16px;font-weight:500;margin-bottom:4px}
+.proc-detail-desc{font-size:13px;color:var(--muted);line-height:1.6}
 
 /* Reveal */
-.reveal-zone{
-  padding:18px 20px;
-  border-top:1px solid var(--border);
-  flex-shrink:0;background:var(--surface);
-  margin-top:14px;
-}
-.reveal-loading{display:flex;flex-direction:column;gap:8px;align-items:center;padding:8px 0}
-.rl-bar{width:100%;height:4px;background:var(--bg);border-radius:4px;overflow:hidden}
-.rl-fill{height:100%;background:linear-gradient(90deg,var(--brand-dim),var(--brand));border-radius:4px;width:0}
-.rl-label{font-size:12px;color:var(--t2);text-align:center}
-
+.reveal-zone{padding:16px 18px;border-top:0.5px solid var(--border);flex-shrink:0;background:white}
+.reveal-loading{display:flex;align-items:center;gap:10px;padding:8px 0}
+.rl-bar{flex:1;height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.rl-fill{height:100%;background:#C8A2C8;border-radius:2px;width:0}
+.rl-label{font-size:12px;color:var(--hint);white-space:nowrap;min-width:90px;text-align:right}
 .offer{display:none}
-.offer-tag{
-  font-size:10px;font-weight:700;color:var(--brand-deep);
-  letter-spacing:0.08em;text-transform:uppercase;
-  margin-bottom:10px;
-  display:flex;align-items:center;gap:6px;
-}
-.offer-tag::before{content:'✦';color:var(--brand);font-size:9px}
-.offer-price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
-.offer-old{font-size:16px;color:var(--t3);text-decoration:line-through;font-weight:400}
-.offer-new{
-  font-family:'Cormorant Garamond',serif;
-  font-size:38px;font-weight:600;line-height:1;
-  color:var(--t0);letter-spacing:-0.5px;
-}
-.offer-badge{
-  display:inline-block;
-  background:var(--amber-bg);color:var(--amber);
-  font-size:11px;font-weight:600;
-  padding:4px 11px;border-radius:20px;
-  margin-bottom:8px;letter-spacing:0.02em;
-}
-.offer-cond{font-size:12px;color:var(--t2);margin-bottom:18px;font-weight:300}
-.offer-btns{display:flex;flex-direction:column;gap:0}
+.offer-tag{font-size:10px;color:var(--purple-dark);font-weight:600;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.offer-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block}
+.offer-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+.offer-old{font-size:16px;color:#bbb;text-decoration:line-through;font-weight:400}
+.offer-new{font-size:30px;font-weight:500;line-height:1}
+.offer-badge{display:inline-block;background:var(--amber-light);color:var(--amber);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:6px}
+.offer-cond{font-size:12px;color:var(--muted);margin-bottom:16px}
+.offer-btns{display:flex;flex-direction:column;gap:8px}
 
-/* ── EXIT ── */
-.exit-hero{
-  padding:24px 0 16px;
-  text-align:center;margin-bottom:16px;
-}
-.exit-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:600;color:var(--t0);
-  margin-bottom:6px;
-}
-.exit-sub{font-size:14px;color:var(--t1);line-height:1.6;font-weight:300}
+/* Exit screen */
+.exit-title{font-size:16px;font-weight:500;margin-bottom:6px;margin-top:4px}
+.exit-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.exit-option{padding:14px;border:0.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;-webkit-user-select:none;user-select:none}
+.exit-option:active{background:var(--gray)}
+.exit-opt-title{font-size:14px;font-weight:500}
+.exit-opt-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.exit-chevron{color:var(--hint);font-size:18px;flex-shrink:0}
 
-.exit-option{
-  padding:16px;
-  border:1px solid var(--border);border-radius:14px;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  margin-bottom:10px;background:white;
-  transition:border-color 0.15s,background 0.15s;
-  -webkit-user-select:none;user-select:none;
-}
-.exit-option:active{background:var(--bg);border-color:var(--brand)}
-.exit-opt-icon{
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-size:18px;
-}
-.exit-opt-body{flex:1;min-width:0}
-.exit-opt-title{font-size:14px;font-weight:600;color:var(--t0);margin-bottom:2px}
-.exit-opt-sub{font-size:12px;color:var(--t2);font-weight:300}
-.exit-chevron{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--t2);font-size:16px;flex-shrink:0;
-}
+/* Calendar */
+.proc-pill{display:inline-flex;align-items:center;gap:6px;background:var(--purple-light);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--purple-dark);margin-bottom:16px;flex-shrink:0}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.month-title{font-size:14px;font-weight:500}
+.mnav-btn{background:none;border:0.5px solid var(--border);border-radius:7px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:18px}
+.cal-hdr{font-size:10px;color:var(--hint);padding:4px 0}
+.cal-day{font-size:13px;padding:8px 0;border-radius:8px;cursor:pointer;color:var(--muted);position:relative}
+.cal-day.avail{color:var(--text)}
+.cal-day.avail:active{background:var(--gray)}
+.cal-day.sel{background:var(--purple);color:white;border-radius:8px}
+.cal-day.past,.cal-day.empty{color:#ddd;cursor:default}
+.slots-title{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:10px}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.slot{padding:10px 6px;text-align:center;font-size:13px;border:0.5px solid var(--border);border-radius:10px;cursor:pointer;color:var(--muted);background:white;-webkit-user-select:none;user-select:none}
+.slot:active:not(.taken){background:var(--gray)}
+.slot.sel{background:var(--purple);color:white;border-color:var(--purple)}
+.slot.taken{background:var(--gray);color:#ccc;cursor:default;text-decoration:line-through}
+.no-slots{padding:20px;text-align:center;font-size:13px;color:var(--hint)}
 
-/* ── CALENDAR ── */
-.proc-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--brand-dim);border-radius:20px;
-  padding:6px 14px;font-size:12px;font-weight:600;
-  color:var(--brand-deep);margin-bottom:18px;flex-shrink:0;
-}
-.proc-pill svg{width:12px;height:12px;color:var(--brand)}
-
-.month-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;
-}
-.month-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:18px;font-weight:600;color:var(--t0);
-  letter-spacing:0.01em;
-}
-.mnav-btn{
-  background:var(--bg);border:1px solid var(--border-m);
-  border-radius:10px;width:36px;height:36px;
-  cursor:pointer;color:var(--t1);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;transition:all 0.15s;
-}
-.mnav-btn:active{background:var(--brand-dim);border-color:var(--brand-ring);color:var(--brand)}
-
-.cal-grid{
-  display:grid;grid-template-columns:repeat(7,1fr);
-  gap:4px;text-align:center;margin-bottom:22px;
-}
-.cal-hdr{
-  font-size:10px;font-weight:700;color:var(--t2);
-  padding:4px 0;text-transform:uppercase;letter-spacing:0.06em;
-}
-.cal-day{
-  font-size:14px;font-weight:500;
-  padding:10px 0;border-radius:10px;
-  cursor:pointer;color:var(--t0);
-  transition:background 0.1s,color 0.1s;
-  min-height:40px;display:flex;align-items:center;justify-content:center;
-}
-.cal-day.avail:active{background:var(--brand-dim)}
-.cal-day.sel{background:var(--brand);color:white;font-weight:600}
-.cal-day.past,.cal-day.empty{color:var(--t3);cursor:default}
-
-.slots-title{
-  font-size:11px;font-weight:700;color:var(--t2);
-  text-transform:uppercase;letter-spacing:0.07em;
-  margin-bottom:12px;
-}
-.slots-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:9px;margin-bottom:20px;
-}
-.slot{
-  padding:13px 6px;text-align:center;
-  font-size:14px;font-weight:500;
-  border:1px solid var(--border-m);border-radius:12px;
-  cursor:pointer;color:var(--t0);background:white;
-  transition:all 0.15s;
-  -webkit-user-select:none;user-select:none;
-  min-height:48px;display:flex;align-items:center;justify-content:center;
-}
-.slot:active:not(.taken){background:var(--brand-dim);border-color:var(--brand-ring)}
-.slot.sel{background:var(--brand);color:white;border-color:var(--brand);font-weight:600}
-.slot.taken{background:var(--bg);color:var(--t3);cursor:default;text-decoration:line-through;font-size:12px}
-.no-slots{padding:24px;text-align:center;font-size:13px;color:var(--t2);font-weight:300}
-
-/* ── CONFIRM ── */
-.confirm-heading{
-  font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:600;color:var(--t0);
-  margin-bottom:18px;letter-spacing:0.01em;
-}
-.confirm-card{
-  background:var(--bg);border-radius:16px;
-  padding:4px 0;margin-bottom:22px;
-  border:1px solid var(--border);overflow:hidden;
-}
-.confirm-row{
-  display:flex;justify-content:space-between;align-items:center;
-  font-size:14px;padding:12px 16px;
-  border-bottom:1px solid var(--border);
-}
+/* Confirm */
+.confirm-card{background:var(--gray);border-radius:12px;padding:14px;margin-bottom:16px}
+.confirm-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,0.07)}
 .confirm-row:last-child{border:none}
-.confirm-label{color:var(--t2);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
-.confirm-val{font-weight:600;color:var(--t0);font-size:14px}
-.confirm-val.accent{color:var(--brand)}
+.confirm-label{color:var(--muted)}
+.confirm-val{font-weight:500}
 
-/* ── SUCCESS ── */
-.success-wrap{
-  padding:36px 20px 40px;
-  display:flex;flex-direction:column;
-  align-items:center;text-align:center;flex:1;
-  background:var(--surface);
-}
-.success-check{
-  width:80px;height:80px;border-radius:24px;
-  background:linear-gradient(135deg,var(--brand-dim) 0%,rgba(184,101,122,0.15) 100%);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:22px;
-  animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes pop{from{transform:scale(0.6);opacity:0}to{transform:scale(1);opacity:1}}
-.success-ring{
-  width:68px;height:68px;border-radius:50%;
-  background:var(--green-bg);
-  display:flex;align-items:center;justify-content:center;
-}
-.success-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:26px;font-weight:600;color:var(--t0);
-  margin-bottom:10px;letter-spacing:0.01em;
-  animation:fadeup 0.4s 0.1s both;
-}
-.success-sub{
-  font-size:14px;color:var(--t1);
-  line-height:1.7;margin-bottom:28px;
-  max-width:280px;font-weight:300;
-  animation:fadeup 0.4s 0.2s both;
-}
-@keyframes fadeup{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
-.success-card{
-  width:100%;
-  background:var(--bg);border-radius:16px;
-  border:1px solid var(--border);overflow:hidden;
-  margin-bottom:24px;text-align:left;
-  animation:fadeup 0.4s 0.25s both;
-}
-.whatsapp-note{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(37,211,102,0.08);
-  border:1px solid rgba(37,211,102,0.2);
-  border-radius:12px;padding:13px 16px;
-  font-size:13px;color:var(--t1);font-weight:400;
-  animation:fadeup 0.4s 0.3s both;
-}
-.whatsapp-note svg{flex-shrink:0}
+/* Success */
+.success-wrap{padding:32px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;flex:1}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.success-title{font-size:18px;font-weight:500;margin-bottom:8px}
+.success-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.success-card{width:100%;background:var(--gray);border-radius:12px;padding:14px;text-align:left;margin-bottom:20px}
+
+/* Loading spinner */
+.spinner{width:20px;height:20px;border:2px solid rgba(155,111,165,0.2);border-top-color:var(--purple);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{flex:1;display:flex;align-items:center;justify-content:center;background:white}
+
+/* Error */
+.error-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:white;padding:32px;text-align:center}
+.error-screen p{font-size:14px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
 
-<!-- ══ HEADER ══ -->
 <div id="ph" class="ph">
-  <div class="ph-mark" id="ph-logo">?</div>
-  <div class="ph-text">
+  <div class="ph-logo" id="ph-logo">?</div>
+  <div>
     <div class="ph-name" id="ph-name">Carregando...</div>
     <div class="ph-sub">Agende seu procedimento</div>
   </div>
 </div>
 
-<!-- ══ LOADING ══ -->
+<!-- LOADING -->
 <div class="screen on" id="s-loading">
-  <div class="loading-screen">
+  <div class="loading-screen" style="flex-direction:column;gap:12px">
     <div class="spinner"></div>
-    <span class="loading-msg" id="loading-msg">Carregando portal...</span>
+    <span style="font-size:13px;color:var(--hint)" id="loading-msg">Carregando portal...</span>
   </div>
 </div>
 
-<!-- ══ ERROR ══ -->
+<!-- ERROR -->
 <div class="screen" id="s-error">
   <div class="error-screen">
-    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5">
-      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="var(--t3)"/>
-    </svg>
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="#ddd"/></svg>
     <p id="error-msg">Não foi possível carregar este portal.</p>
   </div>
 </div>
 
-<!-- ══ ENTRADA ══ -->
+<!-- ENTRADA -->
 <div class="screen" id="s-entry">
   <div class="screen-body">
-    <div class="entry-hero">
-      <div class="entry-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.6">
-          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-        </svg>
-      </div>
-      <div class="entry-title">Bem-vinda</div>
-      <div class="entry-sub">Nos conte um pouquinho sobre você para começarmos o seu agendamento.</div>
-    </div>
-    <div class="field">
-      <label>Seu nome</label>
-      <input type="text" id="inp-nome" placeholder="Como você se chama?" autocomplete="given-name" inputmode="text">
-    </div>
-    <div class="field">
-      <label>WhatsApp</label>
-      <input type="tel" id="inp-tel" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" maxlength="15" oninput="maskPhone(this)">
-    </div>
+    <div class="entry-title">Olá! Bem-vinda</div>
+    <div class="entry-sub">Para continuar, nos diga como podemos te chamar e como entrar em contato.</div>
+    <div class="field"><label>Seu nome</label><input type="text" id="inp-nome" placeholder="Como você se chama?" autocomplete="given-name"></div>
+    <div class="field"><label>WhatsApp</label><input type="tel" id="inp-tel" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" maxlength="15" oninput="maskPhone(this)"></div>
   </div>
   <div class="screen-foot">
-    <button class="cta cta-primary" onclick="goToList()">
-      Ver procedimentos
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
-    </button>
+    <button class="cta cta-primary" onclick="goToList()">Ver procedimentos →</button>
   </div>
 </div>
 
-<!-- ══ LISTA ══ -->
+<!-- LISTA -->
 <div class="screen" id="s-lista">
   <div class="screen-body">
-    <div class="list-hero">
-      <div class="list-greeting" id="list-greeting-text">Escolha o procedimento que te interessa:</div>
-      <div class="list-sub">Clique para ver detalhes e agendar</div>
-    </div>
+    <p class="list-greeting" id="list-greeting-text">Olá! Escolha o procedimento que te interessa:</p>
     <div id="proc-list"></div>
   </div>
 </div>
 
-<!-- ══ PROCEDIMENTO ══ -->
+<!-- VIDEO + REVEAL -->
 <div class="screen" id="s-proc">
-  <div class="back-bar">
-    <button class="back-btn" onclick="go('s-lista')">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="13" y1="8" x2="3" y2="8"/><polyline points="7,4 3,8 7,12"/></svg>
-      Voltar
-    </button>
+  <div class="back-bar"><button class="back-btn" onclick="go('s-lista')">← Voltar</button></div>
+  <div class="video-box" id="video-box">
+    <div class="video-placeholder" id="video-placeholder" onclick="playVideo()">
+      <div class="play-btn"><div class="play-tri"></div></div>
+    </div>
   </div>
-  <div class="screen-body" style="padding:0">
-    <div class="video-box" id="video-box">
-      <div class="video-placeholder" id="video-placeholder" onclick="playVideo()">
-        <div class="play-ring"><div class="play-tri"></div></div>
-        <span class="no-video-msg">Toque para assistir o vídeo</span>
-      </div>
-    </div>
-    <div class="proc-detail">
-      <div class="proc-detail-name" id="proc-detail-name"></div>
-      <div class="proc-detail-desc">Entenda como o procedimento funciona e o que esperar do resultado. Realizado por profissionais certificados.</div>
-    </div>
+  <div class="proc-detail">
+    <div class="proc-detail-name" id="proc-detail-name"></div>
+    <div class="proc-detail-desc">Entenda como o procedimento funciona e o que esperar do resultado. Realizado por profissionais certificados.</div>
   </div>
   <div class="reveal-zone" id="reveal-zone">
     <div class="reveal-loading" id="reveal-loading">
       <div class="rl-bar"><div class="rl-fill" id="rl-fill"></div></div>
-      <span class="rl-label" id="rl-label">Preparando sua oferta especial...</span>
+      <span class="rl-label" id="rl-label">Preparando oferta...</span>
     </div>
     <div class="offer" id="offer">
-      <div class="offer-tag">Oferta exclusiva para você</div>
+      <div class="offer-tag">Oferta especial para você</div>
       <div id="offer-price-zone">
         <div class="offer-price-row">
           <span class="offer-old" id="o-old"></span>
@@ -646,53 +227,35 @@ body{
         <div class="offer-cond" id="o-cond"></div>
       </div>
       <div class="offer-btns">
-        <button class="cta cta-primary" onclick="go('s-cal')">
-          Agendar agora
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
-        </button>
+        <button class="cta cta-primary" onclick="go('s-cal')">Agendar este procedimento →</button>
         <button class="cta cta-outline" onclick="go('s-exit')">Escolher outro procedimento</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ SAÍDA ══ -->
+<!-- SAÍDA -->
 <div class="screen" id="s-exit">
   <div class="screen-body">
-    <div class="exit-hero">
-      <div class="exit-title">Antes de continuar...</div>
-      <div class="exit-sub">Nos ajude a entender melhor para que possamos te oferecer a melhor experiência.</div>
-    </div>
+    <div class="exit-title">Antes de continuar...</div>
+    <div class="exit-sub">Nos ajude a entender melhor. Por que você está saindo desta oferta?</div>
     <div class="exit-option" onclick="exitReason('outro')">
-      <div class="exit-opt-icon" style="background:#F0F4FE">🔍</div>
-      <div class="exit-opt-body">
-        <div class="exit-opt-title">Quero ver outro procedimento</div>
-        <div class="exit-opt-sub">Tenho interesse em outra opção</div>
-      </div>
-      <div class="exit-chevron">›</div>
+      <div><div class="exit-opt-title">Quero ver outro procedimento</div><div class="exit-opt-sub">Tenho interesse em outra opção</div></div>
+      <span class="exit-chevron">›</span>
     </div>
     <div class="exit-option" onclick="exitReason('orcamento')">
-      <div class="exit-opt-icon" style="background:#FEF8EE">💭</div>
-      <div class="exit-opt-body">
-        <div class="exit-opt-title">Fora do meu orçamento</div>
-        <div class="exit-opt-sub">O valor não cabe por enquanto</div>
-      </div>
-      <div class="exit-chevron">›</div>
+      <div><div class="exit-opt-title">Fora do meu orçamento</div><div class="exit-opt-sub">O valor não cabe agora</div></div>
+      <span class="exit-chevron">›</span>
     </div>
   </div>
 </div>
 
-<!-- ══ CALENDÁRIO ══ -->
+<!-- CALENDÁRIO -->
 <div class="screen" id="s-cal">
-  <div class="back-bar">
-    <button class="back-btn" onclick="go('s-proc')">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="13" y1="8" x2="3" y2="8"/><polyline points="7,4 3,8 7,12"/></svg>
-      Voltar
-    </button>
-  </div>
+  <div class="back-bar"><button class="back-btn" onclick="go('s-proc')">← Voltar</button></div>
   <div class="screen-body">
     <div class="proc-pill" id="cal-pill">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 8 7 11 12 5"/></svg>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 8 7 11 12 5"/></svg>
       <span id="cal-proc-name"></span>
     </div>
     <div class="month-nav">
@@ -705,64 +268,42 @@ body{
     <div id="slots-wrap"></div>
   </div>
   <div class="screen-foot" id="cal-foot" style="display:none">
-    <button class="cta cta-primary" onclick="go('s-confirm')">
-      Continuar
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
-    </button>
+    <button class="cta cta-primary" onclick="go('s-confirm')">Continuar →</button>
   </div>
 </div>
 
-<!-- ══ CONFIRMAÇÃO ══ -->
+<!-- CONFIRMAÇÃO -->
 <div class="screen" id="s-confirm">
-  <div class="back-bar">
-    <button class="back-btn" onclick="go('s-cal')">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="13" y1="8" x2="3" y2="8"/><polyline points="7,4 3,8 7,12"/></svg>
-      Voltar
-    </button>
-  </div>
+  <div class="back-bar"><button class="back-btn" onclick="go('s-cal')">← Voltar</button></div>
   <div class="screen-body">
-    <div class="confirm-heading">Confirme seu agendamento</div>
+    <p style="font-size:16px;font-weight:500;margin-bottom:16px">Confirme seu agendamento</p>
     <div class="confirm-card">
       <div class="confirm-row"><span class="confirm-label">Procedimento</span><span class="confirm-val" id="cf-proc"></span></div>
       <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="cf-date"></span></div>
       <div class="confirm-row"><span class="confirm-label">Horário</span><span class="confirm-val" id="cf-time"></span></div>
-      <div class="confirm-row"><span class="confirm-label">Valor</span><span class="confirm-val accent" id="cf-price"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Valor</span><span class="confirm-val" style="color:var(--purple-dark)" id="cf-price"></span></div>
     </div>
-    <div class="field">
-      <label>Seu nome</label>
-      <input type="text" id="cf-nome" autocomplete="given-name" inputmode="text">
-    </div>
-    <div class="field">
-      <label>WhatsApp</label>
-      <input type="tel" id="cf-tel" autocomplete="tel" inputmode="numeric">
-    </div>
+    <div class="field"><label>Seu nome</label><input type="text" id="cf-nome" autocomplete="given-name"></div>
+    <div class="field"><label>WhatsApp</label><input type="tel" id="cf-tel" autocomplete="tel"></div>
   </div>
   <div class="screen-foot">
     <button class="cta cta-primary" id="book-btn" onclick="book()">Confirmar agendamento</button>
   </div>
 </div>
 
-<!-- ══ SUCESSO ══ -->
+<!-- SUCESSO -->
 <div class="screen" id="s-success">
   <div class="success-wrap">
-    <div class="success-check">
-      <div class="success-ring">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      </div>
+    <div class="success-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2E8C66" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div class="success-title">Agendamento confirmado!</div>
-    <div class="success-sub">Você receberá uma mensagem no WhatsApp com todos os detalhes do seu horário. Até breve!</div>
+    <div class="success-sub">Você receberá uma mensagem no WhatsApp com todos os detalhes. Até breve!</div>
     <div class="success-card">
       <div class="confirm-row"><span class="confirm-label">Procedimento</span><span class="confirm-val" id="sc-proc"></span></div>
       <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="sc-date"></span></div>
       <div class="confirm-row"><span class="confirm-label">Horário</span><span class="confirm-val" id="sc-time"></span></div>
       <div class="confirm-row"><span class="confirm-label">Cliente</span><span class="confirm-val" id="sc-nome"></span></div>
-    </div>
-    <div class="whatsapp-note">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-      Você vai receber a confirmação no WhatsApp em instantes.
     </div>
   </div>
 </div>
@@ -782,11 +323,12 @@ let calYear, calMonth
 let clientName = '', clientPhone = ''
 
 let portalSettings = { reveal_delay: 5, show_price: true, greeting_msg: 'Escolha o procedimento que te interessa:' }
-let procPhotos = {}
+let procPhotos = {}  // { [procedure_id]: { before: [...urls], after: [...urls] } }
 
 /* ---- INIT ---- */
 async function init() {
   try {
+    // Carrega clínica + procedimentos + settings em paralelo
     const [portalRes, settingsRes] = await Promise.all([
       fetch(`${API}/api/portal/${SLUG}`),
       fetch(`${API}/api/settings?slug=${SLUG}`).catch(() => null)
@@ -797,6 +339,7 @@ async function init() {
     clinicData = data.clinic
     procedures = data.procedures || []
 
+    // Settings — usa defaults se falhar
     if (settingsRes && settingsRes.ok) {
       const s = await settingsRes.json()
       portalSettings = {
@@ -806,17 +349,37 @@ async function init() {
       }
     }
 
-    const logoEl = document.getElementById('ph-logo')
-    if (clinicData.logo_url) {
-      logoEl.innerHTML = `<img src="${clinicData.logo_url}" alt="${clinicData.name}">`
-    } else {
-      const initials = clinicData.name.split(' ').filter(w => /^[A-ZÀ-Ú]/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join('')
-      logoEl.textContent = initials || 'C'
-    }
+    // Header
+    const initials = clinicData.name.split(' ').filter(w => /^[A-ZÀ-Ú]/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join('')
+    document.getElementById('ph-logo').textContent = initials || 'C'
     document.getElementById('ph-name').textContent = clinicData.name
     document.title = clinicData.name + ' — Agendamento'
 
+    // Busca fotos de todos os procedimentos em paralelo (silenciosamente)
     await loadAllPhotos()
+
+    // Auto-identificação via query params (vindo do agente WhatsApp)
+    const params = new URLSearchParams(window.location.search)
+    const pName = params.get('name')
+    const pPhone = params.get('phone')
+    if (pName && pPhone) {
+      clientName = pName
+      clientPhone = pPhone
+      try {
+        const r = await fetch(`${API}/api/portal/${SLUG}/identify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: clientName, phone: clientPhone })
+        })
+        if (r.ok) { const d = await r.json(); currentLeadId = d.lead_id }
+      } catch {}
+      document.getElementById('list-greeting-text').innerHTML =
+        `Olá, <strong>${esc(clientName.split(' ')[0])}</strong>! ${esc(portalSettings.greeting_msg)}`
+      renderProcList()
+      go('s-lista')
+      return
+    }
+
     go('s-entry')
   } catch (e) {
     document.getElementById('error-msg').textContent = 'Este link de agendamento não está disponível no momento.'
@@ -870,6 +433,7 @@ async function goToList() {
   if (rawPhone.length < 10 || rawPhone.length > 11) { alert('WhatsApp inválido. Digite DDD + número (ex: 11 99999-9999).'); return }
   clientPhone = rawPhone
 
+  // Registra lead imediatamente, sem precisar agendar
   try {
     const r = await fetch(`${API}/api/portal/${SLUG}/identify`, {
       method: 'POST',
@@ -879,9 +443,8 @@ async function goToList() {
     if (r.ok) { const d = await r.json(); currentLeadId = d.lead_id }
   } catch {}
 
-  const firstName = esc(clientName.split(' ')[0])
   document.getElementById('list-greeting-text').innerHTML =
-    `Olá, <strong>${firstName}</strong>! ${esc(portalSettings.greeting_msg)}`
+    `Olá, <strong>${esc(clientName.split(' ')[0])}</strong>! ${esc(portalSettings.greeting_msg)}`
   renderProcList()
   go('s-lista')
 }
@@ -890,12 +453,14 @@ async function goToList() {
 function renderProcList() {
   const el = document.getElementById('proc-list')
   if (!procedures.length) {
-    el.innerHTML = '<p style="color:var(--t2);font-size:14px;text-align:center;padding:40px 0;font-weight:300">Nenhum procedimento disponível.</p>'
+    el.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:32px 0">Nenhum procedimento disponível.</p>'
     return
   }
   el.innerHTML = procedures.map((p, i) => {
     const cid = `c-${i}`
     const photos = procPhotos[p.id] || { before: [], after: [] }
+
+    // Constrói slides com pares reais de fotos ou placeholder
     const count = Math.max(photos.before.length, photos.after.length, 1)
     const slides = Array.from({ length: count }, (_, idx) => {
       const toUrl = u => u ? (u.startsWith('data:') ? u : `${API}${u}`) : null
@@ -906,14 +471,14 @@ function renderProcList() {
           <div class="img-half before">
             ${bUrl
               ? `<img src="${bUrl}" alt="antes" loading="${idx === 0 ? 'eager' : 'lazy'}" onerror="this.style.display='none'">`
-              : '<span class="img-placeholder-txt">Foto antes</span>'}
+              : '<span style="font-size:11px;color:#aaa">Foto antes</span>'}
             <span class="img-lbl">antes</span>
           </div>
           <div class="img-divider"></div>
           <div class="img-half after">
             ${aUrl
               ? `<img src="${aUrl}" alt="depois" loading="${idx === 0 ? 'eager' : 'lazy'}" onerror="this.style.display='none'">`
-              : '<span class="img-placeholder-txt" style="color:var(--brand)">Foto depois</span>'}
+              : '<span style="font-size:11px;color:#9B6FA5">Foto depois</span>'}
             <span class="img-lbl">depois</span>
           </div>
         </div>`
@@ -933,16 +498,11 @@ function renderProcList() {
         ${arrows}${dots}
       </div>
       <div class="proc-foot">
-        <div class="proc-foot-left">
+        <div>
           <div class="proc-name">${esc(p.name)}</div>
-          <div class="proc-meta">
-            <span class="proc-dur-pill">
-              <span style="font-style:normal;color:var(--t3);font-family:'DM Sans',sans-serif;font-size:11px">·</span>
-              ${p.duration} min de duração
-            </span>
-          </div>
+          <div class="proc-dur">${p.duration} min · Resultado comprovado</div>
         </div>
-        <div class="proc-cta-arrow">›</div>
+        <span class="proc-chevron">›</span>
       </div>
     </div>`
   }).join('')
@@ -953,14 +513,18 @@ function selectProc(id) {
   if (!selected.proc) return
   document.getElementById('proc-detail-name').textContent = selected.proc.name
   document.getElementById('cal-proc-name').textContent = selected.proc.name
+  // Confirm fields
   document.getElementById('cf-proc').textContent = selected.proc.name
   document.getElementById('cf-price').textContent = fmtPrice(selected.proc.price)
   document.getElementById('cf-nome').value = clientName
   document.getElementById('cf-tel').value = clientPhone
+  // Success fields
   document.getElementById('sc-proc').textContent = selected.proc.name
+  // video
   document.getElementById('video-placeholder').style.display = 'flex'
   const iframe = document.getElementById('video-iframe')
   if (iframe) iframe.remove()
+  // Rastreia procedimento visualizado
   if (currentLeadId) {
     fetch(`${API}/api/portal/${SLUG}/track`, {
       method: 'POST',
@@ -983,7 +547,7 @@ function playVideo() {
   const iframe = document.createElement('iframe')
   iframe.id = 'video-iframe'
   iframe.src = embedUrl
-  iframe.style.cssText = 'width:100%;height:210px;border:none;display:block'
+  iframe.style.cssText = 'width:100%;height:200px;border:none;display:block'
   iframe.allow = 'autoplay; fullscreen'
   document.getElementById('video-placeholder').style.display = 'none'
   document.getElementById('video-box').appendChild(iframe)
@@ -1002,6 +566,7 @@ function startReveal() {
   fill.style.transition = 'none'
   fill.style.width      = '0'
 
+  // Delay vem das configurações do portal (API), com fallback pro valor do procedimento
   const delaySecs = portalSettings.reveal_delay || selected.proc?.reveal_delay || 5
   const delay = delaySecs * 1000
 
@@ -1011,10 +576,10 @@ function startReveal() {
   }, 60)
 
   let cd = delaySecs
-  label.textContent = `Preparando sua oferta em ${cd}s...`
+  label.textContent = `Preparando oferta em ${cd}s...`
   revealTick = setInterval(() => {
     cd--
-    if (cd > 0) label.textContent = `Preparando sua oferta em ${cd}s...`
+    if (cd > 0) label.textContent = `Preparando oferta em ${cd}s...`
     else clearInterval(revealTick)
   }, 1000)
 
@@ -1023,6 +588,8 @@ function startReveal() {
     offer.style.display   = 'block'
     const p = selected.proc
     if (!p) return
+
+    // Preço — respeita configuração show_price
     const priceZone = document.getElementById('offer-price-zone')
     if (portalSettings.show_price && p.price) {
       document.getElementById('o-old').textContent = fmtPrice(p.price_old)
@@ -1072,11 +639,13 @@ function initCal() {
   document.getElementById('cal-foot').style.display = 'none'
 }
 
+// Override go to init cal when entering s-cal
 const _go = go
 window.go = function(id) {
   _go(id)
   if (id === 's-cal') initCal()
 }
+// Re-assign to fix forward ref
 go = window.go
 
 function changeMonth(dir) {
@@ -1138,6 +707,7 @@ function selectSlot(time, el) {
   document.querySelectorAll('.slot').forEach(s => s.classList.remove('sel'))
   el.classList.add('sel')
   document.getElementById('cal-foot').style.display = 'block'
+  // Update confirm
   const d = new Date(selected.date + 'T12:00:00')
   const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
   document.getElementById('cf-date').textContent = dateStr

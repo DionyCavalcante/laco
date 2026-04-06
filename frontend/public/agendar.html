@@ -358,6 +358,28 @@ async function init() {
     // Busca fotos de todos os procedimentos em paralelo (silenciosamente)
     await loadAllPhotos()
 
+    // Auto-identificação via query params (vindo do agente WhatsApp)
+    const params = new URLSearchParams(window.location.search)
+    const pName = params.get('name')
+    const pPhone = params.get('phone')
+    if (pName && pPhone) {
+      clientName = pName
+      clientPhone = pPhone
+      try {
+        const r = await fetch(`${API}/api/portal/${SLUG}/identify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: clientName, phone: clientPhone })
+        })
+        if (r.ok) { const d = await r.json(); currentLeadId = d.lead_id }
+      } catch {}
+      document.getElementById('list-greeting-text').innerHTML =
+        `Olá, <strong>${esc(clientName.split(' ')[0])}</strong>! ${esc(portalSettings.greeting_msg)}`
+      renderProcList()
+      go('s-lista')
+      return
+    }
+
     go('s-entry')
   } catch (e) {
     document.getElementById('error-msg').textContent = 'Este link de agendamento não está disponível no momento.'
