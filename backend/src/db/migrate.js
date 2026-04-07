@@ -120,6 +120,7 @@ async function migrate() {
     const alters = [
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '{}'`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS reveal_delay INTEGER DEFAULT 5`,
+      `ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_interaction_at TIMESTAMPTZ`,
     ]
     for (const sql of alters) await client.query(sql)
 

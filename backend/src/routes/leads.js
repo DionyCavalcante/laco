@@ -78,25 +78,52 @@ router.get('/stats', async (req, res) => {
   }
 })
 
-// POST /api/leads — cria lead manualmente
+// POST /api/leads — cria ou atualiza lead (upsert por telefone)
 router.post('/', async (req, res) => {
   try {
     const { name, phone, source = 'manual', status = 'link_sent' } = req.body
     if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' })
 
     const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
-    // Upsert por telefone — se já existir, atualiza nome e status
     const { rows } = await db.query(`
-      INSERT INTO leads (clinic_id, name, phone, source, status)
-      VALUES ((SELECT id FROM clinics WHERE slug = $1), $2, $3, $4, $5)
+      INSERT INTO leads (clinic_id, name, phone, source, status, last_interaction_at)
+      VALUES ((SELECT id FROM clinics WHERE slug = $1), $2, $3, $4, $5, NOW())
       ON CONFLICT (clinic_id, phone)
-      DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status, updated_at = NOW()
+      DO UPDATE SET
+        name = EXCLUDED.name,
+        status = EXCLUDED.status,
+        last_interaction_at = NOW(),
+        updated_at = NOW()
       RETURNING *
     `, [clinicSlug, name, phone, source, status])
     res.status(201).json(rows[0])
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao criar lead' })
+  }
+})
+
+// PATCH /api/leads/phone/:phone — atualiza nome e last_interaction_at sem sobrescrever status
+router.patch('/phone/:phone', async (req, res) => {
+  try {
+    const { name } = req.body
+    const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
+    const { rows } = await db.query(`
+      UPDATE leads
+      SET
+        name = COALESCE($1, name),
+        last_interaction_at = NOW(),
+        updated_at = NOW()
+      WHERE phone = $2
+        AND clinic_id = (SELECT id FROM clinics WHERE slug = $3)
+      RETURNING *
+    `, [name || null, req.params.phone, clinicSlug])
+
+    if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
+    res.json(rows[0])
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao atualizar interação' })
   }
 })
 
