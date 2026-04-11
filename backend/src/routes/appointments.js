@@ -132,6 +132,49 @@ router.get('/slots', async (req, res) => {
   }
 })
 
+// PATCH /api/appointments/:id/reschedule
+router.patch('/:id/reschedule', async (req, res) => {
+  const { date, time } = req.body
+  if (!date || !time) return res.status(400).json({ error: 'date e time obrigatórios' })
+
+  const { pool } = require('../db')
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+
+    const { rows: [orig] } = await client.query(
+      'SELECT * FROM appointments WHERE id = $1',
+      [req.params.id]
+    )
+    console.log(`[reschedule] id=${req.params.id} found=${!!orig} status=${orig?.status}`)
+    if (!orig) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'Agendamento não encontrado' })
+    }
+
+    await client.query(
+      'UPDATE appointments SET status = $1, updated_at = NOW() WHERE id = $2',
+      ['cancelled', req.params.id]
+    )
+
+    const scheduled_at = new Date(`${date}T${time}:00-03:00`)
+    const { rows: [newAppt] } = await client.query(`
+      INSERT INTO appointments (clinic_id, lead_id, procedure_id, scheduled_at, status, source, rescheduled_from)
+      VALUES ($1, $2, $3, $4, 'confirmed', 'system', $5)
+      RETURNING *
+    `, [orig.clinic_id, orig.lead_id, orig.procedure_id, scheduled_at, orig.id])
+
+    await client.query('COMMIT')
+    res.json(newAppt)
+  } catch (err) {
+    await client.query('ROLLBACK')
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao remarcar agendamento' })
+  } finally {
+    client.release()
+  }
+})
+
 // PATCH /api/appointments/:id/status
 router.patch('/:id/status', async (req, res) => {
   try {
