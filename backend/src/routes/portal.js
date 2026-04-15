@@ -12,7 +12,7 @@ router.get('/:slug', async (req, res) => {
 
     const { rows: procedures } = await db.query(`
       SELECT id, name, duration, price, price_old, payment_note, video_url,
-             headline, subheadline, detail_images,
+             headline, subheadline,
              benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc
       FROM procedures
       WHERE clinic_id = $1 AND active = true

@@ -16,14 +16,15 @@ const upload = multer({
 
 // POST /api/upload/procedure/:id/photos
 router.post('/procedure/:id/photos', upload.fields([
-  { name: 'before', maxCount: 5 },
-  { name: 'after',  maxCount: 5 }
+  { name: 'before',   maxCount: 5 },
+  { name: 'after',    maxCount: 5 },
+  { name: 'carousel', maxCount: 10 },
 ]), async (req, res) => {
   try {
     const procId = req.params.id
-    const saved = { before: [], after: [] }
+    const saved = { before: [], after: [], carousel: [] }
 
-    for (const side of ['before', 'after']) {
+    for (const side of ['before', 'after', 'carousel']) {
       const files = req.files?.[side] || []
       for (const file of files) {
         const buffer = await sharp(file.buffer)

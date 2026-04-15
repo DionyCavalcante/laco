@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   try {
     const { name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
-            headline, subheadline, detail_images,
+            headline, subheadline,
             benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc } = req.body
     const { rows } = await db.query(`
       UPDATE procedures SET
@@ -53,16 +53,15 @@ router.patch('/:id', async (req, res) => {
         reveal_delay   = COALESCE($9, reveal_delay),
         headline       = COALESCE($10, headline),
         subheadline    = COALESCE($11, subheadline),
-        detail_images  = COALESCE($12, detail_images),
-        benefit_1_title = COALESCE($13, benefit_1_title),
-        benefit_1_desc  = COALESCE($14, benefit_1_desc),
-        benefit_2_title = COALESCE($15, benefit_2_title),
-        benefit_2_desc  = COALESCE($16, benefit_2_desc),
-        benefit_3_title = COALESCE($17, benefit_3_title),
-        benefit_3_desc  = COALESCE($18, benefit_3_desc)
-      WHERE id = $19 RETURNING *
+        benefit_1_title = COALESCE($12, benefit_1_title),
+        benefit_1_desc  = COALESCE($13, benefit_1_desc),
+        benefit_2_title = COALESCE($14, benefit_2_title),
+        benefit_2_desc  = COALESCE($15, benefit_2_desc),
+        benefit_3_title = COALESCE($16, benefit_3_title),
+        benefit_3_desc  = COALESCE($17, benefit_3_desc)
+      WHERE id = $18 RETURNING *
     `, [name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
-        headline || null, subheadline || null, detail_images ? JSON.stringify(detail_images) : null,
+        headline || null, subheadline || null,
         benefit_1_title || null, benefit_1_desc || null, benefit_2_title || null, benefit_2_desc || null,
         benefit_3_title || null, benefit_3_desc || null,
         req.params.id])

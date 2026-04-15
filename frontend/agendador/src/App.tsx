@@ -58,7 +58,6 @@ interface Procedure {
   description?: string;
   headline?: string;
   subheadline?: string;
-  detail_images?: string[];
   benefit_1_title?: string;
   benefit_1_desc?: string;
   benefit_2_title?: string;
@@ -78,7 +77,7 @@ interface Slot {
   taken: boolean;
 }
 
-type ProcPhotos = Record<string, { before: string[]; after: string[] }>;
+type ProcPhotos = Record<string, { before: string[]; after: string[]; carousel: string[] }>;
 
 interface BookingFormData {
   name: string;
@@ -153,12 +152,13 @@ async function apiLoadPhotos(procedures: Procedure[]): Promise<ProcPhotos> {
           id: p.id,
           before: photos.filter((x) => x.side === 'before').map((x) => x.url),
           after: photos.filter((x) => x.side === 'after').map((x) => x.url),
+          carousel: photos.filter((x) => x.side === 'carousel').map((x) => x.url),
         }))
     )
   );
   const map: ProcPhotos = {};
   results.forEach((r) => {
-    if (r.status === 'fulfilled') map[r.value.id] = { before: r.value.before, after: r.value.after };
+    if (r.status === 'fulfilled') map[r.value.id] = { before: r.value.before, after: r.value.after, carousel: r.value.carousel };
   });
   return map;
 }
@@ -628,14 +628,14 @@ const OfferPage = ({
   const [currentImg, setCurrentImg] = useState(0);
   const [showFooter, setShowFooter] = useState(false);
 
+  const carouselPhotos = selectedProc ? (procPhotos[selectedProc.id]?.carousel || []).map(photoUrl) : [];
   const afterPhotos = selectedProc ? (procPhotos[selectedProc.id]?.after || []).map(photoUrl) : [];
-  const detailImages = selectedProc?.detail_images?.length ? selectedProc.detail_images : [];
   const fallbackImages = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
   ];
-  const images = detailImages.length >= 1 ? detailImages : afterPhotos.length >= 2 ? afterPhotos : fallbackImages;
+  const images = carouselPhotos.length >= 1 ? carouselPhotos : afterPhotos.length >= 2 ? afterPhotos : fallbackImages;
 
   const revealMs = (portalSettings.reveal_delay || 5) * 1000;
 

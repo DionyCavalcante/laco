@@ -127,13 +127,15 @@ async function migrate() {
       // Campos da página de detalhes do procedimento
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS headline TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS subheadline TEXT`,
-      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS detail_images JSONB DEFAULT '[]'`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_1_title TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_1_desc TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_2_title TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_2_desc TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_title TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_desc TEXT`,
+      // Suporte a imagens de carrossel na tabela procedure_photos
+      `ALTER TABLE procedure_photos DROP CONSTRAINT IF EXISTS procedure_photos_side_check`,
+      `ALTER TABLE procedure_photos ADD CONSTRAINT procedure_photos_side_check CHECK (side IN ('before','after','carousel'))`,
     ]
     for (const sql of alters) await client.query(sql)
 
