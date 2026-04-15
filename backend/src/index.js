@@ -51,6 +51,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(pub))
 
   // CRM — rotas do painel administrativo (HTMLs estáticos)
+  app.get('/',          (req, res) => res.sendFile(path.join(pub, 'painel.html')))
   app.get('/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
   app.get('/login',     (req, res) => res.sendFile(path.join(pub, 'login.html')))
   app.get('/clientes',  (req, res) => res.sendFile(path.join(pub, 'cliente.html')))
