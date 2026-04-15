@@ -628,6 +628,8 @@ const OfferPage = ({
   const [currentImg, setCurrentImg] = useState(0);
   const [showFooter, setShowFooter] = useState(false);
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   const carouselPhotos = selectedProc ? (procPhotos[selectedProc.id]?.carousel || []).map(photoUrl) : [];
   const afterPhotos = selectedProc ? (procPhotos[selectedProc.id]?.after || []).map(photoUrl) : [];
   const fallbackImages = [
@@ -875,6 +877,8 @@ const BookingFlow = ({
   onShowExit: () => void;
   clinicName: string;
 }) => {
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   const [formData, setFormData] = useState<BookingFormData>({
     name: prefillName,
     whatsapp: prefillPhone ? formatPhoneDisplay(prefillPhone) : '',
