@@ -48,9 +48,8 @@ app.use('/uploads', express.static(UPLOAD_DIR))
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
   const pub = path.join(__dirname, '../public')
-  app.use(express.static(pub))
 
-  // CRM — rotas do painel administrativo (HTMLs estáticos)
+  // CRM — rotas explícitas ANTES do static (evita index.html ser servido para /)
   app.get('/',          (req, res) => res.sendFile(path.join(pub, 'painel.html')))
   app.get('/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
   app.get('/login',     (req, res) => res.sendFile(path.join(pub, 'login.html')))
@@ -59,12 +58,11 @@ if (process.env.NODE_ENV === 'production') {
   app.get('/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 
   // Portal de agendamento (React SPA) — rota /:slug enviada pelo WhatsApp
-  app.get('/:slug', (req, res) => {
-    res.sendFile(path.join(pub, 'index.html'))
-  })
-  app.get('/:slug/agendar', (req, res) => {
-    res.sendFile(path.join(pub, 'index.html'))
-  })
+  app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'index.html')))
+  app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
+
+  // Assets estáticos (JS, CSS, imagens)
+  app.use(express.static(pub, { index: false }))
 }
 
 // 404
