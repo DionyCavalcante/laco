@@ -33,6 +33,14 @@ router.get('/', async (req, res) => {
       params.push(req.query.date)
       q += ` AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $${params.length}`
     }
+    if (req.query.from) {
+      params.push(req.query.from)
+      q += ` AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') >= $${params.length}`
+    }
+    if (req.query.to) {
+      params.push(req.query.to)
+      q += ` AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') <= $${params.length}`
+    }
     q += ' ORDER BY a.scheduled_at ASC'
     const { rows } = await db.query(q, params)
     res.json(rows)

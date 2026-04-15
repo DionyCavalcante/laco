@@ -17,7 +17,7 @@ router.get('/:slug', async (req, res) => {
       ORDER BY sort_order, name
     `, [clinic.id])
 
-    res.json({ clinic: { id: clinic.id, name: clinic.name, slug: clinic.slug }, procedures })
+    res.json({ clinic: { id: clinic.id, name: clinic.name, slug: clinic.slug, phone: clinic.phone || null }, procedures })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao carregar portal' })
@@ -173,6 +173,121 @@ router.post('/:slug/book', async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao realizar agendamento' })
+  }
+})
+
+// GET /api/portal/:slug/appointments?phone=PHONE — agendamentos do cliente (credencial = telefone do login)
+router.get('/:slug/appointments', async (req, res) => {
+  try {
+    const { phone } = req.query
+    if (!phone) return res.status(400).json({ error: 'Telefone obrigatório' })
+
+    const digits = phone.replace(/\D/g, '')
+    const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [req.params.slug])
+    if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
+
+    const { rows: [lead] } = await db.query(
+      'SELECT id FROM leads WHERE clinic_id=$1 AND phone=$2 LIMIT 1',
+      [clinic.id, digits]
+    )
+    if (!lead) return res.json([])
+
+    const { rows } = await db.query(`
+      SELECT a.id, a.procedure_id, p.name AS procedure_name, a.scheduled_at, a.status
+      FROM appointments a
+      JOIN procedures p ON a.procedure_id = p.id
+      WHERE a.lead_id = $1 AND a.status != 'cancelled'
+      ORDER BY a.scheduled_at ASC
+    `, [lead.id])
+
+    res.json(rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao buscar agendamentos' })
+  }
+})
+
+// Helper — verifica propriedade do agendamento via telefone
+async function verifyOwnership(slug, appointmentId, phone) {
+  const digits = phone.replace(/\D/g, '')
+  const { rows: [clinic] } = await db.query('SELECT id FROM clinics WHERE slug=$1', [slug])
+  if (!clinic) return null
+
+  const { rows: [apt] } = await db.query(`
+    SELECT a.*, l.phone AS lead_phone
+    FROM appointments a
+    JOIN leads l ON a.lead_id = l.id
+    WHERE a.id = $1 AND a.clinic_id = $2
+  `, [appointmentId, clinic.id])
+
+  if (!apt || apt.lead_phone !== digits) return null
+  return apt
+}
+
+// POST /api/portal/:slug/appointments/:id/confirm
+router.post('/:slug/appointments/:id/confirm', async (req, res) => {
+  try {
+    const { phone } = req.body
+    if (!phone) return res.status(400).json({ error: 'Telefone obrigatório' })
+
+    const apt = await verifyOwnership(req.params.slug, req.params.id, phone)
+    if (!apt) return res.status(404).json({ error: 'Agendamento não encontrado' })
+    if (apt.status === 'cancelled') return res.status(400).json({ error: 'Agendamento já cancelado' })
+
+    await db.query(`UPDATE appointments SET status='confirmed', updated_at=NOW() WHERE id=$1`, [apt.id])
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao confirmar agendamento' })
+  }
+})
+
+// POST /api/portal/:slug/appointments/:id/cancel  (regra 24h)
+router.post('/:slug/appointments/:id/cancel', async (req, res) => {
+  try {
+    const { phone } = req.body
+    if (!phone) return res.status(400).json({ error: 'Telefone obrigatório' })
+
+    const apt = await verifyOwnership(req.params.slug, req.params.id, phone)
+    if (!apt) return res.status(404).json({ error: 'Agendamento não encontrado' })
+    if (apt.status === 'cancelled') return res.status(400).json({ error: 'Agendamento já cancelado' })
+
+    const hoursUntil = (new Date(apt.scheduled_at) - Date.now()) / 3600000
+    if (hoursUntil <= 24 && !req.body.is_reschedule) {
+      return res.status(400).json({ error: 'Não é possível cancelar com menos de 24 horas de antecedência.', code: 'too_late' })
+    }
+
+    await db.query(`UPDATE appointments SET status='cancelled', updated_at=NOW() WHERE id=$1`, [apt.id])
+    await db.query(`UPDATE leads SET status='captado', updated_at=NOW() WHERE id=$1`, [apt.lead_id])
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao cancelar agendamento' })
+  }
+})
+
+// POST /api/portal/:slug/appointments/:id/reschedule  (regra 24h)
+router.post('/:slug/appointments/:id/reschedule', async (req, res) => {
+  try {
+    const { phone, date, time } = req.body
+    if (!phone || !date || !time) return res.status(400).json({ error: 'Telefone, data e horário obrigatórios' })
+
+    const apt = await verifyOwnership(req.params.slug, req.params.id, phone)
+    if (!apt) return res.status(404).json({ error: 'Agendamento não encontrado' })
+    if (apt.status === 'cancelled') return res.status(400).json({ error: 'Agendamento já cancelado' })
+
+    const hoursUntil = (new Date(apt.scheduled_at) - Date.now()) / 3600000
+    if (hoursUntil <= 24) {
+      return res.status(400).json({ error: 'Não é possível remarcar com menos de 24 horas de antecedência.', code: 'too_late' })
+    }
+
+    const scheduledAt = new Date(`${date}T${time}:00-03:00`)
+
+    await db.query(`UPDATE appointments SET scheduled_at=$1, status='pending', updated_at=NOW() WHERE id=$2`, [scheduledAt, apt.id])
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao remarcar agendamento' })
   }
 })
 

@@ -9,7 +9,8 @@ router.get('/', async (req, res) => {
     let q = `
       SELECT
         l.*,
-        p.name AS procedure_name,
+        p.name  AS procedure_name,
+        p.price AS procedure_price,
         a.id AS appointment_id,
         a.scheduled_at,
         a.status AS appointment_status

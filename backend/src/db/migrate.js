@@ -80,6 +80,8 @@ ALTER TABLE business_hours ADD CONSTRAINT bh_clinic_day_unique UNIQUE (clinic_id
 ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique;
 ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone);
 
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS phone TEXT;
+
 -- Fotos antes/depois dos procedimentos
 CREATE INDEX IF NOT EXISTS idx_photos_proc ON procedure_photos(procedure_id);
 
@@ -121,6 +123,7 @@ async function migrate() {
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '{}'`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS reveal_delay INTEGER DEFAULT 5`,
       `ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_interaction_at TIMESTAMPTZ`,
+      `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS rescheduled_from UUID REFERENCES appointments(id)`,
     ]
     for (const sql of alters) await client.query(sql)
 

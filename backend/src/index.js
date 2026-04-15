@@ -50,37 +50,12 @@ if (process.env.NODE_ENV === 'production') {
   const pub = path.join(__dirname, '../public')
   app.use(express.static(pub))
 
-  // Portal do cliente: /:slug/agendar
+  // Portal público de agendamento — rota dedicada mantida para o link enviado pelo WhatsApp
   app.get('/:slug/agendar', (req, res) => {
-    res.sendFile(path.join(pub, 'agendar.html'))
+    res.sendFile(path.join(pub, 'index.html'))
   })
 
-  // Config da clínica
-  app.get('/config', (req, res) => {
-    res.sendFile(path.join(pub, 'config/index.html'))
-  })
-
-  // Documentação da API
-  app.get('/api-docs', (req, res) => {
-    res.sendFile(path.join(pub, 'api-docs.html'))
-  })
-
-  // Hoje — visão operacional
-  app.get('/hoje', (req, res) => {
-    res.sendFile(path.join(pub, 'hoje.html'))
-  })
-
-  // Detalhe do cliente
-  app.get('/cliente', (req, res) => {
-    res.sendFile(path.join(pub, 'cliente.html'))
-  })
-
-  // Login
-  app.get('/login', (req, res) => {
-    res.sendFile(path.join(pub, 'login.html'))
-  })
-
-  // Dashboard principal
+  // SPA fallback — React Router cuida de todas as rotas internas
   app.get('*', (req, res) => {
     res.sendFile(path.join(pub, 'index.html'))
   })

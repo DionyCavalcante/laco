@@ -3,3 +3,29 @@ node_modules/
 *.log
 .DS_Store
 dist/
+
+# Frontend agendador — build output vai para backend/public (commitar o build)
+frontend/agendador/node_modules/
+
+# Environment & Secrets (AIOX)
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Dependencies (AIOX)
+node_modules
+
+# Build & Logs (AIOX)
+build/
+logs/
+
+# IDE & OS (AIOX)
+Thumbs.db
+.idea/
+*.swp
+
+# AIOX Local (AIOX)
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt

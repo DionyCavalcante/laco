@@ -2,7 +2,10 @@
 nixPkgs = ["nodejs_20", "postgresql"]
 
 [phases.build]
-cmds = ["cd backend && npm install"]
+cmds = [
+  "cd frontend/agendador && npm install && npm run build",
+  "cd backend && npm install"
+]
 
 [start]
 cmd = "cd backend && npm run migrate && npm start"
