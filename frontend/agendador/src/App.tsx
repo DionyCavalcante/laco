@@ -56,6 +56,15 @@ interface Procedure {
   payment_note?: string;
   reveal_delay?: number;
   description?: string;
+  headline?: string;
+  subheadline?: string;
+  detail_images?: string[];
+  benefit_1_title?: string;
+  benefit_1_desc?: string;
+  benefit_2_title?: string;
+  benefit_2_desc?: string;
+  benefit_3_title?: string;
+  benefit_3_desc?: string;
 }
 
 interface PortalSettings {
@@ -620,12 +629,13 @@ const OfferPage = ({
   const [showFooter, setShowFooter] = useState(false);
 
   const afterPhotos = selectedProc ? (procPhotos[selectedProc.id]?.after || []).map(photoUrl) : [];
+  const detailImages = selectedProc?.detail_images?.length ? selectedProc.detail_images : [];
   const fallbackImages = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
   ];
-  const images = afterPhotos.length >= 2 ? afterPhotos : fallbackImages;
+  const images = detailImages.length >= 1 ? detailImages : afterPhotos.length >= 2 ? afterPhotos : fallbackImages;
 
   const revealMs = (portalSettings.reveal_delay || 5) * 1000;
 
@@ -649,10 +659,10 @@ const OfferPage = ({
         <section className="text-center mb-8">
           <span className="text-secondary font-bold text-[10px] mb-2 block uppercase tracking-[0.2em]">Estética</span>
           <h2 className="text-[22px] font-extrabold text-primary tracking-tight leading-tight mb-2">
-            {selectedProc?.name || 'Procedimento Selecionado'}
+            {selectedProc?.headline || selectedProc?.name || 'Procedimento Selecionado'}
           </h2>
           <p className="text-on-surface-variant font-medium text-[11px] leading-relaxed max-w-[280px] mx-auto opacity-80">
-            {selectedProc?.description ||
+            {selectedProc?.subheadline || selectedProc?.description ||
               'Personalização completa para realçar sua beleza natural com sofisticação e segurança.'}
           </p>
         </section>
@@ -712,9 +722,9 @@ const OfferPage = ({
 
         <section className="grid gap-3 mb-10">
           {[
-            { icon: <Sparkles size={20} />, title: 'Resultado Natural', desc: 'Preservamos sua essência com toques artísticos.' },
-            { icon: <Bolt size={20} />, title: 'Recuperação Imediata', desc: 'Protocolos que permitem retorno rápido à rotina.' },
-            { icon: <ShieldCheck size={20} />, title: 'Segurança Máxima', desc: 'Ambiente com os mais rigorosos protocolos.' },
+            { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado Natural', desc: selectedProc?.benefit_1_desc || 'Preservamos sua essência com toques artísticos.' },
+            { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Recuperação Imediata', desc: selectedProc?.benefit_2_desc || 'Protocolos que permitem retorno rápido à rotina.' },
+            { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Segurança Máxima', desc: selectedProc?.benefit_3_desc || 'Ambiente com os mais rigorosos protocolos.' },
           ].map((benefit, idx) => (
             <div key={idx} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm border border-outline-variant/5">
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">

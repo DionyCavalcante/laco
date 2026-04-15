@@ -124,6 +124,16 @@ async function migrate() {
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS reveal_delay INTEGER DEFAULT 5`,
       `ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_interaction_at TIMESTAMPTZ`,
       `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS rescheduled_from UUID REFERENCES appointments(id)`,
+      // Campos da página de detalhes do procedimento
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS headline TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS subheadline TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS detail_images JSONB DEFAULT '[]'`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_1_title TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_1_desc TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_2_title TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_2_desc TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_title TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_desc TEXT`,
     ]
     for (const sql of alters) await client.query(sql)
 
