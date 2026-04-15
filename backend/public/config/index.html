@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laço — Configurações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
+.brand-dot svg{width:13px;height:13px;fill:white}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
+.back-link{font-size:12px;color:#B8657A;cursor:pointer;display:flex;align-items:center;gap:4px}
+.back-link:hover{text-decoration:underline}
+
+.nav{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;display:flex;gap:2px;position:sticky;top:52px;z-index:9}
+.nav-tab{padding:0 16px;height:42px;display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.nav-tab.on{color:#B8657A;border-bottom-color:#B8657A;font-weight:500}
+.nav-tab:hover:not(.on){color:#111}
+.panel{display:none}.panel.on{display:block}
+.page{max-width:800px;margin:0 auto;padding:24px}
+
+/* Section */
+.section{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);margin-bottom:16px;overflow:hidden}
+.section-head{padding:14px 18px;border-bottom:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-size:13px;font-weight:500}
+.section-sub{font-size:11px;color:#888;margin-top:2px}
+
+/* Buttons */
+.btn{padding:7px 14px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap}
+.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
+.btn-ghost:hover{background:#FAF7F5}
+.btn-purple{background:#B8657A;color:white}
+.btn-purple:hover{background:#a55870}
+.btn-danger{background:none;border:0.5px solid #F09595;color:#A32D2D}
+.btn-danger:hover{background:#FCEBEB}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-icon{width:28px;height:28px;padding:0;justify-content:center}
+
+/* Procedure list */
+.proc-row{padding:12px 18px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:12px}
+.proc-row:last-child{border:none}
+.drag-handle{color:#ccc;cursor:grab;font-size:14px;user-select:none;flex-shrink:0}
+.drag-handle:active{cursor:grabbing}
+.proc-info{flex:1;min-width:0}
+.proc-name{font-size:13px;font-weight:500}
+.proc-meta{font-size:11px;color:#888;margin-top:2px}
+.toggle{width:34px;height:20px;border-radius:10px;background:#B8657A;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s}
+.toggle::after{content:'';width:16px;height:16px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;transition:right 0.2s}
+.toggle.off{background:#ddd}
+.toggle.off::after{right:auto;left:2px}
+.proc-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Modal overlay */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:20px}
+.overlay.on{display:flex}
+.modal{background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-head{padding:18px 20px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:500}
+.modal-close{background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;padding:0 4px}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 20px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;justify-content:flex-end;gap:8px}
+
+/* Form */
+.field{margin-bottom:16px}
+.field label{font-size:12px;color:#666;display:block;margin-bottom:5px;font-weight:500}
+.field input,.field textarea,.field select{width:100%;padding:9px 12px;font-size:13px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;color:#111;background:white;outline:none;font-family:inherit}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#B8657A;box-shadow:0 0 0 2px rgba(184,101,122,0.15)}
+.field textarea{resize:vertical;min-height:72px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-hint{font-size:11px;color:#aaa;margin-top:4px}
+.price-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Hours grid */
+.hours-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.hours-row:last-child{border:none}
+.day-name{font-size:13px;font-weight:500;width:44px;flex-shrink:0}
+.time-inputs{display:flex;align-items:center;gap:8px;flex:1}
+.time-inputs input{width:90px;padding:6px 10px;font-size:12px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#111;background:white;outline:none}
+.time-inputs input:focus{border-color:#B8657A}
+.time-sep{font-size:12px;color:#aaa}
+.closed-label{font-size:12px;color:#aaa}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#111;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:all 0.25s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Photo grid */
+.photos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;min-height:80px}
+.photo-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:#F0EBE8;border:0.5px solid rgba(0,0,0,0.08)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s}
+.photo-thumb:hover .photo-del{opacity:1}
+.photo-del svg{width:10px;height:10px;stroke:white;fill:none}
+.photo-empty-slot{border-radius:8px;aspect-ratio:1;background:#F0EBE8;border:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
+    <span class="brand-name">Laço</span>
+  </div>
+  <a href="/" class="back-link">← Voltar para plataforma</a>
+</div>
+
+<div class="nav">
+  <div class="nav-tab on" onclick="switchTab('procedimentos',this)">Procedimentos</div>
+  <div class="nav-tab" onclick="switchTab('fotos',this)">Fotos antes/depois</div>
+  <div class="nav-tab" onclick="switchTab('portal',this)">Portal</div>
+  <div class="nav-tab" onclick="switchTab('horarios',this)">Horários</div>
+  <div class="nav-tab" onclick="switchTab('clinica',this)">Clínica</div>
+</div>
+
+<!-- PROCEDIMENTOS -->
+<div class="panel on" id="panel-procedimentos">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Procedimentos disponíveis</div>
+          <div class="section-sub">Esses procedimentos aparecerão no portal de agendamento</div>
+        </div>
+        <button class="btn btn-purple" onclick="openModal()">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+          Novo procedimento
+        </button>
+      </div>
+      <div id="proc-list"><div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Carregando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HORÁRIOS -->
+<div class="panel" id="panel-horarios">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Horários de atendimento</div>
+          <div class="section-sub">Define os dias e horários disponíveis para agendamento</div>
+        </div>
+        <button class="btn btn-purple" onclick="saveHours()">Salvar horários</button>
+      </div>
+      <div id="hours-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLÍNICA -->
+<div class="panel" id="panel-clinica">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Dados da clínica</div>
+          <div class="section-sub">Informações exibidas no portal do cliente</div>
+        </div>
+        <button class="btn btn-purple" onclick="saveClinic()">Salvar</button>
+      </div>
+      <div style="padding:20px">
+        <div class="field"><label>Nome da clínica</label><input type="text" id="clinic-name-input" placeholder="Ex: Clínica Bella Estética"></div>
+        <div class="field"><label>Slug (URL do portal)</label><input type="text" id="clinic-slug-input" placeholder="Ex: bella-estetica"><div class="field-hint">URL gerada: <span id="slug-preview">laço.app/bella-estetica/agendar</span></div></div>
+        <div class="field"><label>Link do portal (compartilhe com clientes)</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="portal-link" readonly style="background:#F0EBE8;color:#6B5E59">
+            <button class="btn btn-ghost" onclick="copyPortalLink()">Copiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOTOS ANTES/DEPOIS -->
+<div class="panel" id="panel-fotos">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Fotos antes e depois</div>
+          <div class="section-sub">Selecione um procedimento para gerenciar suas fotos</div>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-bottom:0.5px solid rgba(0,0,0,0.07)">
+        <select id="photo-proc-select" class="field" style="margin:0" onchange="loadProcPhotos(this.value)">
+          <option value="">Selecione um procedimento...</option>
+        </select>
+      </div>
+      <div id="photo-manager" style="padding:20px;display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <!-- ANTES -->
+          <div>
+            <div style="font-size:12px;font-weight:500;color:#666;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+              Antes
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+                + Adicionar
+                <input type="file" accept="image/*" multiple style="display:none" onchange="uploadPhotos(event,'before')">
+              </label>
+            </div>
+            <div id="photos-before" class="photos-grid"></div>
+          </div>
+          <!-- DEPOIS -->
+          <div>
+            <div style="font-size:12px;font-weight:500;color:#666;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+              Depois
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+                + Adicionar
+                <input type="file" accept="image/*" multiple style="display:none" onchange="uploadPhotos(event,'after')">
+              </label>
+            </div>
+            <div id="photos-after" class="photos-grid"></div>
+          </div>
+        </div>
+        <div id="upload-progress" style="display:none;margin-top:14px">
+          <div style="height:3px;background:#eee;border-radius:2px;overflow:hidden">
+            <div id="upload-bar" style="height:100%;background:#B8657A;border-radius:2px;width:0;transition:width 0.3s"></div>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px" id="upload-status">Enviando...</div>
+        </div>
+      </div>
+      <div id="photo-empty" style="padding:40px;text-align:center;color:#aaa;font-size:13px">Selecione um procedimento acima para gerenciar as fotos.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div class="panel" id="panel-portal">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Configurações do portal</div>
+          <div class="section-sub">Controla o comportamento da página de agendamento do cliente</div>
+        </div>
+        <button class="btn btn-purple" onclick="saveSettings()">Salvar</button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:0">
+
+        <div class="field">
+          <label>Delay para revelar o preço (segundos)</label>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+            <input type="range" id="s-delay" min="3" max="30" step="1" value="5" style="flex:1"
+              oninput="document.getElementById('s-delay-val').textContent=this.value+'s'">
+            <span id="s-delay-val" style="font-size:16px;font-weight:500;color:#B8657A;min-width:40px">5s</span>
+          </div>
+          <div class="field-hint">O cliente assiste ao vídeo por este tempo antes de ver o preço e os botões de ação</div>
+        </div>
+
+        <div class="field" style="margin-top:8px">
+          <label>Mostrar preço no portal</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+            <div class="toggle" id="s-price-toggle" onclick="this.classList.toggle('off')"></div>
+            <span style="font-size:13px;color:#666">Exibir preço após o delay</span>
+          </div>
+          <div class="field-hint">Se desligado, o botão de agendar aparece sem mostrar o valor</div>
+        </div>
+
+        <div class="field" style="margin-top:8px">
+          <label>Mensagem de saudação</label>
+          <input type="text" id="s-greeting" value="Olá! Escolha o procedimento que te interessa:" placeholder="Texto exibido acima da lista de procedimentos">
+        </div>
+
+        <div style="background:#FDEEF1;border-radius:10px;padding:14px;margin-top:8px">
+          <div style="font-size:12px;font-weight:500;color:#8B3F52;margin-bottom:6px">Preview do fluxo</div>
+          <div style="font-size:12px;color:#B8657A;line-height:1.8">
+            1. Cliente abre o link → informa nome e WhatsApp<br>
+            2. Vê a lista de procedimentos com fotos antes/depois<br>
+            3. Clica num procedimento → assiste ao vídeo<br>
+            4. Após <strong id="preview-delay">5s</strong> → <span id="preview-price-text">preço revelado com desconto</span><br>
+            5. Escolhe agendar → seleciona data e horário → confirma
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: criar/editar procedimento -->
+<div class="overlay" id="proc-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">Novo procedimento</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="field"><label>Nome do procedimento</label><input type="text" id="f-name" placeholder="Ex: Botox — testa"></div>
+      <div class="field-row">
+        <div class="field"><label>Duração (minutos)</label><input type="number" id="f-duration" placeholder="45" min="10" step="5"></div>
+        <div class="field"><label>Preço normal (R$)</label><input type="number" id="f-price-old" placeholder="420" step="0.01"><div class="field-hint">Preço que aparece riscado</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Preço com desconto (R$)</label><input type="number" id="f-price" placeholder="350" step="0.01"><div class="field-hint">Preço revelado após o vídeo</div></div>
+        <div class="field"><label>Condição de pagamento</label><input type="text" id="f-payment" placeholder="ou 3x de R$ 116,67 sem juros"></div>
+      </div>
+      <div class="field"><label>URL do vídeo (YouTube ou Vimeo)</label><input type="url" id="f-video" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="field">
+        <label>Delay para revelar o preço (segundos)</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="f-delay" min="3" max="30" step="1" value="5" style="flex:1" oninput="document.getElementById('f-delay-val').textContent=this.value+'s'">
+          <span id="f-delay-val" style="font-size:13px;font-weight:500;color:#B8657A;min-width:32px">5s</span>
+        </div>
+        <div class="field-hint">O cliente assiste ao vídeo por este tempo antes de ver o preço</div>
+      </div>
+
+      <!-- Página de detalhes — campos separados do catálogo -->
+      <div style="padding-top:4px;border-top:0.5px solid rgba(0,0,0,0.08);margin-bottom:16px">
+        <div style="font-size:12px;font-weight:500;color:#666;margin-bottom:12px">Página de detalhes do procedimento</div>
+        <div class="field"><label>Headline (título da página de detalhes)</label><input type="text" id="f-headline" placeholder="Ex: Botox - Boca"><div class="field-hint">Se vazio, usa o nome do procedimento</div></div>
+        <div class="field"><label>Subheadline (descrição da página de detalhes)</label><textarea id="f-subheadline" placeholder="Ex: Personalização completa para realçar sua beleza natural com sofisticação e segurança." style="min-height:60px"></textarea></div>
+        <div class="field">
+          <label>Imagens do carrossel (URLs, uma por linha)</label>
+          <textarea id="f-detail-images" placeholder="https://exemplo.com/imagem1.jpg&#10;https://exemplo.com/imagem2.jpg&#10;https://exemplo.com/imagem3.jpg" style="min-height:80px;font-size:11px"></textarea>
+          <div class="field-hint">Imagens exibidas no carrossel da página de detalhes. Se vazio, usa as fotos antes/depois ou imagens padrão.</div>
+        </div>
+        <div style="font-size:12px;font-weight:500;color:#666;margin:16px 0 10px">3 tópicos de benefícios</div>
+        <div class="field-row">
+          <div class="field"><label>Tópico 1 — Título</label><input type="text" id="f-b1-title" placeholder="Ex: Resultado Natural"></div>
+          <div class="field"><label>Tópico 1 — Descrição</label><input type="text" id="f-b1-desc" placeholder="Ex: Preservamos sua essência com toques artísticos."></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Tópico 2 — Título</label><input type="text" id="f-b2-title" placeholder="Ex: Recuperação Imediata"></div>
+          <div class="field"><label>Tópico 2 — Descrição</label><input type="text" id="f-b2-desc" placeholder="Ex: Protocolos que permitem retorno rápido à rotina."></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Tópico 3 — Título</label><input type="text" id="f-b3-title" placeholder="Ex: Segurança Máxima"></div>
+          <div class="field"><label>Tópico 3 — Descrição</label><input type="text" id="f-b3-desc" placeholder="Ex: Ambiente com os mais rigorosos protocolos."></div>
+        </div>
+      </div>
+
+      <!-- Fotos antes/depois — só aparece ao editar -->
+      <div id="photos-section" style="display:none">
+        <div style="font-size:12px;font-weight:500;color:#666;margin-bottom:10px;padding-top:4px;border-top:0.5px solid rgba(0,0,0,0.08)">Fotos antes e depois</div>
+        <div id="photo-pairs"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addPhotoPair()" style="width:100%;justify-content:center;margin-top:6px">
+          + Adicionar par de fotos
+        </button>
+        <div class="field-hint" style="margin-top:6px">Máx. 8MB por foto · JPG, PNG ou WEBP</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-purple" onclick="saveProc()">Salvar procedimento</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<style>
+.photo-pair{background:#f9f8f6;border-radius:10px;padding:12px;margin-bottom:8px;border:0.5px solid rgba(0,0,0,0.08)}
+.photo-pair-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.photo-pair-title{font-size:12px;font-weight:500;color:#666}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.photo-slot{border:1.5px dashed rgba(0,0,0,0.15);border-radius:8px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;background:white}
+.photo-slot:hover{border-color:#B8657A;background:#FDF5F6}
+.photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-slot-label{font-size:10px;color:#aaa;margin-top:4px;z-index:1}
+.photo-slot-icon{font-size:18px;color:#ddd;z-index:1}
+.photo-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;gap:8px;z-index:2}
+.photo-slot:hover .photo-overlay{display:flex}
+.photo-overlay button{background:white;border:none;border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer;color:#111}
+.photo-uploading{position:absolute;inset:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:3}
+.spinner-sm{width:18px;height:18px;border:2px solid rgba(184,101,122,0.2);border-top-color:#B8657A;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<script>
+const API = window.location.origin.replace('/config','').replace('/config/','')
+const API_KEY = localStorage.getItem('laco_api_key') || promptApiKey()
+const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
+
+function promptApiKey(){const k=prompt('Chave de acesso (API_SECRET):');if(k)localStorage.setItem('laco_api_key',k);return k||''}
+function h(){return{'Content-Type':'application/json','x-api-key':API_KEY}}
+
+function switchTab(name,el){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'))
+  el.classList.add('on')
+  document.getElementById('panel-'+name).classList.add('on')
+}
+
+function toast(msg,ok=true){
+  const t=document.getElementById('toast')
+  t.textContent=msg
+  t.style.background=ok?'#111':'#A32D2D'
+  t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2500)
+}
+
+/* ---- PROCEDIMENTOS ---- */
+let procs=[]
+
+async function loadProcs(){
+  try{
+    const r=await fetch(`${API}/api/procedures`,{headers:h()})
+    if(!r.ok)throw new Error()
+    procs=await r.json()
+    renderProcs()
+  }catch{document.getElementById('proc-list').innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Erro ao carregar. Verifique a chave de acesso.</div>'}
+}
+
+function renderProcs(){
+  const el=document.getElementById('proc-list')
+  if(!procs.length){el.innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Nenhum procedimento cadastrado ainda.</div>';return}
+  el.innerHTML=procs.map(p=>`
+    <div class="proc-row" data-id="${p.id}">
+      <span class="drag-handle">⠿</span>
+      <div class="proc-info">
+        <div class="proc-name">${esc(p.name)}</div>
+        <div class="proc-meta">${p.duration} min · ${fmtPrice(p.price_old)} → ${fmtPrice(p.price)} · ${esc(p.payment_note||'')}</div>
+      </div>
+      <div class="proc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editProc('${p.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProc('${p.id}')">Remover</button>
+      </div>
+      <div class="toggle ${p.active?'':'off'}" onclick="toggleProc('${p.id}',this)"></div>
+    </div>`).join('')
+}
+
+function fmtPrice(cents){
+  if(!cents)return'—'
+  return'R$ '+(cents/100).toLocaleString('pt-BR',{minimumFractionDigits:2})
+}
+
+function openModal(proc=null){
+  document.getElementById('edit-id').value=proc?proc.id:''
+  document.getElementById('modal-title').textContent=proc?'Editar procedimento':'Novo procedimento'
+  document.getElementById('f-name').value=proc?proc.name:''
+  document.getElementById('f-duration').value=proc?proc.duration:''
+  document.getElementById('f-price').value=proc?((proc.price||0)/100).toFixed(2):''
+  document.getElementById('f-price-old').value=proc?((proc.price_old||0)/100).toFixed(2):''
+  document.getElementById('f-payment').value=proc?proc.payment_note||'':''
+  document.getElementById('f-video').value=proc?proc.video_url||'':''
+  const delay=proc?proc.reveal_delay||5:5
+  document.getElementById('f-delay').value=delay
+  document.getElementById('f-delay-val').textContent=delay+'s'
+  // Campos da página de detalhes
+  document.getElementById('f-headline').value=proc?proc.headline||'':''
+  document.getElementById('f-subheadline').value=proc?proc.subheadline||'':''
+  const imgs=proc?Array.isArray(proc.detail_images)?proc.detail_images:(proc.detail_images||[]):[]
+  document.getElementById('f-detail-images').value=imgs.join('\n')
+  document.getElementById('f-b1-title').value=proc?proc.benefit_1_title||'':''
+  document.getElementById('f-b1-desc').value=proc?proc.benefit_1_desc||'':''
+  document.getElementById('f-b2-title').value=proc?proc.benefit_2_title||'':''
+  document.getElementById('f-b2-desc').value=proc?proc.benefit_2_desc||'':''
+  document.getElementById('f-b3-title').value=proc?proc.benefit_3_title||'':''
+  document.getElementById('f-b3-desc').value=proc?proc.benefit_3_desc||'':''
+  // Fotos — só mostra ao editar
+  const photoSec=document.getElementById('photos-section')
+  if(proc){
+    photoSec.style.display='block'
+    currentImages=proc.images||{}
+    photoPairCount=0
+    document.getElementById('photo-pairs').innerHTML=''
+    const pairs=getExistingPairs(currentImages)
+    if(pairs.length){pairs.forEach((_,i)=>addPhotoPair(i))}
+    else{addPhotoPair(0)}
+  } else {
+    photoSec.style.display='none'
+  }
+  document.getElementById('proc-modal').classList.add('on')
+}
+
+function closeModal(){document.getElementById('proc-modal').classList.remove('on')}
+
+function editProc(id){const p=procs.find(x=>x.id===id);if(p)openModal(p)}
+
+async function saveProc(){
+  const id=document.getElementById('edit-id').value
+  const detailImgsRaw=document.getElementById('f-detail-images').value.trim()
+  const detailImgs=detailImgsRaw?detailImgsRaw.split('\n').map(s=>s.trim()).filter(Boolean):[]
+  const body={
+    name:document.getElementById('f-name').value.trim(),
+    duration:parseInt(document.getElementById('f-duration').value)||60,
+    price:Math.round(parseFloat(document.getElementById('f-price').value||0)*100),
+    price_old:Math.round(parseFloat(document.getElementById('f-price-old').value||0)*100)||null,
+    payment_note:document.getElementById('f-payment').value.trim()||null,
+    video_url:document.getElementById('f-video').value.trim()||null,
+    reveal_delay:parseInt(document.getElementById('f-delay').value)||5,
+    headline:document.getElementById('f-headline').value.trim()||null,
+    subheadline:document.getElementById('f-subheadline').value.trim()||null,
+    detail_images:detailImgs.length?detailImgs:null,
+    benefit_1_title:document.getElementById('f-b1-title').value.trim()||null,
+    benefit_1_desc:document.getElementById('f-b1-desc').value.trim()||null,
+    benefit_2_title:document.getElementById('f-b2-title').value.trim()||null,
+    benefit_2_desc:document.getElementById('f-b2-desc').value.trim()||null,
+    benefit_3_title:document.getElementById('f-b3-title').value.trim()||null,
+    benefit_3_desc:document.getElementById('f-b3-desc').value.trim()||null,
+  }
+  if(!body.name||!body.price){toast('Nome e preço são obrigatórios',false);return}
+  try{
+    const url=id?`${API}/api/procedures/${id}`:`${API}/api/procedures`
+    const r=await fetch(url,{method:id?'PATCH':'POST',headers:h(),body:JSON.stringify(body)})
+    if(!r.ok)throw new Error()
+    toast(id?'Procedimento atualizado!':'Procedimento criado!')
+    closeModal()
+    loadProcs()
+  }catch{toast('Erro ao salvar procedimento',false)}
+}
+
+async function toggleProc(id,el){
+  el.classList.toggle('off')
+  const active=!el.classList.contains('off')
+  try{
+    await fetch(`${API}/api/procedures/${id}`,{method:'PATCH',headers:h(),body:JSON.stringify({active})})
+    toast(active?'Procedimento ativado':'Procedimento desativado')
+  }catch{toast('Erro ao atualizar',false)}
+}
+
+async function deleteProc(id){
+  if(!confirm('Remover este procedimento?'))return
+  try{
+    await fetch(`${API}/api/procedures/${id}`,{method:'PATCH',headers:h(),body:JSON.stringify({active:false})})
+    toast('Procedimento removido')
+    loadProcs()
+  }catch{toast('Erro ao remover',false)}
+}
+
+/* ---- HORÁRIOS ---- */
+const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+let hoursData=[]
+
+async function loadHours(){
+  try{
+    const r=await fetch(`${API}/api/hours`,{headers:h()})
+    if(!r.ok)throw new Error()
+    hoursData=await r.json()
+  }catch{
+    // fallback padrão
+    hoursData=DAYS.map((_,i)=>({day_of_week:i,open:i>0&&i<7,start_time:'09:00',end_time:i===6?'13:00':'18:00'}))
+  }
+  renderHours()
+}
+
+function renderHours(){
+  const el=document.getElementById('hours-grid')
+  el.innerHTML=hoursData.map((d,i)=>`
+    <div class="hours-row">
+      <div class="day-name">${DAYS[d.day_of_week??i]}</div>
+      <div class="toggle ${d.open?'':'off'}" id="ht-${i}" onclick="toggleDay(${i},this)"></div>
+      <div class="time-inputs" id="hi-${i}" style="${d.open?'':'opacity:0.3;pointer-events:none'}">
+        <input type="time" id="hs-${i}" value="${d.start_time||'09:00'}">
+        <span class="time-sep">até</span>
+        <input type="time" id="he-${i}" value="${d.end_time||'18:00'}">
+      </div>
+      ${d.open?'':'<span class="closed-label">Fechado</span>'}
+    </div>`).join('')
+}
+
+function toggleDay(i,el){
+  el.classList.toggle('off')
+  const open=!el.classList.contains('off')
+  hoursData[i].open=open
+  renderHours()
+}
+
+async function saveHours(){
+  const payload=hoursData.map((d,i)=>({
+    day_of_week:d.day_of_week??i,
+    open:d.open,
+    start_time:document.getElementById(`hs-${i}`)?.value||d.start_time||'09:00',
+    end_time:document.getElementById(`he-${i}`)?.value||d.end_time||'18:00',
+  }))
+  try{
+    await fetch(`${API}/api/hours`,{method:'POST',headers:h(),body:JSON.stringify(payload)})
+    toast('Horários salvos!')
+  }catch{toast('Erro ao salvar horários',false)}
+}
+
+/* ---- CLÍNICA ---- */
+function initClinic(){
+  const slug=SLUG
+  document.getElementById('clinic-slug-input').value=slug
+  document.getElementById('portal-link').value=`${window.location.origin}/${slug}/agendar`
+  document.getElementById('slug-preview').textContent=`laço.app/${slug}/agendar`
+  document.getElementById('clinic-slug-input').addEventListener('input',function(){
+    document.getElementById('slug-preview').textContent=`laço.app/${this.value}/agendar`
+    document.getElementById('portal-link').value=`${window.location.origin}/${this.value}/agendar`
+  })
+}
+
+function saveClinic(){toast('Configurações salvas!')}
+
+function copyPortalLink(){
+  navigator.clipboard.writeText(document.getElementById('portal-link').value)
+    .then(()=>toast('Link copiado!'))
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+/* ---- FOTOS ANTES/DEPOIS ---- */
+let currentImages={}
+let photoPairCount=0
+
+function getExistingPairs(images){
+  const indices=new Set()
+  Object.keys(images).forEach(k=>{const m=k.match(/_(\d+)$/);if(m)indices.add(parseInt(m[1]))})
+  return Array.from(indices).sort()
+}
+
+function addPhotoPair(index){
+  const i=index!==undefined?index:photoPairCount
+  photoPairCount=Math.max(photoPairCount,i+1)
+  const container=document.getElementById('photo-pairs')
+  const div=document.createElement('div')
+  div.className='photo-pair'
+  div.id=`pair-${i}`
+  div.innerHTML=`
+    <div class="photo-pair-head">
+      <span class="photo-pair-title">Par ${i+1}</span>
+      <button class="btn btn-danger btn-sm" onclick="removePair(${i})">Remover par</button>
+    </div>
+    <div class="photo-grid">
+      ${renderPhotoSlot(i,'before')}
+      ${renderPhotoSlot(i,'after')}
+    </div>`
+  container.appendChild(div)
+}
+
+function renderPhotoSlot(pairIndex,type){
+  const slot=`${type}_${pairIndex}`
+  const url=currentImages[slot]||''
+  const label=type==='before'?'Antes':'Depois'
+  return `
+    <div class="photo-slot" id="slot-${slot}">
+      ${url?`<img src="${API}${url}" alt="${label}">`:''}
+      ${url?'':`<div class="photo-slot-icon">+</div><div class="photo-slot-label">${label}</div>`}
+      <input type="file" accept="image/*" onchange="uploadPhoto(event,'${slot}')">
+      ${url?`<div class="photo-overlay">
+        <button onclick="removePhoto(event,'${slot}')">Remover</button>
+      </div>`:''}
+    </div>`
+}
+
+async function uploadPhoto(e,slot){
+  const file=e.target.files[0]
+  if(!file)return
+  const procId=document.getElementById('edit-id').value
+  if(!procId){toast('Salve o procedimento primeiro',false);return}
+  const slotEl=document.getElementById(`slot-${slot}`)
+  slotEl.innerHTML=`<div class="photo-uploading"><div class="spinner-sm"></div></div>`
+  try{
+    const form=new FormData()
+    form.append('photo',file)
+    const r=await fetch(`${API}/api/upload/${procId}/${slot}`,{
+      method:'POST',
+      headers:{'x-api-key':API_KEY},
+      body:form
+    })
+    if(!r.ok)throw new Error()
+    const data=await r.json()
+    currentImages[slot]=data.url
+    // Re-render slot
+    const [type,idx]=slot.split('_')
+    const newSlot=document.createElement('div')
+    newSlot.outerHTML=renderPhotoSlot(parseInt(idx),type)
+    slotEl.outerHTML=renderPhotoSlot(parseInt(idx),type)
+    toast('Foto enviada!')
+  }catch{
+    slotEl.innerHTML='<div class="photo-slot-label" style="color:#A32D2D">Erro no upload</div>'
+    toast('Erro ao enviar foto',false)
+  }
+}
+
+async function removePhoto(e,slot){
+  e.stopPropagation()
+  const procId=document.getElementById('edit-id').value
+  if(!procId)return
+  try{
+    await fetch(`${API}/api/upload/${procId}/${slot}`,{method:'DELETE',headers:{'x-api-key':API_KEY}})
+    delete currentImages[slot]
+    const [type,idx]=slot.split('_')
+    document.getElementById(`slot-${slot}`).outerHTML=renderPhotoSlot(parseInt(idx),type)
+    toast('Foto removida')
+  }catch{toast('Erro ao remover',false)}
+}
+
+function removePair(i){
+  document.getElementById(`pair-${i}`)?.remove()
+  // Remove fotos do par do servidor se existirem
+  const procId=document.getElementById('edit-id').value
+  if(procId){
+    ;['before','after'].forEach(async type=>{
+      const slot=`${type}_${i}`
+      if(currentImages[slot]){
+        await fetch(`${API}/api/upload/${procId}/${slot}`,{method:'DELETE',headers:{'x-api-key':API_KEY}})
+        delete currentImages[slot]
+      }
+    })
+  }
+}
+
+// Fecha modal ao clicar fora
+document.getElementById('proc-modal').addEventListener('click',function(e){if(e.target===this)closeModal()})
+
+/* ---- FOTOS (painel dedicado) ---- */
+let currentProcForPhotos = null
+
+async function initPhotosPanel() {
+  const sel = document.getElementById('photo-proc-select')
+  if (!procs.length) await loadProcs()
+  sel.innerHTML = '<option value="">Selecione um procedimento...</option>' +
+    procs.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')
+}
+
+async function loadProcPhotos(procId) {
+  if (!procId) {
+    document.getElementById('photo-manager').style.display = 'none'
+    document.getElementById('photo-empty').style.display = 'block'
+    return
+  }
+  currentProcForPhotos = procId
+  document.getElementById('photo-manager').style.display = 'block'
+  document.getElementById('photo-empty').style.display = 'none'
+  document.getElementById('photos-before').innerHTML = '<div style="color:#aaa;font-size:12px;padding:8px 0">Carregando...</div>'
+  document.getElementById('photos-after').innerHTML = ''
+  try {
+    const r = await fetch(`${API}/api/upload/procedure/${procId}/photos`, { headers: h() })
+    const photos = r.ok ? await r.json() : []
+    renderPhotoGrid('before', photos.filter(p => p.side === 'before'))
+    renderPhotoGrid('after',  photos.filter(p => p.side === 'after'))
+  } catch {
+    document.getElementById('photos-before').innerHTML = '<div style="color:#A32D2D;font-size:12px">Erro ao carregar</div>'
+  }
+}
+
+function renderPhotoGrid(side, photos) {
+  const el = document.getElementById(`photos-${side}`)
+  if (!photos.length) { el.innerHTML = '<div class="photo-empty-slot">Sem fotos ainda</div>'; return }
+  el.innerHTML = photos.map(p => `
+    <div class="photo-thumb">
+      <img src="${p.url}" alt="${side}" loading="lazy">
+      <button class="photo-del" onclick="deletePhoto('${p.id}','${side}')" title="Remover">
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>`).join('')
+}
+
+async function uploadPhotos(e, side) {
+  const files = Array.from(e.target.files)
+  if (!files.length || !currentProcForPhotos) return
+  const prog = document.getElementById('upload-progress')
+  const bar  = document.getElementById('upload-bar')
+  const stat = document.getElementById('upload-status')
+  prog.style.display = 'block'; bar.style.width = '0'
+  stat.textContent = `Enviando ${files.length} foto(s)...`
+  const fd = new FormData()
+  files.forEach(f => fd.append(side, f))
+  try {
+    bar.style.width = '40%'
+    const r = await fetch(`${API}/api/upload/procedure/${currentProcForPhotos}/photos`, {
+      method: 'POST', headers: { 'x-api-key': API_KEY }, body: fd
+    })
+    bar.style.width = '100%'
+    if (!r.ok) throw new Error()
+    stat.textContent = 'Upload concluído!'
+    toast('Fotos enviadas!')
+    await loadProcPhotos(currentProcForPhotos)
+  } catch {
+    stat.textContent = 'Erro no upload.'
+    toast('Erro ao enviar fotos', false)
+  } finally {
+    setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0' }, 2000)
+    e.target.value = ''
+  }
+}
+
+async function deletePhoto(photoId, side) {
+  if (!confirm('Remover esta foto?')) return
+  try {
+    await fetch(`${API}/api/upload/photo/${photoId}`, { method: 'DELETE', headers: h() })
+    toast('Foto removida')
+    await loadProcPhotos(currentProcForPhotos)
+  } catch { toast('Erro ao remover foto', false) }
+}
+
+/* ---- SETTINGS DO PORTAL ---- */
+async function loadSettings() {
+  try {
+    const r = await fetch(`${API}/api/settings`, { headers: h() })
+    if (!r.ok) return
+    const s = await r.json()
+    const delay = s.reveal_delay || 5
+    document.getElementById('s-delay').value = delay
+    document.getElementById('s-delay-val').textContent = delay + 's'
+    document.getElementById('preview-delay').textContent = delay + 's'
+    if (!s.show_price) document.getElementById('s-price-toggle').classList.add('off')
+    if (s.greeting_msg) document.getElementById('s-greeting').value = s.greeting_msg
+  } catch {}
+}
+
+async function saveSettings() {
+  const delay = parseInt(document.getElementById('s-delay').value) || 5
+  const price = !document.getElementById('s-price-toggle').classList.contains('off')
+  const greet = document.getElementById('s-greeting').value.trim()
+  try {
+    const r = await fetch(`${API}/api/settings`, {
+      method: 'POST', headers: h(),
+      body: JSON.stringify({ reveal_delay: delay, show_price: price, greeting_msg: greet })
+    })
+    if (!r.ok) throw new Error()
+    toast('Configurações do portal salvas!')
+  } catch { toast('Erro ao salvar configurações', false) }
+}
+
+document.getElementById('s-delay').addEventListener('input', function() {
+  document.getElementById('s-delay-val').textContent = this.value + 's'
+  document.getElementById('preview-delay').textContent = this.value + 's'
+})
+document.getElementById('s-price-toggle').addEventListener('click', function() {
+  setTimeout(() => {
+    const off = this.classList.contains('off')
+    document.getElementById('preview-price-text').textContent = off
+      ? 'botão de agendar revelado (sem preço)'
+      : 'preço revelado com desconto'
+  }, 50)
+})
+
+const _switchTab = switchTab
+window.switchTab = function(name, el) {
+  _switchTab(name, el)
+  if (name === 'fotos')  initPhotosPanel()
+  if (name === 'portal') loadSettings()
+}
+
+loadProcs()
+loadHours()
+initClinic()
+
+</script>
+</body>
+</html>
