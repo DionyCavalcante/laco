@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laço — Cliente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
+.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
+.brand-dot svg{width:13px;height:13px;fill:white}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
+.back-btn{font-size:12px;color:#B8657A;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0}
+.back-btn:hover{text-decoration:underline}
+.page{max-width:760px;margin:0 auto;padding:24px}
+
+/* Hero card */
+.hero{background:white;border-radius:14px;border:0.5px solid rgba(0,0,0,0.08);padding:22px 24px;display:flex;align-items:flex-start;gap:18px;margin-bottom:16px}
+.hero-av{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;flex-shrink:0}
+.hero-info{flex:1;min-width:0}
+.hero-name{font-size:18px;font-weight:500;margin-bottom:3px}
+.hero-phone{font-size:13px;color:#666;display:flex;align-items:center;gap:5px}
+.hero-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.b-scheduled{background:#E0F4EE;color:#27500A}
+.b-rejected{background:#FAECE7;color:#712B13}
+.b-link_sent{background:#FEF3E2;color:#633806}
+.b-new{background:#EEF4FE;color:#0C447C}
+.hero-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.btn{padding:7px 14px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap;text-decoration:none}
+.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
+.btn-ghost:hover{background:#FAF7F5}
+.btn-green{background:#25D366;color:white;font-size:11px}
+.btn-purple{background:#B8657A;color:white}
+.btn-danger{background:none;border:0.5px solid rgba(163,45,45,0.3);color:#A32D2D}
+.btn-danger:hover{background:#FAECE7}
+
+/* Sections */
+.section{background:white;border-radius:14px;border:0.5px solid rgba(0,0,0,0.08);margin-bottom:14px;overflow:hidden}
+.section-head{padding:13px 20px;border-bottom:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-size:13px;font-weight:500}
+
+/* Info rows */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:11px 20px;border-bottom:0.5px solid rgba(0,0,0,0.06);font-size:13px}
+.info-row:last-child{border:none}
+.info-label{color:#666}
+.info-val{font-weight:500;text-align:right;max-width:60%}
+.info-val.purple{color:#B8657A}
+.info-val.green{color:#2E8C66}
+.info-val.red{color:#A32D2D}
+.info-val.amber{color:#9A6B10}
+
+/* Timeline */
+.timeline{padding:14px 20px}
+.tl-item{display:flex;gap:12px;margin-bottom:16px}
+.tl-item:last-child{margin:0}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.tl-dot.purple{background:#B8657A}
+.tl-dot.green{background:#2E8C66}
+.tl-dot.amber{background:#E09F1A}
+.tl-dot.red{background:#E24B4A}
+.tl-dot.gray{background:#ccc}
+.tl-line{width:1px;background:#eee;flex:1;margin-top:4px}
+.tl-content{flex:1;min-width:0;padding-bottom:4px}
+.tl-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.tl-sub{font-size:11px;color:#888}
+
+/* Appointment card */
+.apt-card{padding:12px 20px;display:flex;align-items:center;gap:12px}
+.apt-bar{width:3px;height:38px;border-radius:2px;flex-shrink:0;background:#D4899A}
+.apt-info{flex:1}
+.apt-proc{font-size:13px;font-weight:500}
+.apt-dt{font-size:11px;color:#888;margin-top:2px}
+.apt-status{font-size:10px;padding:3px 9px;border-radius:20px}
+.s-confirmed{background:#E0F4EE;color:#27500A}
+.s-pending{background:#FEF3E2;color:#633806}
+.s-done{background:#f0f0f0;color:#666}
+.s-cancelled{background:#FAECE7;color:#712B13}
+
+/* Status editor */
+.status-select{padding:6px 10px;font-size:12px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#111;background:white;cursor:pointer;outline:none}
+.status-select:focus{border-color:#B8657A}
+
+/* Avatar colors */
+.av-0{background:#FDEEF1;color:#8B3F52}
+.av-1{background:#E0F4EE;color:#2E6647}
+.av-2{background:#FEF3E2;color:#9A6B10}
+.av-3{background:#FAECE7;color:#A04830}
+.av-4{background:#F1EFE8;color:#5F5E5A}
+.av-5{background:#EEF4FE;color:#0C447C}
+
+.loading{padding:48px;text-align:center;color:#aaa;font-size:13px}
+.empty-state{padding:32px;text-align:center;color:#aaa;font-size:13px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#111;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:all 0.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
+    <span class="brand-name">Laço</span>
+  </div>
+  <button class="back-btn" onclick="history.back()">← Voltar para clientes</button>
+</div>
+
+<div class="page" id="page">
+  <div class="loading">Carregando cliente...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+if (!sessionStorage.getItem('laco_auth') && !localStorage.getItem('laco_api_key')) {
+  window.location.href = '/login.html'
+}
+
+const API = window.location.origin
+const API_KEY = localStorage.getItem('laco_api_key') || ''
+const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
+const params = new URLSearchParams(window.location.search)
+const LEAD_ID = params.get('id')
+
+function h() { return { 'Content-Type': 'application/json', 'x-api-key': API_KEY } }
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.style.background = ok ? '#111' : '#A32D2D'
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 2500)
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function fmtDate(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) }
+function fmtDateTime(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) }
+
+const statusLabels = { new:'Novo lead', link_sent:'Link enviado', scheduled:'Agendado', rejected:'Não agendou' }
+const statusColors = { new:'b-new', link_sent:'b-link_sent', scheduled:'b-scheduled', rejected:'b-rejected' }
+const reasonLabels = { orcamento:'Fora do orçamento', outro:'Quer ver outro procedimento' }
+const aptStatusLabels = { pending:'Pendente', confirmed:'Confirmado', done:'Concluído', cancelled:'Cancelado' }
+const aptStatusClasses = { pending:'s-pending', confirmed:'s-confirmed', done:'s-done', cancelled:'s-cancelled' }
+const avColors = ['av-0','av-1','av-2','av-3','av-4','av-5']
+
+let lead = null
+let appointments = []
+
+async function load() {
+  if (!LEAD_ID) { document.getElementById('page').innerHTML = '<div class="loading">ID do cliente não encontrado.</div>'; return }
+  try {
+    const [lr, ar] = await Promise.all([
+      fetch(`${API}/api/leads/${LEAD_ID}`, { headers: h() }),
+      fetch(`${API}/api/appointments?lead_id=${LEAD_ID}`, { headers: h() })
+    ])
+    if (!lr.ok) throw new Error()
+    lead = await lr.json()
+    appointments = ar.ok ? await ar.json() : []
+    render()
+  } catch {
+    document.getElementById('page').innerHTML = '<div class="loading">Erro ao carregar cliente.</div>'
+  }
+}
+
+function render() {
+  const initials = lead.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()
+  const avClass = avColors[lead.name.charCodeAt(0) % 6]
+  const waLink = `https://wa.me/55${lead.phone.replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${lead.name.split(' ')[0]}! Segue o link para agendar seu procedimento: ${window.location.origin}/${SLUG}/agendar`)}`
+
+  document.getElementById('page').innerHTML = `
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-av ${avClass}">${initials}</div>
+      <div class="hero-info">
+        <div class="hero-name">${esc(lead.name)}</div>
+        <div class="hero-phone">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          ${esc(lead.phone)}
+        </div>
+        <div class="hero-meta">
+          <span class="badge ${statusColors[lead.status]||'b-new'}">${statusLabels[lead.status]||lead.status}</span>
+          <span class="badge" style="background:#F0EBE8;color:#888">via${lead.source||'whatsapp'}</span>
+          <span class="badge" style="background:#F0EBE8;color:#888">desde${fmtDate(lead.created_at)}</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a href="${waLink}" target="_blank" class="btn btn-green">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Enviar link
+        </a>
+        <select class="status-select" onchange="updateStatus(this.value)">
+          <option value="new"       ${lead.status==='new'?'selected':''}>Novo lead</option>
+          <option value="link_sent" ${lead.status==='link_sent'?'selected':''}>Link enviado</option>
+          <option value="scheduled" ${lead.status==='scheduled'?'selected':''}>Agendado</option>
+          <option value="rejected"  ${lead.status==='rejected'?'selected':''}>Não agendou</option>
+        </select>
+        <button class="btn btn-danger" onclick="deleteLead()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Excluir cliente
+        </button>
+      </div>
+    </div>
+
+    <!-- Informações -->
+    <div class="section">
+      <div class="section-head"><span class="section-title">Informações</span></div>
+      <div class="info-row"><span class="info-label">Procedimento visto</span><span class="info-val purple">${esc(lead.procedure_name||'—')}</span></div>
+      <div class="info-row"><span class="info-label">Motivo de recusa</span><span class="info-val ${lead.reject_reason?'red':''}">${esc(reasonLabels[lead.reject_reason]||lead.reject_reason||'—')}</span></div>
+      <div class="info-row"><span class="info-label">Origem</span><span class="info-val">${esc(lead.source||'whatsapp')}</span></div>
+      <div class="info-row"><span class="info-label">Entrou em</span><span class="info-val">${fmtDateTime(lead.created_at)}</span></div>
+      <div class="info-row"><span class="info-label">Última atualização</span><span class="info-val">${fmtDateTime(lead.updated_at)}</span></div>
+    </div>
+
+    <!-- Agendamentos -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">Agendamentos</span>
+        <span style="font-size:11px;color:#aaa">${appointments.length} registro(s)</span>
+      </div>
+      ${appointments.length ? appointments.map(a => `
+        <div class="apt-card">
+          <div class="apt-bar" style="background:${['#D4899A','#5DCAA5','#EF9F27','#378ADD'][a.procedure_name?.charCodeAt(0)%4||0]}"></div>
+          <div class="apt-info">
+            <div class="apt-proc">${esc(a.procedure_name||'—')}</div>
+            <div class="apt-dt">${fmtDateTime(a.scheduled_at)} · ${a.duration} min</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <span class="apt-status ${aptStatusClasses[a.status]||''}">${aptStatusLabels[a.status]||a.status}</span>
+            <select class="status-select" style="font-size:11px" onchange="updateAptStatus('${a.id}',this.value)">
+              <option value="pending"   ${a.status==='pending'?'selected':''}>Pendente</option>
+              <option value="confirmed" ${a.status==='confirmed'?'selected':''}>Confirmado</option>
+              <option value="done"      ${a.status==='done'?'selected':''}>Concluído</option>
+              <option value="cancelled" ${a.status==='cancelled'?'selected':''}>Cancelado</option>
+            </select>
+          </div>
+        </div>`).join('') : '<div class="empty-state">Nenhum agendamento registrado.</div>'}
+    </div>
+
+    <!-- Timeline -->
+    <div class="section">
+      <div class="section-head"><span class="section-title">Histórico</span></div>
+      <div class="timeline">${buildTimeline()}</div>
+    </div>
+  `
+}
+
+function buildTimeline() {
+  const events = []
+  events.push({ dot:'gray', title:'Lead criado', sub: fmtDateTime(lead.created_at) + ` · via ${lead.source||'whatsapp'}` })
+  if (lead.procedure_name) events.push({ dot:'purple', title:`Viu: ${lead.procedure_name}`, sub: 'Acessou o portal de agendamento' })
+  if (lead.status === 'link_sent') events.push({ dot:'amber', title:'Link de agendamento enviado', sub: fmtDateTime(lead.updated_at) })
+  if (lead.reject_reason) events.push({ dot:'red', title:'Não agendou', sub: reasonLabels[lead.reject_reason] || lead.reject_reason })
+  appointments.forEach(a => {
+    events.push({ dot:'green', title:`Agendamento: ${a.procedure_name}`, sub: fmtDateTime(a.scheduled_at) + ` · ${aptStatusLabels[a.status]}` })
+  })
+  events.sort((a,b) => 0) // already in order
+  return events.map((e, i) => `
+    <div class="tl-item">
+      <div class="tl-dot-col">
+        <div class="tl-dot ${e.dot}"></div>
+        ${i < events.length-1 ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">${esc(e.title)}</div>
+        <div class="tl-sub">${esc(e.sub)}</div>
+      </div>
+    </div>`).join('')
+}
+
+async function updateStatus(status) {
+  try {
+    const r = await fetch(`${API}/api/leads/${LEAD_ID}/status`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ status })
+    })
+    if (!r.ok) throw new Error()
+    lead.status = status
+    toast('Status atualizado')
+    render()
+  } catch { toast('Erro ao atualizar status', false) }
+}
+
+async function deleteLead() {
+  if (!confirm(`Excluir ${lead.name}? Todos os agendamentos também serão removidos. Essa ação não pode ser desfeita.`)) return
+  try {
+    const r = await fetch(`${API}/api/leads/${LEAD_ID}`, { method: 'DELETE', headers: h() })
+    if (!r.ok) throw new Error()
+    toast('Cliente excluído')
+    setTimeout(() => window.location.href = '/', 1000)
+  } catch { toast('Erro ao excluir cliente', false) }
+}
+
+async function updateAptStatus(aptId, status) {
+  try {
+    const r = await fetch(`${API}/api/appointments/${aptId}/status`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ status })
+    })
+    if (!r.ok) throw new Error()
+    const apt = appointments.find(a => a.id === aptId)
+    if (apt) apt.status = status
+    toast('Agendamento atualizado')
+    render()
+  } catch { toast('Erro ao atualizar agendamento', false) }
+}
+
+load()
+</script>
+</body>
+</html>

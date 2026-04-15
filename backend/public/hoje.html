@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laço — Hoje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
+.brand-dot svg{width:13px;height:13px;fill:white}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{padding:6px 12px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap;text-decoration:none}
+.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
+.btn-ghost:hover{background:#FAF7F5}
+
+.date-bar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.08);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.date-nav{display:flex;align-items:center;gap:12px}
+.date-nav-btn{width:30px;height:30px;border-radius:8px;background:none;border:0.5px solid rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
+.date-nav-btn:hover{background:#FAF7F5}
+.date-title{font-size:14px;font-weight:500;min-width:180px;text-align:center}
+.date-today-btn{padding:5px 12px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;background:none;cursor:pointer;color:#666}
+.date-today-btn:hover{background:#FAF7F5}
+.date-today-btn.active{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
+
+.page{max-width:900px;margin:0 auto;padding:16px 20px}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:white;border-radius:10px;border:0.5px solid rgba(0,0,0,0.07);padding:12px 14px}
+.kpi-label{font-size:11px;color:#888;margin-bottom:3px}
+.kpi-val{font-size:22px;font-weight:500}
+.kpi-val.purple{color:#B8657A}
+.kpi-val.green{color:#2E8C66}
+.kpi-val.amber{color:#9A6B10}
+.kpi-val.muted{color:#aaa}
+
+.main-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+
+/* Timeline */
+.timeline-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.07);overflow:hidden}
+.tl-head{padding:12px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
+.tl-title{font-size:13px;font-weight:500}
+.tl-filter{display:flex;gap:4px}
+.filter-pill{padding:4px 10px;font-size:11px;border:0.5px solid rgba(0,0,0,0.1);border-radius:20px;cursor:pointer;color:#666;background:white}
+.filter-pill.on{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
+
+.time-slots-wrap{padding:8px 0}
+.hour-row{display:flex;min-height:52px}
+.hour-label{width:52px;padding:6px 8px 0 16px;font-size:11px;color:#bbb;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
+.hour-col{flex:1;padding:2px 8px 2px 12px;border-left:0.5px solid rgba(0,0,0,0.06);position:relative}
+.hour-col.now{border-left-color:#B8657A}
+.now-line{position:absolute;left:0;right:0;top:50%;height:1.5px;background:#B8657A;opacity:0.4}
+
+.apt-block{background:white;border-radius:8px;border:0.5px solid rgba(0,0,0,0.08);border-left:3px solid #D4899A;padding:8px 10px;margin-bottom:4px;cursor:pointer;transition:box-shadow 0.15s}
+.apt-block:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.apt-block.confirmed{border-left-color:#5DCAA5}
+.apt-block.done{border-left-color:#ccc;opacity:0.65}
+.apt-block.cancelled{border-left-color:#F09595;opacity:0.55}
+.apt-time{font-size:11px;color:#888;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.apt-name{font-size:13px;font-weight:500}
+.apt-proc{font-size:11px;color:#888;margin-top:1px}
+.apt-badges{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.b-confirmed{background:#E0F4EE;color:#27500A}
+.b-pending{background:#FEF3E2;color:#633806}
+.b-done{background:#f0f0f0;color:#666}
+.b-cancelled{background:#FCEBEB;color:#A32D2D}
+.b-system{background:#FDEEF1;color:#8B3F52}
+.apt-empty{padding:16px;text-align:center;font-size:12px;color:#bbb}
+
+/* Sidebar */
+.sidebar{display:flex;flex-direction:column;gap:12px}
+
+.side-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.07);overflow:hidden}
+.side-head{padding:11px 14px;border-bottom:0.5px solid rgba(0,0,0,0.07)}
+.side-title{font-size:12px;font-weight:500;color:#888;letter-spacing:0.3px}
+
+/* Next up */
+.next-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
+.next-item:last-child{border:none}
+.next-time{font-size:12px;font-weight:500;color:#B8657A;width:40px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.next-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.next-info{flex:1;min-width:0}
+.next-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next-proc{font-size:10px;color:#888;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next-dur{font-size:10px;color:#aaa;flex-shrink:0}
+
+/* Quick actions */
+.qa-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.qa-item:last-child{border:none}
+.qa-item:hover{background:#FBF8F6}
+.qa-label{font-size:12px;color:#555}
+.qa-val{font-size:12px;font-weight:500}
+.qa-val.green{color:#2E8C66}
+.qa-val.amber{color:#9A6B10}
+
+/* Status select inline */
+.status-sel{padding:4px 8px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:6px;background:white;color:#111;cursor:pointer;outline:none;max-width:110px}
+
+/* Detail drawer */
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50}
+.drawer-overlay.on{display:block}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:360px;background:white;z-index:51;border-left:0.5px solid rgba(0,0,0,0.1);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.25s ease}
+.drawer.on{transform:translateX(0)}
+.drawer-head{padding:16px 18px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.drawer-title{font-size:14px;font-weight:500}
+.drawer-close{background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;padding:0 4px;line-height:1}
+.drawer-body{padding:18px;flex:1;overflow-y:auto}
+.info-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.info-row:last-child{border:none}
+.info-label{color:#666}
+.info-val{font-weight:500;text-align:right}
+.drawer-actions{padding:14px 18px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;gap:8px;flex-shrink:0}
+.da-btn{flex:1;padding:10px;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;text-align:center;border:none}
+.da-confirm{background:#B8657A;color:white}
+.da-done{background:#2E8C66;color:white}
+.da-cancel{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
+
+.loading{padding:40px;text-align:center;color:#aaa;font-size:13px}
+
+.av-0{background:#FDEEF1;color:#8B3F52}
+.av-1{background:#E0F4EE;color:#2E6647}
+.av-2{background:#FEF3E2;color:#9A6B10}
+.av-3{background:#FAECE7;color:#A04830}
+.av-4{background:#F1EFE8;color:#5F5E5A}
+.av-5{background:#EEF4FE;color:#0C447C}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#111;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:all 0.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:680px){
+  .main-grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
+    <span class="brand-name">Laço — Hoje</span>
+  </div>
+  <div class="topbar-right">
+    <a href="/" class="btn btn-ghost">← Dashboard</a>
+    <button class="btn btn-ghost" onclick="reload()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1 0 1.5-4"/><polyline points="2 2 2 6 6 6"/></svg>
+      Atualizar
+    </button>
+  </div>
+</div>
+
+<div class="date-bar">
+  <div class="date-nav">
+    <button class="date-nav-btn" onclick="changeDay(-1)">‹</button>
+    <div class="date-title" id="date-title">Carregando...</div>
+    <button class="date-nav-btn" onclick="changeDay(1)">›</button>
+  </div>
+  <button class="date-today-btn" id="today-btn" onclick="goToday()">Hoje</button>
+</div>
+
+<div class="page">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Total do dia</div><div class="kpi-val purple" id="k-total">—</div></div>
+    <div class="kpi"><div class="kpi-label">Confirmados</div><div class="kpi-val green" id="k-confirmed">—</div></div>
+    <div class="kpi"><div class="kpi-label">Pendentes</div><div class="kpi-val amber" id="k-pending">—</div></div>
+    <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-val muted" id="k-done">—</div></div>
+  </div>
+
+  <div class="main-grid">
+    <div class="timeline-card">
+      <div class="tl-head">
+        <span class="tl-title" id="tl-title">Agenda do dia</span>
+        <div class="tl-filter">
+          <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
+          <div class="filter-pill" onclick="setFilter('pending',this)">Pendentes</div>
+          <div class="filter-pill" onclick="setFilter('confirmed',this)">Confirmados</div>
+        </div>
+      </div>
+      <div class="time-slots-wrap" id="timeline">
+        <div class="loading">Carregando agenda...</div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="side-card">
+        <div class="side-head"><div class="side-title">PRÓXIMOS</div></div>
+        <div id="next-up"><div class="apt-empty">—</div></div>
+      </div>
+      <div class="side-card">
+        <div class="side-head"><div class="side-title">RESUMO</div></div>
+        <div id="summary-rows"><div class="apt-empty">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <span class="drawer-title" id="d-title">Agendamento</span>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="d-body"></div>
+  <div class="drawer-actions" id="d-actions"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+if (!sessionStorage.getItem('laco_auth') && !localStorage.getItem('laco_api_key')) {
+  window.location.href = '/login.html'
+}
+
+const API     = window.location.origin
+const API_KEY = localStorage.getItem('laco_api_key') || ''
+const SLUG    = localStorage.getItem('laco_slug') || 'bella-estetica'
+function h() { return { 'Content-Type':'application/json', 'x-api-key': API_KEY } }
+
+const HOURS = [8,9,10,11,12,13,14,15,16,17,18,19]
+const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
+const DAY_NAMES   = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
+const barColors   = ['#D4899A','#5DCAA5','#EF9F27','#378ADD','#D85A30']
+const avColors    = ['av-0','av-1','av-2','av-3','av-4','av-5']
+
+let currentDate = new Date()
+currentDate.setHours(0,0,0,0)
+let appointments = []
+let activeFilter = 'todos'
+let selectedApt  = null
+
+/* ---- DATE NAVIGATION ---- */
+function dateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
+function isToday(d) {
+  const t = new Date(); t.setHours(0,0,0,0)
+  return d.getTime() === t.getTime()
+}
+
+function updateDateTitle() {
+  const d = currentDate
+  const dayName = DAY_NAMES[d.getDay()]
+  const label   = `${dayName}, ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]} de ${d.getFullYear()}`
+  document.getElementById('date-title').textContent = label
+  document.getElementById('tl-title').textContent   = isToday(d) ? 'Agenda de hoje' : 'Agenda do dia'
+  const todayBtn = document.getElementById('today-btn')
+  todayBtn.classList.toggle('active', isToday(d))
+}
+
+function changeDay(dir) {
+  currentDate.setDate(currentDate.getDate() + dir)
+  updateDateTitle()
+  load()
+}
+
+function goToday() {
+  currentDate = new Date(); currentDate.setHours(0,0,0,0)
+  updateDateTitle()
+  load()
+}
+
+function reload() { load() }
+
+/* ---- LOAD ---- */
+async function load() {
+  document.getElementById('timeline').innerHTML = '<div class="loading">Carregando...</div>'
+  document.getElementById('next-up').innerHTML  = '<div class="apt-empty">—</div>'
+  try {
+    const ds = dateStr(currentDate)
+    const r  = await fetch(`${API}/api/appointments?date=${ds}`, { headers: h() })
+    appointments = r.ok ? await r.json() : []
+    // Filter by date client-side (backend returns all, filter here)
+    appointments = appointments.filter(a => {
+      const ad = new Date(a.scheduled_at)
+      return ad.getFullYear()  === currentDate.getFullYear() &&
+             ad.getMonth()     === currentDate.getMonth() &&
+             ad.getDate()      === currentDate.getDate()
+    })
+    render()
+  } catch {
+    document.getElementById('timeline').innerHTML = '<div class="loading">Erro ao carregar. Verifique o servidor.</div>'
+  }
+}
+
+/* ---- RENDER ---- */
+function render() {
+  const filtered = activeFilter === 'todos'
+    ? appointments
+    : appointments.filter(a => a.status === activeFilter)
+
+  updateKpis()
+  renderTimeline(filtered)
+  renderNextUp()
+  renderSummary()
+}
+
+function updateKpis() {
+  const total     = appointments.length
+  const confirmed = appointments.filter(a => a.status === 'confirmed').length
+  const pending   = appointments.filter(a => a.status === 'pending').length
+  const done      = appointments.filter(a => a.status === 'done').length
+  document.getElementById('k-total').textContent     = total
+  document.getElementById('k-confirmed').textContent = confirmed
+  document.getElementById('k-pending').textContent   = pending
+  document.getElementById('k-done').textContent      = done
+}
+
+function renderTimeline(apts) {
+  const tl = document.getElementById('timeline')
+  if (!apts.length) {
+    tl.innerHTML = `<div class="apt-empty" style="padding:32px">Nenhum agendamento${activeFilter !== 'todos' ? ' com este filtro' : ' para este dia'}.</div>`
+    return
+  }
+
+  const now = new Date()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+
+  const html = HOURS.map(h => {
+    const slotMins = h * 60
+    const isNowHour = isToday(currentDate) && now.getHours() === h
+    const aptsInSlot = apts.filter(a => new Date(a.scheduled_at).getHours() === h)
+
+    return `
+      <div class="hour-row">
+        <div class="hour-label">${String(h).padStart(2,'0')}:00</div>
+        <div class="hour-col${isNowHour ? ' now' : ''}">
+          ${isNowHour ? '<div class="now-line"></div>' : ''}
+          ${aptsInSlot.map(a => renderAptBlock(a)).join('')}
+        </div>
+      </div>`
+  }).join('')
+
+  tl.innerHTML = html
+}
+
+function renderAptBlock(a) {
+  const dt       = new Date(a.scheduled_at)
+  const time     = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+  const initials = a.lead_name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()
+  const color    = barColors[a.lead_name.charCodeAt(0) % barColors.length]
+  const statusBadge = {
+    pending:   '<span class="badge b-pending">Pendente</span>',
+    confirmed: '<span class="badge b-confirmed">Confirmado</span>',
+    done:      '<span class="badge b-done">Concluído</span>',
+    cancelled: '<span class="badge b-cancelled">Cancelado</span>',
+  }[a.status] || ''
+
+  return `
+    <div class="apt-block ${a.status}" onclick="openDrawer('${a.id}')" style="border-left-color:${color}">
+      <div class="apt-time">${time} · ${a.duration} min</div>
+      <div class="apt-name">${esc(a.lead_name)}</div>
+      <div class="apt-proc">${esc(a.procedure_name)}</div>
+      <div class="apt-badges">
+        ${statusBadge}
+        ${a.source === 'system' ? '<span class="badge b-system">via sistema</span>' : ''}
+      </div>
+    </div>`
+}
+
+function renderNextUp() {
+  const now  = new Date()
+  const next = appointments
+    .filter(a => a.status !== 'done' && a.status !== 'cancelled' && new Date(a.scheduled_at) >= now)
+    .sort((a,b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+    .slice(0, 5)
+
+  if (!next.length) {
+    document.getElementById('next-up').innerHTML = '<div class="apt-empty">Nenhum próximo</div>'
+    return
+  }
+
+  document.getElementById('next-up').innerHTML = next.map(a => {
+    const time     = new Date(a.scheduled_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+    const initials = a.lead_name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()
+    const avClass  = avColors[a.lead_name.charCodeAt(0) % 6]
+    return `
+      <div class="next-item" onclick="openDrawer('${a.id}')" style="cursor:pointer">
+        <span class="next-time">${time}</span>
+        <div class="next-av ${avClass}">${initials}</div>
+        <div class="next-info">
+          <div class="next-name">${esc(a.lead_name)}</div>
+          <div class="next-proc">${esc(a.procedure_name)}</div>
+        </div>
+        <span class="next-dur">${a.duration}m</span>
+      </div>`
+  }).join('')
+}
+
+function renderSummary() {
+  const procs = {}
+  appointments.forEach(a => {
+    if (!procs[a.procedure_name]) procs[a.procedure_name] = 0
+    procs[a.procedure_name]++
+  })
+  const total    = appointments.length
+  const pending  = appointments.filter(a => a.status === 'pending').length
+  const rows = [
+    { label: 'Total agendamentos', val: total, cls: 'purple' },
+    { label: 'Aguardando confirmação', val: pending, cls: pending > 0 ? 'amber' : 'green' },
+    ...Object.entries(procs).map(([k,v]) => ({ label: k, val: v, cls: '' }))
+  ]
+  document.getElementById('summary-rows').innerHTML = rows.map(r => `
+    <div class="qa-item">
+      <span class="qa-label">${esc(r.label)}</span>
+      <span class="qa-val ${r.cls}">${r.val}</span>
+    </div>`).join('')
+}
+
+/* ---- DRAWER ---- */
+function openDrawer(id) {
+  selectedApt = appointments.find(a => a.id === id)
+  if (!selectedApt) return
+  const a  = selectedApt
+  const dt = new Date(a.scheduled_at)
+
+  document.getElementById('d-title').textContent = a.lead_name
+  document.getElementById('d-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:500;margin-bottom:4px">${esc(a.procedure_name)}</div>
+      <div style="font-size:12px;color:#888">${dt.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})} às ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${a.duration} min</div>
+    </div>
+    <div style="background:#f5f4f0;border-radius:10px;padding:12px;margin-bottom:16px">
+      <div class="info-row"><span class="info-label">Cliente</span><span class="info-val">${esc(a.lead_name)}</span></div>
+      <div class="info-row"><span class="info-label">WhatsApp</span>
+        <a href="https://wa.me/55${(a.lead_phone||'').replace(/\D/g,'')}" target="_blank"
+           style="font-weight:500;color:#25D366">${esc(a.lead_phone||'—')}</a>
+      </div>
+      <div class="info-row"><span class="info-label">Origem</span><span class="info-val">${a.source === 'system' ? 'Portal de agendamento' : 'Manual'}</span></div>
+      <div class="info-row" style="border:none"><span class="info-label">Status atual</span>
+        <select class="status-sel" onchange="updateStatus(this.value)">
+          <option value="pending"   ${a.status==='pending'  ?'selected':''}>Pendente</option>
+          <option value="confirmed" ${a.status==='confirmed'?'selected':''}>Confirmado</option>
+          <option value="done"      ${a.status==='done'     ?'selected':''}>Concluído</option>
+          <option value="cancelled" ${a.status==='cancelled'?'selected':''}>Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <a href="/cliente.html?id=${a.lead_id}" style="font-size:12px;color:#B8657A;display:flex;align-items:center;gap:4px">
+      Ver perfil completo do cliente →
+    </a>`
+
+  const actionsMap = {
+    pending:   `<button class="da-btn da-confirm" onclick="quickStatus('confirmed')">Confirmar</button>
+                <button class="da-btn da-cancel"  onclick="quickStatus('cancelled')">Cancelar</button>`,
+    confirmed: `<button class="da-btn da-done"    onclick="quickStatus('done')">Marcar concluído</button>
+                <button class="da-btn da-cancel"  onclick="quickStatus('cancelled')">Cancelar</button>`,
+    done:      `<span style="font-size:12px;color:#888;padding:10px 0">Agendamento concluído</span>`,
+    cancelled: `<span style="font-size:12px;color:#888;padding:10px 0">Agendamento cancelado</span>`,
+  }
+  document.getElementById('d-actions').innerHTML = actionsMap[a.status] || ''
+
+  document.getElementById('overlay').classList.add('on')
+  document.getElementById('drawer').classList.add('on')
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('on')
+  document.getElementById('drawer').classList.remove('on')
+  selectedApt = null
+}
+
+async function updateStatus(status) {
+  if (!selectedApt) return
+  await patchStatus(selectedApt.id, status)
+}
+
+async function quickStatus(status) {
+  if (!selectedApt) return
+  await patchStatus(selectedApt.id, status)
+  closeDrawer()
+}
+
+async function patchStatus(id, status) {
+  try {
+    const r = await fetch(`${API}/api/appointments/${id}/status`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ status })
+    })
+    if (!r.ok) throw new Error()
+    const apt = appointments.find(a => a.id === id)
+    if (apt) apt.status = status
+    toast(`Status atualizado: ${({pending:'Pendente',confirmed:'Confirmado',done:'Concluído',cancelled:'Cancelado'})[status]||status}`)
+    render()
+  } catch { toast('Erro ao atualizar', false) }
+}
+
+function setFilter(f, el) {
+  activeFilter = f
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'))
+  el.classList.add('on')
+  render()
+}
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.style.background = ok ? '#111' : '#A32D2D'
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 2200)
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+// Auto-refresh a cada 2 minutos
+setInterval(load, 120000)
+
+updateDateTitle()
+load()
+</script>
+</body>
+</html>
