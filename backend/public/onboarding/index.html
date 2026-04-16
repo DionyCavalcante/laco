@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laco - Onboarding</title>
+  <style>
+    body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f4f7f5;color:#17231f}main{max-width:720px;margin:auto;padding:24px 16px}
+    .bar{height:10px;background:#d9e1dc;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;background:#1e6f5c;width:25%}
+    section{background:white;border:1px solid #d8ded9;border-radius:8px;padding:22px;margin-top:18px}label{display:block;margin:12px 0 5px;font-weight:700}
+    input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #bdc8c1;border-radius:6px}button{padding:11px 14px;border:0;border-radius:6px;background:#1e6f5c;color:#fff;font-weight:800;margin-top:16px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ativacao</h1>
+    <div class="bar"><span id="progress"></span></div>
+    <section id="app"></section>
+  </main>
+  <script>
+    const token = localStorage.getItem('token')
+    const headers = { 'Content-Type':'application/json', Authorization:'Bearer ' + token }
+    let state = { step: 1, clinic: {} }
+    async function load(){
+      const res = await fetch('/api/onboarding' + location.search, { headers })
+      if (res.status === 401) location.href = '/login'
+      const data = await res.json()
+      state.clinic = data.clinic
+      state.step = Math.min(4, Math.max(1, (data.clinic.onboarding_step || 0) + 1))
+      render()
+    }
+    async function saveStep(step){ await fetch('/api/onboarding/step' + location.search,{method:'PATCH',headers,body:JSON.stringify({step})}) }
+    function render(){
+      progress.style.width = (state.step * 25) + '%'
+      if(state.step===1) app.innerHTML = `<h2>1/4 Dados da clinica</h2><label>Nome</label><input id="name" value="${state.clinic.name||''}"><label>WhatsApp</label><input id="phone" value="${state.clinic.phone||''}"><button onclick="step1()">Continuar</button>`
+      if(state.step===2) app.innerHTML = `<h2>2/4 Primeiro procedimento</h2><label>Nome</label><input id="pname"><div class="row"><p><label>Preco desconto</label><input id="price" type="number"></p><p><label>Duracao min</label><input id="duration" type="number" value="60"></p></div><button onclick="step2()">Continuar</button>`
+      if(state.step===3) app.innerHTML = `<h2>3/4 Horarios</h2><p>Segunda a sexta, 09:00-18:00.</p><button onclick="step3()">Continuar</button>`
+      if(state.step===4){ const link=location.origin+'/'+state.clinic.slug+'/agendar'; app.innerHTML = `<h2>4/4 Portal pronto</h2><p><strong>${link}</strong></p><button onclick="navigator.clipboard.writeText('${link}')">Copiar</button> <button onclick="location.href='https://wa.me/?text='+encodeURIComponent('Ola! Ja tenho meu portal de agendamento online: ${link}')">WhatsApp</button> <button onclick="location.href='/painel'">Acessar painel</button>`}
+    }
+    async function step1(){ if(!name.value.trim()) return; await fetch('/api/settings/clinic'+location.search,{method:'PATCH',headers,body:JSON.stringify({name:name.value,phone:phone.value})}); await saveStep(1); state.step=2; render() }
+    async function step2(){ if(!pname.value.trim()||!price.value||!duration.value) return; await fetch('/api/procedures'+location.search,{method:'POST',headers,body:JSON.stringify({name:pname.value,price:Number(price.value),duration:Number(duration.value)})}); await saveStep(2); state.step=3; render() }
+    async function step3(){ const days=[0,1,2,3,4,5,6].map(d=>({day_of_week:d,open:d>0&&d<6,start_time:'09:00',end_time:'18:00'})); await fetch('/api/hours'+location.search,{method:'POST',headers,body:JSON.stringify(days)}); await saveStep(3); await fetch('/api/onboarding/complete'+location.search,{method:'POST',headers}); state.step=4; render() }
+    load()
+  </script>
+</body>
+</html>

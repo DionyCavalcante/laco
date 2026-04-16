@@ -9,6 +9,10 @@ router.get('/:slug', async (req, res) => {
       'SELECT * FROM clinics WHERE slug = $1', [req.params.slug]
     )
     if (!clinic) return res.status(404).json({ error: 'Clínica não encontrada' })
+    if (process.env.ENFORCE_ONBOARDING_GATE === 'true' && !clinic.onboarding_completed_at) {
+      return res.status(423).json({ error: 'Portal ainda nao ativado' })
+    }
+    if (clinic.status === 'suspended') return res.status(402).json({ error: 'Portal suspenso' })
 
     const { rows: procedures } = await db.query(`
       SELECT id, name, duration, price, price_old, payment_note, video_url,

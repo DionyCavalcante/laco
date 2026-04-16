@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laco - Superadmin</title>
+  <style>
+    body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f5f6f4;color:#17231f}main{max-width:1100px;margin:auto;padding:24px 16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.card,section{background:white;border:1px solid #d8ded9;border-radius:8px;padding:16px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}td,th{padding:10px;border-bottom:1px solid #e5e8e5;text-align:left}input,select,button{padding:10px;border-radius:6px;border:1px solid #bdc8c1}button{background:#1e6f5c;color:white;border:0;font-weight:800}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Superadmin</h1>
+    <div class="grid" id="metrics"></div>
+    <section>
+      <h2>Clinicas</h2>
+      <p><input id="name" placeholder="Nome da clinica"> <input id="email" placeholder="Email admin"> <input id="pass" placeholder="Senha admin"> <button onclick="createClinic()">Criar</button></p>
+      <table><thead><tr><th>Nome</th><th>Slug</th><th>Status</th><th>Trial</th><th>Onboarding</th><th>Acoes</th></tr></thead><tbody id="rows"></tbody></table>
+    </section>
+  </main>
+  <script>
+    const token=localStorage.getItem('token'); const headers={Authorization:'Bearer '+token,'Content-Type':'application/json'}
+    async function api(path, opts={}){ const r=await fetch('/api/superadmin'+path,{...opts,headers:{...headers,...opts.headers}}); if(r.status===401||r.status===403) location.href='/login'; return r.json() }
+    async function load(){ const m=await api('/dashboard'); metrics.innerHTML=Object.entries(m).map(([k,v])=>`<div class="card"><strong>${v}</strong><br>${k}</div>`).join(''); const cs=await api('/clinics'); rows.innerHTML=cs.map(c=>`<tr><td>${c.name}</td><td>${c.slug}</td><td>${c.status}</td><td>${c.trial_days_left??'-'}</td><td>${c.onboarding_step||0}/4</td><td><button onclick="impersonate('${c.id}')">Impersonar</button> <button onclick="statusClinic('${c.id}','suspended')">Suspender</button> <button onclick="statusClinic('${c.id}','active')">Ativar</button></td></tr>`).join('') }
+    async function createClinic(){ await api('/clinics',{method:'POST',body:JSON.stringify({name:name.value,admin_email:email.value,admin_password:pass.value})}); load() }
+    async function statusClinic(id,status){ await api('/clinics/'+id+'/status',{method:'PATCH',body:JSON.stringify({status})}); load() }
+    async function impersonate(id){ const r=await api('/impersonate/'+id,{method:'POST'}); localStorage.setItem('token',r.token); sessionStorage.setItem('impersonationBanner',r.banner); location.href='/painel' }
+    load()
+  </script>
+</body>
+</html>

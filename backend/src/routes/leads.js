@@ -1,11 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
+const { getEffectiveClinicId } = require('../lib/tenant')
 
 // GET /api/leads — lista todos com filtros opcionais
 router.get('/', async (req, res) => {
   try {
     const { status, search, date_from, date_to } = req.query
+    const clinicId = await getEffectiveClinicId(req)
     let q = `
       SELECT
         l.*,
@@ -21,9 +23,9 @@ router.get('/', async (req, res) => {
         WHERE lead_id = l.id
         ORDER BY created_at DESC LIMIT 1
       ) a ON true
-      WHERE l.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+      WHERE l.clinic_id = $1
     `
-    const params = [process.env.CLINIC_SLUG || 'bella-estetica']
+    const params = [clinicId]
 
     if (status && status !== 'todos') {
       params.push(status)
@@ -54,6 +56,7 @@ router.get('/', async (req, res) => {
 // GET /api/leads/stats — contadores para os cards do topo
 router.get('/stats', async (req, res) => {
   try {
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       SELECT
         COUNT(*)                                           AS total,
@@ -70,8 +73,8 @@ router.get('/stats', async (req, res) => {
       FROM leads l
       LEFT JOIN procedures p ON l.procedure_viewed = p.id
       LEFT JOIN appointments a ON a.lead_id = l.id AND a.status = 'done'
-      WHERE l.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
-    `, [process.env.CLINIC_SLUG || 'bella-estetica'])
+      WHERE l.clinic_id = $1
+    `, [clinicId])
     res.json(rows[0])
   } catch (err) {
     console.error('stats error:', err.message)
@@ -85,10 +88,10 @@ router.post('/', async (req, res) => {
     const { name, phone, source = 'manual', status = 'link_sent' } = req.body
     if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' })
 
-    const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       INSERT INTO leads (clinic_id, name, phone, source, status, last_interaction_at)
-      VALUES ((SELECT id FROM clinics WHERE slug = $1), $2, $3, $4, $5, NOW())
+      VALUES ($1, $2, $3, $4, $5, NOW())
       ON CONFLICT (clinic_id, phone)
       DO UPDATE SET
         name = EXCLUDED.name,
@@ -96,7 +99,7 @@ router.post('/', async (req, res) => {
         last_interaction_at = NOW(),
         updated_at = NOW()
       RETURNING *
-    `, [clinicSlug, name, phone, source, status])
+    `, [clinicId, name, phone, source, status])
     res.status(201).json(rows[0])
   } catch (err) {
     console.error(err)
@@ -108,7 +111,7 @@ router.post('/', async (req, res) => {
 router.patch('/phone/:phone', async (req, res) => {
   try {
     const { name } = req.body
-    const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       UPDATE leads
       SET
@@ -116,9 +119,9 @@ router.patch('/phone/:phone', async (req, res) => {
         last_interaction_at = NOW(),
         updated_at = NOW()
       WHERE phone = $2
-        AND clinic_id = (SELECT id FROM clinics WHERE slug = $3)
+        AND clinic_id = $3
       RETURNING *
-    `, [name || null, req.params.phone, clinicSlug])
+    `, [name || null, req.params.phone, clinicId])
 
     if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
     res.json(rows[0])
@@ -132,6 +135,7 @@ router.patch('/phone/:phone', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status, reject_reason, procedure_viewed } = req.body
+    const clinicId = await getEffectiveClinicId(req)
     const allowed = ['new', 'link_sent', 'scheduled', 'rejected']
     if (!allowed.includes(status)) return res.status(400).json({ error: 'Status inválido' })
 
@@ -141,9 +145,9 @@ router.patch('/:id/status', async (req, res) => {
           reject_reason = $2,
           procedure_viewed = $3,
           updated_at = NOW()
-      WHERE id = $4
+      WHERE id = $4 AND clinic_id = $5
       RETURNING *
-    `, [status, reject_reason || null, procedure_viewed || null, req.params.id])
+    `, [status, reject_reason || null, procedure_viewed || null, req.params.id, clinicId])
 
     if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
     res.json(rows[0])
@@ -156,12 +160,13 @@ router.patch('/:id/status', async (req, res) => {
 // GET /api/leads/:id — detalhe de um lead
 router.get('/:id', async (req, res) => {
   try {
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       SELECT l.*, p.name AS procedure_name
       FROM leads l
       LEFT JOIN procedures p ON l.procedure_viewed = p.id
-      WHERE l.id = $1
-    `, [req.params.id])
+      WHERE l.id = $1 AND l.clinic_id = $2
+    `, [req.params.id, clinicId])
     if (!rows.length) return res.status(404).json({ error: 'Lead não encontrado' })
     res.json(rows[0])
   } catch (err) {
@@ -172,8 +177,9 @@ router.get('/:id', async (req, res) => {
 // DELETE /api/leads/:id
 router.delete('/:id', async (req, res) => {
   try {
-    await db.query('DELETE FROM appointments WHERE lead_id = $1', [req.params.id])
-    await db.query('DELETE FROM leads WHERE id = $1', [req.params.id])
+    const clinicId = await getEffectiveClinicId(req)
+    await db.query('DELETE FROM appointments WHERE lead_id = $1 AND clinic_id = $2', [req.params.id, clinicId])
+    await db.query('DELETE FROM leads WHERE id = $1 AND clinic_id = $2', [req.params.id, clinicId])
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: 'Erro ao excluir cliente' })

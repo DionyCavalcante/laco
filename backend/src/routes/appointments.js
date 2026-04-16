@@ -1,11 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
+const { getEffectiveClinicId } = require('../lib/tenant')
 
 // GET /api/appointments — lista agendamentos
 router.get('/', async (req, res) => {
   try {
     const { status } = req.query
+    const clinicId = await getEffectiveClinicId(req)
     let q = `
       SELECT
         a.*,
@@ -17,9 +19,9 @@ router.get('/', async (req, res) => {
       FROM appointments a
       JOIN leads l      ON a.lead_id      = l.id
       JOIN procedures p ON a.procedure_id = p.id
-      WHERE a.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+      WHERE a.clinic_id = $1
     `
-    const params = [process.env.CLINIC_SLUG || 'bella-estetica']
+    const params = [clinicId]
 
     if (status) {
       params.push(status)
@@ -53,6 +55,7 @@ router.get('/', async (req, res) => {
 // GET /api/appointments/stats
 router.get('/stats', async (req, res) => {
   try {
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       SELECT
         COUNT(*)                                                AS total,
@@ -66,8 +69,8 @@ router.get('/stats', async (req, res) => {
         COALESCE(SUM(p.price) FILTER (WHERE a.status = 'cancelled'), 0)               AS valor_perdido
       FROM appointments a
       JOIN procedures p ON a.procedure_id = p.id
-      WHERE a.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
-    `, [process.env.CLINIC_SLUG || 'bella-estetica'])
+      WHERE a.clinic_id = $1
+    `, [clinicId])
     res.json(rows[0])
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar stats' })
@@ -79,6 +82,7 @@ router.get('/stats', async (req, res) => {
 router.get('/slots', async (req, res) => {
   try {
     const { date, procedure_id } = req.query
+    const clinicId = await getEffectiveClinicId(req)
     if (!date) return res.status(400).json({ error: 'Data obrigatória' })
 
     const d = new Date(date)
@@ -87,16 +91,16 @@ router.get('/slots', async (req, res) => {
     // Horário de funcionamento desse dia
     const { rows: [hours] } = await db.query(`
       SELECT * FROM business_hours
-      WHERE clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+      WHERE clinic_id = $1
         AND day_of_week = $2
-    `, [process.env.CLINIC_SLUG || 'bella-estetica', dayOfWeek])
+    `, [clinicId, dayOfWeek])
 
     if (!hours || !hours.open) return res.json({ slots: [], reason: 'closed' })
 
     // Duração do procedimento
     let duration = 60
     if (procedure_id) {
-      const { rows: [proc] } = await db.query('SELECT duration FROM procedures WHERE id = $1', [procedure_id])
+      const { rows: [proc] } = await db.query('SELECT duration FROM procedures WHERE id = $1 AND clinic_id = $2', [procedure_id, clinicId])
       if (proc) duration = proc.duration
     }
 
@@ -105,10 +109,10 @@ router.get('/slots', async (req, res) => {
       SELECT a.scheduled_at, p.duration
       FROM appointments a
       JOIN procedures p ON a.procedure_id = p.id
-      WHERE a.clinic_id = (SELECT id FROM clinics WHERE slug = $1)
+      WHERE a.clinic_id = $1
         AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $2
         AND a.status != 'cancelled'
-    `, [process.env.CLINIC_SLUG || 'bella-estetica', date])
+    `, [clinicId, date])
 
     // Gera slots de 30 em 30 min dentro do horário
     const slots = []
@@ -148,11 +152,12 @@ router.patch('/:id/reschedule', async (req, res) => {
   const { pool } = require('../db')
   const client = await pool.connect()
   try {
+    const clinicId = await getEffectiveClinicId(req)
     await client.query('BEGIN')
 
     const { rows: [orig] } = await client.query(
-      'SELECT * FROM appointments WHERE id = $1',
-      [req.params.id]
+      'SELECT * FROM appointments WHERE id = $1 AND clinic_id = $2',
+      [req.params.id, clinicId]
     )
     console.log(`[reschedule] id=${req.params.id} found=${!!orig} status=${orig?.status}`)
     if (!orig) {
@@ -187,13 +192,14 @@ router.patch('/:id/reschedule', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body
+    const clinicId = await getEffectiveClinicId(req)
     const allowed = ['pending', 'confirmed', 'done', 'cancelled']
     if (!allowed.includes(status)) return res.status(400).json({ error: 'Status inválido' })
 
     const { rows } = await db.query(`
       UPDATE appointments SET status = $1, updated_at = NOW()
-      WHERE id = $2 RETURNING *
-    `, [status, req.params.id])
+      WHERE id = $2 AND clinic_id = $3 RETURNING *
+    `, [status, req.params.id, clinicId])
 
     if (!rows.length) return res.status(404).json({ error: 'Agendamento não encontrado' })
     res.json(rows[0])

@@ -1,17 +1,17 @@
-# EPIC 2 — Auth Real (JWT + Roles)
+﻿# EPIC 2 â€” Auth Real (JWT + Roles)
 
-**Status:** Draft  
-**Prioridade:** P0 — Bloqueante para EPIC 3, 5, 6  
+**Status:** Ready for Review  
+**Prioridade:** P0 â€” Bloqueante para EPIC 3, 5, 6  
 **Owner:** @dev  
 **Estimativa:** 1 semana
 
 ## Objetivo
 
-Substituir o `x-api-key` estático por autenticação real com email + senha + JWT. Criar a tabela de usuários com roles (`superadmin`, `admin`).
+Substituir o `x-api-key` estÃ¡tico por autenticaÃ§Ã£o real com email + senha + JWT. Criar a tabela de usuÃ¡rios com roles (`superadmin`, `admin`).
 
 ## Contexto
 
-Auth atual: `x-api-key` salvo em `localStorage` — mesma chave para todos. Sem distinção de usuários, sem roles, sem como ter superadmin separado do admin da clínica.
+Auth atual: `x-api-key` salvo em `localStorage` â€” mesma chave para todos. Sem distinÃ§Ã£o de usuÃ¡rios, sem roles, sem como ter superadmin separado do admin da clÃ­nica.
 
 ## Schema
 
@@ -31,10 +31,10 @@ CREATE TABLE users (
 ## Fluxo de auth
 
 ```
-POST /api/auth/login   { email, password } → { token, user }
-POST /api/auth/refresh { refreshToken }    → { token }
-POST /api/auth/logout                      → 200 OK
-GET  /api/auth/me                          → { user }
+POST /api/auth/login   { email, password } â†’ { token, user }
+POST /api/auth/refresh { refreshToken }    â†’ { token }
+POST /api/auth/logout                      â†’ 200 OK
+GET  /api/auth/me                          â†’ { user }
 ```
 
 JWT payload:
@@ -44,34 +44,47 @@ JWT payload:
 
 ## Acceptance Criteria
 
-- [ ] AC1: `POST /api/auth/login` valida email/senha, retorna JWT (1h) + refresh token (30d)
-- [ ] AC2: Middleware `requireAuth` aceita `Authorization: Bearer <token>` (mantém `x-api-key` como fallback por 1 sprint)
-- [ ] AC3: Superadmin: `clinic_id = null`, `role = superadmin` — acesso irrestrito
-- [ ] AC4: Admin: `clinic_id = <id>`, `role = admin` — acesso somente à própria clínica
-- [ ] AC5: Senha armazenada com bcrypt (rounds: 12)
-- [ ] AC6: Refresh token rotacionado a cada uso (invalidar o anterior)
-- [ ] AC7: `POST /api/auth/logout` invalida refresh token no servidor
-- [ ] AC8: Seed cria usuário superadmin via `SUPERADMIN_EMAIL` + `SUPERADMIN_PASSWORD` env vars
-- [ ] AC9: Rate limiting em `/api/auth/login` (máx 10 tentativas/min por IP)
-- [ ] AC10: Páginas do CRM redirecionam para `/login` se token inválido/expirado
+- [x] AC1: `POST /api/auth/login` valida email/senha, retorna JWT (1h) + refresh token (30d)
+- [x] AC2: Middleware `requireAuth` aceita `Authorization: Bearer <token>` (mantÃ©m `x-api-key` como fallback por 1 sprint)
+- [x] AC3: Superadmin: `clinic_id = null`, `role = superadmin` â€” acesso irrestrito
+- [x] AC4: Admin: `clinic_id = <id>`, `role = admin` â€” acesso somente Ã  prÃ³pria clÃ­nica
+- [x] AC5: Senha armazenada com bcrypt (rounds: 12)
+- [x] AC6: Refresh token rotacionado a cada uso (invalidar o anterior)
+- [x] AC7: `POST /api/auth/logout` invalida refresh token no servidor
+- [x] AC8: Seed cria usuÃ¡rio superadmin via `SUPERADMIN_EMAIL` + `SUPERADMIN_PASSWORD` env vars
+- [x] AC9: Rate limiting em `/api/auth/login` (mÃ¡x 10 tentativas/min por IP)
+- [x] AC10: PÃ¡ginas do CRM redirecionam para `/login` se token invÃ¡lido/expirado
 
 ## Arquivos impactados
 
-- `backend/src/middleware/auth.js` — estender para JWT
-- `backend/src/routes/auth.js` — novo arquivo
-- `backend/src/db/migrate.js` — adicionar tabela users + seed superadmin
-- `backend/src/index.js` — registrar rota `/api/auth`
-- `backend/public/login.html` — trocar API key por email/senha
-- `backend/public/config/index.html` — remover `promptApiKey()`
+- `backend/src/middleware/auth.js` â€” estender para JWT
+- `backend/src/routes/auth.js` â€” novo arquivo
+- `backend/src/db/migrate.js` â€” adicionar tabela users + seed superadmin
+- `backend/src/index.js` â€” registrar rota `/api/auth`
+- `backend/public/login.html` â€” trocar API key por email/senha
+- `backend/public/config/index.html` â€” remover `promptApiKey()`
 
-## Dependências
+## DependÃªncias
 
 - **Bloqueado por:** EPIC 1 (clinicId no JWT)
-- **Bloqueia:** EPIC 3 (superadmin precisa de auth), EPIC 5 (billing por usuário), EPIC 6 (signup)
+- **Bloqueia:** EPIC 3 (superadmin precisa de auth), EPIC 5 (billing por usuÃ¡rio), EPIC 6 (signup)
 
-## Notas técnicas
+## Notas tÃ©cnicas
 
-- Biblioteca JWT: `jsonwebtoken` (já comum no ecossistema Node)
-- Biblioteca bcrypt: `bcryptjs` (sem dependência nativa — melhor para Railway)
-- Refresh tokens armazenados na tabela `refresh_tokens` (não em cookie — mobile friendly)
+- Biblioteca JWT: `jsonwebtoken` (jÃ¡ comum no ecossistema Node)
+- Biblioteca bcrypt: `bcryptjs` (sem dependÃªncia nativa â€” melhor para Railway)
+- Refresh tokens armazenados na tabela `refresh_tokens` (nÃ£o em cookie â€” mobile friendly)
 - `SUPERADMIN_EMAIL` e `SUPERADMIN_PASSWORD` como env vars no Railway
+
+## Dev Agent Record
+
+### File List
+
+- `backend/package.json`
+- `backend/package-lock.json`
+- `backend/src/middleware/auth.js`
+- `backend/src/routes/auth.js`
+- `backend/src/db/migrate.js`
+- `backend/src/index.js`
+- `backend/public/login.html`
+- `backend/public/config/index.html`

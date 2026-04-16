@@ -49,7 +49,8 @@ router.post('/evolution', async (req, res) => {
     const phone = from.replace('@s.whatsapp.net', '').replace(/\D/g, '')
     const name = pushName || 'Lead WhatsApp'
 
-    const clinicSlug = process.env.CLINIC_SLUG || 'bella-estetica'
+    const clinicSlug = payload.clinic_slug || payload.instance?.clinic_slug || process.env.WEBHOOK_DEFAULT_CLINIC_SLUG || process.env.CLINIC_SLUG
+    if (!clinicSlug) return res.json({ ok: true, action: 'missing_clinic_slug' })
     const { rows: [clinic] } = await db.query(
       'SELECT id FROM clinics WHERE slug=$1', [clinicSlug]
     )

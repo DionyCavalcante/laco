@@ -5,20 +5,30 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "start:local": "node -r dotenv/config src/index.js dotenv_config_path=.env.local",
     "dev": "nodemon src/index.js",
+    "dev:local": "nodemon -r dotenv/config src/index.js dotenv_config_path=.env.local",
     "migrate": "node src/db/migrate.js",
+    "migrate:local": "node -r dotenv/config src/db/migrate.js dotenv_config_path=.env.local",
+    "smoke": "node scripts/smoke.js",
+    "smoke:local": "node scripts/smoke.js --env=.env.local",
+    "smoke:prod": "node scripts/smoke.js",
+    "predeploy:check": "node scripts/predeploy-check.js",
     "backup": "node scripts/backup.js",
     "restore": "node scripts/restore.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
     "pg": "^8.11.5",
     "sharp": "^0.34.5",
+    "stripe": "^22.0.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

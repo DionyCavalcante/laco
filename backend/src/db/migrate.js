@@ -1,4 +1,5 @@
 require('dotenv').config()
+const bcrypt = require('bcryptjs')
 const { pool } = require('./index')
 
 const schema = `
@@ -81,6 +82,13 @@ ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique;
 ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone);
 
 ALTER TABLE clinics ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'trial';
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'standard';
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS onboarding_step INTEGER DEFAULT 0;
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMPTZ;
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 
 -- Fotos antes/depois dos procedimentos
 CREATE INDEX IF NOT EXISTS idx_photos_proc ON procedure_photos(procedure_id);
@@ -101,6 +109,46 @@ CREATE TABLE IF NOT EXISTS webhook_log (
   payload    JSONB NOT NULL,
   processed  BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  clinic_id   UUID REFERENCES clinics(id) ON DELETE CASCADE,
+  email       TEXT UNIQUE NOT NULL,
+  password    TEXT NOT NULL,
+  role        TEXT DEFAULT 'admin',
+  active      BOOLEAN DEFAULT true,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  last_login  TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE CASCADE,
+  token_hash  TEXT UNIQUE NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  revoked_at  TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id    UUID REFERENCES users(id),
+  action      TEXT NOT NULL,
+  target_type TEXT,
+  target_id   UUID,
+  meta        JSONB,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS stripe_events (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id    TEXT UNIQUE NOT NULL,
+  type        TEXT NOT NULL,
+  clinic_id   UUID REFERENCES clinics(id),
+  payload     JSONB,
+  processed   BOOLEAN DEFAULT false,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Índices
@@ -133,6 +181,13 @@ async function migrate() {
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_2_desc TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_title TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_3_desc TEXT`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'trial'`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'standard'`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS onboarding_step INTEGER DEFAULT 0`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMPTZ`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT`,
       // Suporte a imagens de carrossel na tabela procedure_photos
       `ALTER TABLE procedure_photos DROP CONSTRAINT IF EXISTS procedure_photos_side_check`,
       `ALTER TABLE procedure_photos ADD CONSTRAINT procedure_photos_side_check CHECK (side IN ('before','after','carousel'))`,
@@ -168,6 +223,18 @@ async function migrate() {
           ON CONFLICT (clinic_id, day_of_week) DO NOTHING
         `, [clinic.id, dow, open, start, end])
       }
+    }
+
+    if (process.env.SUPERADMIN_EMAIL && process.env.SUPERADMIN_PASSWORD) {
+      const passwordHash = await bcrypt.hash(process.env.SUPERADMIN_PASSWORD, 12)
+      await client.query(`
+        INSERT INTO users (clinic_id, email, password, role)
+        VALUES (NULL, LOWER($1), $2, 'superadmin')
+        ON CONFLICT (email) DO UPDATE SET
+          password = EXCLUDED.password,
+          role = 'superadmin',
+          active = true
+      `, [process.env.SUPERADMIN_EMAIL, passwordHash])
     }
 
     console.log('✅ Migrations concluídas com sucesso')

@@ -2,7 +2,10 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const sharp = require('sharp')
+const fs = require('fs/promises')
+const path = require('path')
 const db = require('../db')
+const { getEffectiveClinicId } = require('../lib/tenant')
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -22,23 +25,36 @@ router.post('/procedure/:id/photos', upload.fields([
 ]), async (req, res) => {
   try {
     const procId = req.params.id
+    const clinicId = await getEffectiveClinicId(req)
+    const { rows: [procedure] } = await db.query(
+      'SELECT id FROM procedures WHERE id = $1 AND clinic_id = $2',
+      [procId, clinicId]
+    )
+    if (!procedure) return res.status(404).json({ error: 'Procedimento nao encontrado' })
+
     const saved = { before: [], after: [], carousel: [] }
+    const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
+    const clinicDir = path.join(uploadDir, String(clinicId), 'procedures', String(procId))
+    await fs.mkdir(clinicDir, { recursive: true })
 
     for (const side of ['before', 'after', 'carousel']) {
       const files = req.files?.[side] || []
-      for (const file of files) {
+      for (const [idx, file] of files.entries()) {
         const buffer = await sharp(file.buffer)
           .resize({ width: 900, withoutEnlargement: true })
           .webp({ quality: 82 })
           .toBuffer()
 
-        const dataUri = `data:image/webp;base64,${buffer.toString('base64')}`
-        saved[side].push(dataUri)
+        const filename = `${side}-${Date.now()}-${idx}.webp`
+        const filePath = path.join(clinicDir, filename)
+        await fs.writeFile(filePath, buffer)
+        const url = `/uploads/${clinicId}/procedures/${procId}/${filename}`
+        saved[side].push(url)
 
         await db.query(`
           INSERT INTO procedure_photos (procedure_id, side, url)
           VALUES ($1, $2, $3)
-        `, [procId, side, dataUri])
+        `, [procId, side, url])
       }
     }
 
@@ -66,8 +82,12 @@ router.get('/procedure/:id/photos', async (req, res) => {
 // DELETE /api/upload/photo/:photoId
 router.delete('/photo/:photoId', async (req, res) => {
   try {
+    const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(
-      'SELECT id FROM procedure_photos WHERE id = $1', [req.params.photoId]
+      `SELECT pp.id FROM procedure_photos pp
+       JOIN procedures p ON p.id = pp.procedure_id
+       WHERE pp.id = $1 AND p.clinic_id = $2`,
+      [req.params.photoId, clinicId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
 

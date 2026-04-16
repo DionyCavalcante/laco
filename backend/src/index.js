@@ -12,9 +12,13 @@ app.use(helmet({ contentSecurityPolicy: false }))
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'x-api-key']
+  allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization']
 }))
-app.use(express.json())
+app.use(express.json({
+  verify: (req, res, buf) => {
+    if (req.originalUrl === '/api/billing/stripe/webhook') req.rawBody = buf
+  }
+}))
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 
 // Garante constraints críticas no banco (idempotente)
@@ -28,6 +32,7 @@ db.query(`
 app.get('/health', (req, res) => res.json({ ok: true, ts: new Date() }))
 
 // Auth em todas as rotas /api (exceto portal e webhook)
+app.use('/api/auth', require('./routes/auth'))
 app.use('/api', requireAuth)
 
 // Rotas
@@ -38,21 +43,32 @@ app.use('/api/portal',       require('./routes/portal'))
 app.use('/api/hours',        require('./routes/hours'))
 app.use('/api/upload',       require('./routes/upload'))
 app.use('/api/settings',     require('./routes/settings'))
+app.use('/api/superadmin',   require('./routes/superadmin'))
+app.use('/api/onboarding',   require('./routes/onboarding'))
+app.use('/api/billing',      require('./routes/billing'))
 app.use('/webhook',          require('./routes/webhook'))
 
 // Serve arquivos de upload (fotos antes/depois)
 const path = require('path')
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')
 app.use('/uploads', express.static(UPLOAD_DIR))
+const pub = path.join(__dirname, '../public')
+app.get('/login',      (req, res) => res.sendFile(path.join(pub, 'login.html')))
+app.get('/cadastro',   (req, res) => res.sendFile(path.join(pub, 'cadastro/index.html')))
+app.get('/checkout',   (req, res) => res.sendFile(path.join(pub, 'checkout/index.html')))
+app.get('/onboarding', (req, res) => res.sendFile(path.join(pub, 'onboarding/index.html')))
+app.get('/superadmin', (req, res) => res.sendFile(path.join(pub, 'superadmin/index.html')))
 
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
-  const pub = path.join(__dirname, '../public')
-
   // CRM — rotas explícitas ANTES do static (evita index.html ser servido para /)
   app.get('/',          (req, res) => res.sendFile(path.join(pub, 'painel.html')))
   app.get('/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
   app.get('/login',     (req, res) => res.sendFile(path.join(pub, 'login.html')))
+  app.get('/cadastro',  (req, res) => res.sendFile(path.join(pub, 'cadastro/index.html')))
+  app.get('/checkout',  (req, res) => res.sendFile(path.join(pub, 'checkout/index.html')))
+  app.get('/onboarding',(req, res) => res.sendFile(path.join(pub, 'onboarding/index.html')))
+  app.get('/superadmin',(req, res) => res.sendFile(path.join(pub, 'superadmin/index.html')))
   app.get('/clientes',  (req, res) => res.sendFile(path.join(pub, 'cliente.html')))
   app.get('/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
   app.get('/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
