@@ -584,18 +584,35 @@ async function saveHours(){
 }
 
 /* ---- CLÍNICA ---- */
-function initClinic(){
-  const slug=SLUG
-  document.getElementById('clinic-slug-input').value=slug
-  document.getElementById('portal-link').value=`${window.location.origin}/${slug}/agendar`
-  document.getElementById('slug-preview').textContent=`laço.app/${slug}/agendar`
-  document.getElementById('clinic-slug-input').addEventListener('input',function(){
-    document.getElementById('slug-preview').textContent=`laço.app/${this.value}/agendar`
-    document.getElementById('portal-link').value=`${window.location.origin}/${this.value}/agendar`
+async function initClinic(){
+  try {
+    const r = await fetch(`${API}/api/settings/clinic`, { headers: h() })
+    if (r.ok) {
+      const data = await r.json()
+      localStorage.setItem('laco_slug', data.slug)
+      document.getElementById('clinic-name-input').value = data.name || ''
+      document.getElementById('clinic-slug-input').value = data.slug
+      document.getElementById('portal-link').value = `${window.location.origin}/${data.slug}/agendar`
+      document.getElementById('slug-preview').textContent = `laço.app/${data.slug}/agendar`
+    }
+  } catch {}
+  document.getElementById('clinic-slug-input').addEventListener('input', function(){
+    document.getElementById('slug-preview').textContent = `laço.app/${this.value}/agendar`
+    document.getElementById('portal-link').value = `${window.location.origin}/${this.value}/agendar`
   })
 }
 
-function saveClinic(){toast('Configurações salvas!')}
+async function saveClinic(){
+  const name = document.getElementById('clinic-name-input').value.trim()
+  if (!name) { toast('Informe o nome da clínica', false); return }
+  try {
+    const r = await fetch(`${API}/api/settings/clinic`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ name })
+    })
+    if (!r.ok) throw new Error()
+    toast('Dados da clínica salvos!')
+  } catch { toast('Erro ao salvar dados da clínica', false) }
+}
 
 function copyPortalLink(){
   navigator.clipboard.writeText(document.getElementById('portal-link').value)
