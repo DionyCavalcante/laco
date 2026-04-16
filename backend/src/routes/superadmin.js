@@ -48,6 +48,51 @@ router.get('/clinics', async (req, res) => {
   res.json(rows)
 })
 
+router.get('/accounts', async (req, res) => {
+  const params = []
+  let where = ''
+  if (req.query.search) {
+    params.push(`%${req.query.search.toLowerCase()}%`)
+    where = `WHERE LOWER(c.name) LIKE $1 OR LOWER(c.slug) LIKE $1 OR LOWER(u.email) LIKE $1`
+  }
+
+  const { rows } = await query(`
+    SELECT
+      c.id AS clinic_id,
+      c.name AS clinic_name,
+      c.slug,
+      c.status,
+      c.plan,
+      c.trial_ends_at,
+      c.onboarding_step,
+      c.onboarding_completed_at,
+      c.created_at AS clinic_created_at,
+      COUNT(DISTINCT l.id) AS leads_count,
+      COUNT(DISTINCT a.id) AS appointments_count,
+      COALESCE(
+        JSONB_AGG(
+          DISTINCT JSONB_BUILD_OBJECT(
+            'id', u.id,
+            'email', u.email,
+            'role', u.role,
+            'active', u.active,
+            'last_login', u.last_login
+          )
+        ) FILTER (WHERE u.id IS NOT NULL),
+        '[]'::jsonb
+      ) AS users
+    FROM clinics c
+    LEFT JOIN users u ON u.clinic_id = c.id
+    LEFT JOIN leads l ON l.clinic_id = c.id
+    LEFT JOIN appointments a ON a.clinic_id = c.id
+    ${where}
+    GROUP BY c.id
+    ORDER BY c.created_at DESC
+  `, params)
+
+  res.json(rows)
+})
+
 router.post('/clinics', async (req, res) => {
   const { name, admin_email, admin_password } = req.body
   if (!name) return res.status(400).json({ error: 'Nome obrigatorio' })
@@ -144,11 +189,43 @@ router.post('/users', async (req, res) => {
 })
 
 router.patch('/users/:id/password', async (req, res) => {
-  if (!req.body.password || req.body.password.length < 8) return res.status(400).json({ error: 'Senha invalida' })
+  if (!req.body.password) return res.status(400).json({ error: 'Senha invalida' })
   const hash = await bcrypt.hash(req.body.password, 12)
   await query('UPDATE users SET password = $1 WHERE id = $2', [hash, req.params.id])
   await audit(req.user.id, 'user.reset_password', 'user', req.params.id)
   res.json({ ok: true })
+})
+
+router.patch('/users/:id/email', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase()
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Email invalido' })
+  try {
+    const { rows: [user] } = await query(`
+      UPDATE users
+      SET email = $1
+      WHERE id = $2
+      RETURNING id, clinic_id, email, role, active
+    `, [email, req.params.id])
+    if (!user) return res.status(404).json({ error: 'Usuario nao encontrado' })
+    await audit(req.user.id, 'user.update_email', 'user', req.params.id, { email })
+    res.json(user)
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Email ja cadastrado' })
+    throw err
+  }
+})
+
+router.patch('/users/:id/active', async (req, res) => {
+  const active = req.body.active === true
+  const { rows: [user] } = await query(`
+    UPDATE users
+    SET active = $1
+    WHERE id = $2
+    RETURNING id, clinic_id, email, role, active
+  `, [active, req.params.id])
+  if (!user) return res.status(404).json({ error: 'Usuario nao encontrado' })
+  await audit(req.user.id, active ? 'user.activate' : 'user.deactivate', 'user', req.params.id)
+  res.json(user)
 })
 
 router.post('/impersonate/:clinicId', async (req, res) => {

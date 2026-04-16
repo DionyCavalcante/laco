@@ -39,6 +39,17 @@ Com multi-tenant ativo (EPIC 1) e auth real (EPIC 2), o superadmin precisa de um
 - Listar admins por clÃ­nica
 - Redefinir senha de admin
 - Criar admin adicional para uma clÃ­nica
+- Alterar email de admin
+- Ativar/desativar admin
+```
+
+### Central de Contas
+```
+- Visualizar todas as contas em lista pesquisÃ¡vel
+- Abrir detalhes da conta com usuÃ¡rios, status, leads e agendamentos
+- Entrar no CRM da conta via impersonaÃ§Ã£o
+- Abrir onboarding/configuraÃ§Ã£o da conta via impersonaÃ§Ã£o
+- Abrir portal pÃºblico da conta em nova aba
 ```
 
 ## Acceptance Criteria
@@ -51,6 +62,10 @@ Com multi-tenant ativo (EPIC 1) e auth real (EPIC 2), o superadmin precisa de um
 - [x] AC6: Impersonar clÃ­nica â€” superadmin acessa o CRM dela com banner "VocÃª estÃ¡ como admin de {nome}" + botÃ£o "Sair"
 - [x] AC7: Log de aÃ§Ãµes do superadmin (criar, suspender, impersonar) persistido em `audit_logs`
 - [x] AC8: Extender trial â€” input de dias adicionais, atualiza `trial_ends_at` no banco
+- [x] AC9: Superadmin pode alterar email de usuÃ¡rio admin
+- [x] AC10: Superadmin pode redefinir senha de usuÃ¡rio admin
+- [x] AC11: Superadmin visualiza todas as contas em uma central pesquisÃ¡vel
+- [x] AC12: Superadmin consegue abrir CRM, onboarding/configuraÃ§Ã£o e portal de cada conta com facilidade
 
 ## Schema adicional
 
