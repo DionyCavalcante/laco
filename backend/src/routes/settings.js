@@ -59,11 +59,31 @@ router.get('/clinic', async (req, res) => {
 // PATCH /api/settings/clinic
 router.patch('/clinic', async (req, res) => {
   try {
-    const { name } = req.body
+    const { name, slug } = req.body
     if (!name || !name.trim()) return res.status(400).json({ error: 'Nome é obrigatório' })
-    const { rowCount } = await db.query('UPDATE clinics SET name = $1 WHERE slug = $2', [name.trim(), SLUG()])
+
+    const currentSlug = SLUG()
+    const newSlug = slug && slug.trim() ? slug.trim() : currentSlug
+
+    // Verifica conflito de slug (outro registro com o mesmo slug)
+    if (newSlug !== currentSlug) {
+      const { rows: conflict } = await db.query(
+        'SELECT id FROM clinics WHERE slug = $1 AND slug != $2',
+        [newSlug, currentSlug]
+      )
+      if (conflict.length) return res.status(409).json({ error: 'Este nome já está em uso. Escolha outro.' })
+    }
+
+    const { rowCount } = await db.query(
+      'UPDATE clinics SET name = $1, slug = $2 WHERE slug = $3',
+      [name.trim(), newSlug, currentSlug]
+    )
     if (!rowCount) return res.status(404).json({ error: 'Clínica não encontrada' })
-    res.json({ ok: true })
+
+    // Atualiza o slug em memória para que as próximas queries usem o novo valor
+    process.env.CLINIC_SLUG = newSlug
+
+    res.json({ ok: true, slug: newSlug })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao salvar dados da clínica' })

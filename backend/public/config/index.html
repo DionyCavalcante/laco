@@ -166,7 +166,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
       </div>
       <div style="padding:20px">
         <div class="field"><label>Nome da clínica</label><input type="text" id="clinic-name-input" placeholder="Ex: Clínica Bella Estética"></div>
-        <div class="field"><label>Slug (URL do portal)</label><input type="text" id="clinic-slug-input" placeholder="Ex: bella-estetica"><div class="field-hint">URL gerada: <span id="slug-preview">laço.app/bella-estetica/agendar</span></div></div>
+        <div class="field"><label>Slug (URL do portal)</label><input type="text" id="clinic-slug-input" readonly style="background:#F0EBE8;color:#6B5E59"><div class="field-hint">Gerado automaticamente a partir do nome · URL: <span id="slug-preview">laço.app/bella-estetica/agendar</span></div></div>
         <div class="field"><label>Link do portal (compartilhe com clientes)</label>
           <div style="display:flex;gap:8px">
             <input type="text" id="portal-link" readonly style="background:#F0EBE8;color:#6B5E59">
@@ -584,6 +584,20 @@ async function saveHours(){
 }
 
 /* ---- CLÍNICA ---- */
+function nameToSlug(name){
+  return name.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'').trim()
+    .replace(/\s+/g,'-').replace(/-+/g,'-')
+}
+
+function updateSlugPreview(name){
+  const slug = nameToSlug(name)
+  document.getElementById('clinic-slug-input').value = slug
+  document.getElementById('slug-preview').textContent = `laço.app/${slug}/agendar`
+  document.getElementById('portal-link').value = `${window.location.origin}/${slug}/agendar`
+}
+
 async function initClinic(){
   try {
     const r = await fetch(`${API}/api/settings/clinic`, { headers: h() })
@@ -591,25 +605,26 @@ async function initClinic(){
       const data = await r.json()
       localStorage.setItem('laco_slug', data.slug)
       document.getElementById('clinic-name-input').value = data.name || ''
-      document.getElementById('clinic-slug-input').value = data.slug
-      document.getElementById('portal-link').value = `${window.location.origin}/${data.slug}/agendar`
-      document.getElementById('slug-preview').textContent = `laço.app/${data.slug}/agendar`
+      updateSlugPreview(data.name || '')
     }
   } catch {}
-  document.getElementById('clinic-slug-input').addEventListener('input', function(){
-    document.getElementById('slug-preview').textContent = `laço.app/${this.value}/agendar`
-    document.getElementById('portal-link').value = `${window.location.origin}/${this.value}/agendar`
+  document.getElementById('clinic-name-input').addEventListener('input', function(){
+    updateSlugPreview(this.value)
   })
 }
 
 async function saveClinic(){
   const name = document.getElementById('clinic-name-input').value.trim()
   if (!name) { toast('Informe o nome da clínica', false); return }
+  const slug = nameToSlug(name)
   try {
     const r = await fetch(`${API}/api/settings/clinic`, {
-      method: 'PATCH', headers: h(), body: JSON.stringify({ name })
+      method: 'PATCH', headers: h(), body: JSON.stringify({ name, slug })
     })
+    if (r.status === 409) { toast('Este nome já está em uso. Escolha outro.', false); return }
     if (!r.ok) throw new Error()
+    const data = await r.json()
+    localStorage.setItem('laco_slug', data.slug)
     toast('Dados da clínica salvos!')
   } catch { toast('Erro ao salvar dados da clínica', false) }
 }
