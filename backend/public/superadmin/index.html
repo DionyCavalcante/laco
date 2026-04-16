@@ -112,13 +112,13 @@
     }
     function renderAccountsListState(){ document.querySelectorAll('.account').forEach(el => el.classList.remove('active')); const idx = accountsData.findIndex(a => a.clinic_id === selectedClinicId); if (idx >= 0) accounts.children[idx]?.classList.add('active') }
     function accountButtons(id, slug) {
-      return `<button onclick="event.stopPropagation(); impersonate('${id}','/painel')">Entrar CRM</button><button class="secondary" onclick="event.stopPropagation(); impersonate('${id}','/onboarding?clinic_id=${id}')">Configurar</button><button class="secondary" onclick="event.stopPropagation(); window.open('/${slug}/agendar','_blank')">Portal</button>`
+      return `<button onclick="event.stopPropagation(); impersonate('${id}','/painel',true)">Entrar CRM</button><button class="secondary" onclick="event.stopPropagation(); impersonate('${id}','/onboarding',false)">Configurar</button><button class="secondary" onclick="event.stopPropagation(); window.open('/${slug}/agendar','_blank')">Portal</button>`
     }
     function selectAccount(id){ selectedClinicId = id; renderAccountDetail() }
     function filterAccounts(){ const q = search.value.toLowerCase(); renderAccounts(accountsData.filter(a => `${a.clinic_name} ${a.slug} ${a.users.map(u => u.email).join(' ')}`.toLowerCase().includes(q))) }
     async function createClinic(){ await api('/clinics',{method:'POST',body:JSON.stringify({name:name.value,admin_email:email.value,admin_password:pass.value})}); name.value=email.value=pass.value=''; await load() }
     async function statusClinic(id,status){ await api('/clinics/'+id+'/status',{method:'PATCH',body:JSON.stringify({status})}); await load() }
-    async function impersonate(id,target){ localStorage.setItem('superadminToken', originalToken); const r = await api('/impersonate/'+id,{method:'POST'}); localStorage.setItem('token',r.token); sessionStorage.setItem('impersonationBanner',r.banner); window.open(target || '/painel','_blank') }
+    async function impersonate(id, target, newTab = false){ localStorage.setItem('superadminToken', originalToken); const r = await api('/impersonate/'+id,{method:'POST'}); localStorage.setItem('token',r.token); sessionStorage.setItem('impersonationBanner',r.banner); if (newTab) window.open(target || '/painel','_blank'); else location.href = target || '/painel' }
     async function editEmail(id,current){ const next = prompt('Novo email', current); if(next) { await api('/users/'+id+'/email',{method:'PATCH',body:JSON.stringify({email:next})}); await load() } }
     async function saveEmail(id){ const value = document.getElementById('email-'+id).value; await api('/users/'+id+'/email',{method:'PATCH',body:JSON.stringify({email:value})}); await load() }
     async function resetPassword(id){ const password = prompt('Nova senha'); if(password) { await api('/users/'+id+'/password',{method:'PATCH',body:JSON.stringify({password})}); alert('Senha atualizada') } }

@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
   const client = await pool.connect()
   try {
     const { rows: [user] } = await client.query(`
-      SELECT u.*, c.status AS clinic_status
+      SELECT u.*, c.status AS clinic_status, c.slug AS clinic_slug, c.onboarding_step AS clinic_onboarding_step
       FROM users u
       LEFT JOIN clinics c ON c.id = u.clinic_id
       WHERE LOWER(u.email) = LOWER($1)
@@ -69,7 +69,12 @@ router.post('/login', async (req, res) => {
     const refreshToken = await createRefreshToken(client, user.id)
     await client.query('COMMIT')
 
-    res.json({ token: signAccessToken(user), refreshToken, user: publicUser(user) })
+    res.json({
+      token: signAccessToken(user),
+      refreshToken,
+      user: publicUser(user),
+      clinic: user.clinic_slug ? { slug: user.clinic_slug, onboarding_step: user.clinic_onboarding_step || 0 } : null
+    })
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {})
     console.error(err)

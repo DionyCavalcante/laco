@@ -53,32 +53,23 @@ const path = require('path')
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')
 app.use('/uploads', express.static(UPLOAD_DIR))
 const pub = path.join(__dirname, '../public')
+app.get('/',           (req, res) => res.redirect('/login'))
+app.get('/painel',     (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 app.get('/login',      (req, res) => res.sendFile(path.join(pub, 'login.html')))
 app.get('/cadastro',   (req, res) => res.sendFile(path.join(pub, 'cadastro/index.html')))
 app.get('/checkout',   (req, res) => res.sendFile(path.join(pub, 'checkout/index.html')))
 app.get('/onboarding', (req, res) => res.sendFile(path.join(pub, 'onboarding/index.html')))
 app.get('/superadmin', (req, res) => res.sendFile(path.join(pub, 'superadmin/index.html')))
+app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
+app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
-  // CRM — rotas explícitas ANTES do static (evita index.html ser servido para /)
-  app.get('/',          (req, res) => res.sendFile(path.join(pub, 'painel.html')))
-  app.get('/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
-  app.get('/login',     (req, res) => res.sendFile(path.join(pub, 'login.html')))
-  app.get('/cadastro',  (req, res) => res.sendFile(path.join(pub, 'cadastro/index.html')))
-  app.get('/checkout',  (req, res) => res.sendFile(path.join(pub, 'checkout/index.html')))
-  app.get('/onboarding',(req, res) => res.sendFile(path.join(pub, 'onboarding/index.html')))
-  app.get('/superadmin',(req, res) => res.sendFile(path.join(pub, 'superadmin/index.html')))
-  app.get('/clientes',  (req, res) => res.sendFile(path.join(pub, 'cliente.html')))
-  app.get('/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
+  // CRM — rotas explícitas ANTES do static
   app.get('/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 
-  // Assets estáticos (JS, CSS, imagens) — ANTES do wildcard para que .html diretos sejam servidos corretamente
+  // Assets estáticos (JS, CSS, imagens)
   app.use(express.static(pub, { index: false }))
-
-  // Portal de agendamento (React SPA) — rota /:slug enviada pelo WhatsApp
-  app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'index.html')))
-  app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
 }
 
 // 404

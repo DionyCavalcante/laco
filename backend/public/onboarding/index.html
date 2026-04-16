@@ -13,6 +13,7 @@
 </head>
 <body>
   <main>
+    <div id="superadminBar" style="display:none;margin-bottom:12px"><button onclick="voltarSuperadmin()" style="background:#eef3f0;color:#17231f;font-size:13px;padding:7px 12px;margin:0">&#8592; Voltar ao superadmin</button></div>
     <h1>Ativacao</h1>
     <div class="bar"><span id="progress"></span></div>
     <section id="app"></section>
@@ -40,6 +41,8 @@
     async function step1(){ if(!name.value.trim()) return; await fetch('/api/settings/clinic'+location.search,{method:'PATCH',headers,body:JSON.stringify({name:name.value,phone:phone.value})}); await saveStep(1); state.step=2; render() }
     async function step2(){ if(!pname.value.trim()||!price.value||!duration.value) return; await fetch('/api/procedures'+location.search,{method:'POST',headers,body:JSON.stringify({name:pname.value,price:Number(price.value),duration:Number(duration.value)})}); await saveStep(2); state.step=3; render() }
     async function step3(){ const days=[0,1,2,3,4,5,6].map(d=>({day_of_week:d,open:d>0&&d<6,start_time:'09:00',end_time:'18:00'})); await fetch('/api/hours'+location.search,{method:'POST',headers,body:JSON.stringify(days)}); await saveStep(3); await fetch('/api/onboarding/complete'+location.search,{method:'POST',headers}); state.step=4; render() }
+    function voltarSuperadmin(){ const t = localStorage.getItem('superadminToken'); localStorage.setItem('token', t); localStorage.removeItem('superadminToken'); location.href = '/superadmin' }
+    if (localStorage.getItem('superadminToken')) document.getElementById('superadminBar').style.display = 'block'
     load()
   </script>
 </body>

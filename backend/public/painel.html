@@ -869,26 +869,28 @@ select option{background:white;color:var(--t0)}
 <span id="booking-link-2" style="display:none"></span>
 
 <script>
-if (!sessionStorage.getItem('laco_auth') && !localStorage.getItem('laco_api_key')) {
-  window.location.href = '/login.html'
+if (!localStorage.getItem('token')) {
+  window.location.href = '/login'
 }
 
 const API = window.location.origin
-const API_KEY = localStorage.getItem('laco_api_key') || ''
-const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
+const SLUG = localStorage.getItem('laco_slug') || location.pathname.split('/').filter(Boolean)[0] || ''
 let currentFilter = 'todos'
 let dateFrom = null
 let dateTo = null
 let clinicData = null
 
 function headers() {
-  return { 'Content-Type': 'application/json', 'x-api-key': API_KEY }
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
 }
 
 function logout() {
-  sessionStorage.removeItem('laco_auth')
-  localStorage.removeItem('laco_api_key')
-  window.location.href = '/login.html'
+  localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('user')
+  localStorage.removeItem('laco_slug')
+  localStorage.removeItem('laco_onboarding_step')
+  window.location.href = '/login'
 }
 
 function bookingLink() {
