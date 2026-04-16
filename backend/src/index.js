@@ -57,12 +57,12 @@ if (process.env.NODE_ENV === 'production') {
   app.get('/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
   app.get('/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 
+  // Assets estáticos (JS, CSS, imagens) — ANTES do wildcard para que .html diretos sejam servidos corretamente
+  app.use(express.static(pub, { index: false }))
+
   // Portal de agendamento (React SPA) — rota /:slug enviada pelo WhatsApp
   app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'index.html')))
   app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
-
-  // Assets estáticos (JS, CSS, imagens)
-  app.use(express.static(pub, { index: false }))
 }
 
 // 404
