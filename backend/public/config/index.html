@@ -114,6 +114,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .photo-edit{top:4px;right:56px}
 .photo-move{bottom:4px;left:4px}
 .photo-thumb:hover .photo-del,.photo-thumb:hover .photo-rot,.photo-thumb:hover .photo-edit,.photo-thumb:hover .photo-move{opacity:1}
+.photo-thumb[draggable]{cursor:grab}
+.photo-thumb.drag-over{outline:2px dashed #B8657A;outline-offset:-2px}
+.photo-thumb.dragging{opacity:0.4}
+.photos-grid.drag-target{background:rgba(184,101,122,0.05);border-radius:8px}
 .photo-del svg,.photo-rot svg,.photo-edit svg,.photo-move svg{width:10px;height:10px;stroke:white;fill:none}
 .photo-empty-slot{border-radius:8px;aspect-ratio:1;background:#F0EBE8;border:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
 .photo-uploading{position:absolute;inset:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:3}
@@ -761,10 +765,18 @@ async function loadModalPhotos(procId) {
 function renderModalPhotoGrid(side, photos) {
   const el = document.getElementById('modal-photos-' + side)
   if (!el) return
+  el.ondragover = e => { e.preventDefault(); el.classList.add('drag-target') }
+  el.ondragleave = () => el.classList.remove('drag-target')
+  el.ondrop = e => { e.preventDefault(); el.classList.remove('drag-target'); photoDropOnGrid(e, side) }
   if (!photos.length) { el.innerHTML = '<div class="photo-empty-slot">Sem fotos</div>'; return }
   photos.forEach(p => { _photoAngles[p.id] = p.rotation || 0 })
   el.innerHTML = photos.map(p => `
-    <div class="photo-thumb" id="thumb-${p.id}">
+    <div class="photo-thumb" id="thumb-${p.id}" draggable="true"
+      ondragstart="photoDragStart(event,'${p.id}','${side}')"
+      ondragend="photoDragEnd(event)"
+      ondragover="photoDragOverThumb(event,this)"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="photoDropOnThumb(event,'${p.id}','${side}')">
       <img src="${imgUrl(p.url)}" alt="${side}" loading="lazy"
         style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
       <button class="photo-edit" onclick="editorOpen('${p.id}','split')" title="Editar (girar/dividir)">
@@ -780,6 +792,62 @@ function renderModalPhotoGrid(side, photos) {
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M8 3v10M3 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>`).join('')
+}
+
+/* ---- DRAG AND DROP ---- */
+let _dragPhotoId = null, _dragSide = null
+
+function photoDragStart(e, photoId, side) {
+  _dragPhotoId = photoId
+  _dragSide = side
+  e.dataTransfer.effectAllowed = 'move'
+  setTimeout(() => { const el = document.getElementById('thumb-' + photoId); if (el) el.classList.add('dragging') }, 0)
+}
+
+function photoDragEnd(e) {
+  document.querySelectorAll('.photo-thumb.dragging').forEach(el => el.classList.remove('dragging'))
+  document.querySelectorAll('.photo-thumb.drag-over').forEach(el => el.classList.remove('drag-over'))
+}
+
+function photoDragOverThumb(e, el) {
+  e.preventDefault()
+  e.stopPropagation()
+  document.querySelectorAll('.photo-thumb.drag-over').forEach(t => t.classList.remove('drag-over'))
+  if (el.id !== 'thumb-' + _dragPhotoId) el.classList.add('drag-over')
+}
+
+async function photoDropOnThumb(e, targetId, targetSide) {
+  e.preventDefault()
+  e.stopPropagation()
+  document.querySelectorAll('.photo-thumb.drag-over, .photos-grid.drag-target').forEach(el => el.classList.remove('drag-over', 'drag-target'))
+  if (!_dragPhotoId || _dragPhotoId === targetId) return
+  if (_dragSide === targetSide) {
+    await reorderPhotos(_dragPhotoId, targetId, targetSide)
+  } else {
+    await movePhoto(_dragPhotoId, targetSide)
+  }
+}
+
+async function photoDropOnGrid(e, targetSide) {
+  if (!_dragPhotoId || _dragSide === targetSide) return
+  await movePhoto(_dragPhotoId, targetSide)
+}
+
+async function reorderPhotos(dragId, dropId, side) {
+  const photos = modalPhotos.filter(p => p.side === side)
+  const ids = photos.map(p => p.id)
+  const fromIdx = ids.indexOf(dragId)
+  const toIdx = ids.indexOf(dropId)
+  if (fromIdx === -1 || toIdx === -1) return
+  ids.splice(fromIdx, 1)
+  ids.splice(toIdx, 0, dragId)
+  const procId = document.getElementById('edit-id').value
+  try {
+    await fetch(`${API}/api/upload/procedure/${procId}/photos/order`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ ids })
+    })
+    await loadModalPhotos(procId)
+  } catch { toast('Erro ao reordenar', false) }
 }
 
 async function modalUploadPhotos(e, side) {

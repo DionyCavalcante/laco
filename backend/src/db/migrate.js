@@ -193,6 +193,8 @@ async function migrate() {
       `ALTER TABLE procedure_photos ADD CONSTRAINT procedure_photos_side_check CHECK (side IN ('before','after','carousel'))`,
       // Supabase Storage — guarda o path do arquivo no bucket para poder deletar
       `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS storage_path TEXT`,
+      // Ordem de exibição das fotos dentro de cada side
+      `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`,
     ]
     for (const sql of alters) await client.query(sql)
 

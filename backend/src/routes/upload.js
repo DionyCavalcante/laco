@@ -89,13 +89,38 @@ router.post('/procedure/:id/photos', upload.fields([
 router.get('/procedure/:id/photos', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT id, procedure_id, side, url, rotation, created_at FROM procedure_photos
+      SELECT id, procedure_id, side, url, rotation, sort_order, created_at FROM procedure_photos
       WHERE procedure_id = $1
-      ORDER BY side, created_at
+      ORDER BY side, sort_order, created_at
     `, [req.params.id])
     res.json(rows)
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar fotos' })
+  }
+})
+
+// PATCH /api/upload/procedure/:id/photos/order — reordena fotos de um side
+router.patch('/procedure/:id/photos/order', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { rows: [procedure] } = await db.query(
+      'SELECT id FROM procedures WHERE id = $1 AND clinic_id = $2',
+      [req.params.id, clinicId]
+    )
+    if (!procedure) return res.status(404).json({ error: 'Procedimento não encontrado' })
+
+    const { ids } = req.body // array de UUIDs na nova ordem
+    if (!Array.isArray(ids)) return res.status(400).json({ error: 'ids deve ser um array' })
+
+    for (let i = 0; i < ids.length; i++) {
+      await db.query(
+        'UPDATE procedure_photos SET sort_order = $1 WHERE id = $2 AND procedure_id = $3',
+        [i, ids[i], req.params.id]
+      )
+    }
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao reordenar fotos' })
   }
 })
 
