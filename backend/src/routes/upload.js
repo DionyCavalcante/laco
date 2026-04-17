@@ -79,6 +79,29 @@ router.get('/procedure/:id/photos', async (req, res) => {
   }
 })
 
+// POST /api/upload/photo/:photoId/rotate
+router.post('/photo/:photoId/rotate', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { rows } = await db.query(
+      `SELECT pp.url FROM procedure_photos pp
+       JOIN procedures p ON p.id = pp.procedure_id
+       WHERE pp.id = $1 AND p.clinic_id = $2`,
+      [req.params.photoId, clinicId]
+    )
+    if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
+
+    const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
+    const filePath = path.join(uploadDir, rows[0].url.replace('/uploads/', ''))
+    const buffer = await sharp(filePath).rotate(90).webp({ quality: 82 }).toBuffer()
+    await fs.writeFile(filePath, buffer)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('Rotate error:', err)
+    res.status(500).json({ error: 'Erro ao rotacionar foto' })
+  }
+})
+
 // DELETE /api/upload/photo/:photoId
 router.delete('/photo/:photoId', async (req, res) => {
   try {
