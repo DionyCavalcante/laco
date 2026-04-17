@@ -820,19 +820,23 @@ async function uploadPhotos(e, side) {
 
 async function rotatePhoto(photoId, side, procId) {
   const thumb = document.getElementById(`thumb-${photoId}`)
+  const img = thumb ? thumb.querySelector('img') : null
   if (thumb) thumb.style.opacity = '0.5'
   try {
-    const r = await fetch(`${API}/api/upload/photo/${photoId}/rotate`, { method: 'POST', headers: h() })
+    const r = await fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY }
+    })
     if (!r.ok) throw new Error()
-    toast('Foto girada!')
-    if (thumb) {
-      const img = thumb.querySelector('img')
-      if (img) {
-        const base = img.src.split('?')[0]
-        img.src = base + '?t=' + Date.now()
-      }
-      thumb.style.opacity = '1'
+    // Usa o blob retornado diretamente — zero dependência de cache de URL
+    const blob = await r.blob()
+    if (img) {
+      const prev = img.src
+      img.src = URL.createObjectURL(blob)
+      if (prev.startsWith('blob:')) URL.revokeObjectURL(prev)
     }
+    if (thumb) thumb.style.opacity = '1'
+    toast('Foto girada!')
   } catch {
     if (thumb) thumb.style.opacity = '1'
     toast('Erro ao girar foto', false)

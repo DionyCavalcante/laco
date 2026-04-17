@@ -95,7 +95,10 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
     const filePath = path.join(uploadDir, rows[0].url.replace('/uploads/', ''))
     const buffer = await sharp(filePath).rotate(90).webp({ quality: 82 }).toBuffer()
     await fs.writeFile(filePath, buffer)
-    res.json({ ok: true })
+    // Retorna a imagem rotacionada diretamente — evita qualquer cache de URL
+    res.setHeader('Content-Type', 'image/webp')
+    res.setHeader('Cache-Control', 'no-store')
+    res.send(buffer)
   } catch (err) {
     console.error('Rotate error:', err)
     res.status(500).json({ error: 'Erro ao rotacionar foto' })
