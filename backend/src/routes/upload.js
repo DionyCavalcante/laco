@@ -69,7 +69,7 @@ router.post('/procedure/:id/photos', upload.fields([
 router.get('/procedure/:id/photos', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT id, procedure_id, side, url, created_at FROM procedure_photos
+      SELECT id, procedure_id, side, url, rotation, created_at FROM procedure_photos
       WHERE procedure_id = $1
       ORDER BY side, created_at
     `, [req.params.id])
@@ -84,19 +84,19 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(
-      `SELECT pp.url FROM procedure_photos pp
+      `SELECT pp.id, pp.rotation FROM procedure_photos pp
        JOIN procedures p ON p.id = pp.procedure_id
        WHERE pp.id = $1 AND p.clinic_id = $2`,
       [req.params.photoId, clinicId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
 
-    const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
-    const filePath = path.join(uploadDir, rows[0].url.replace('/uploads/', ''))
-    const degrees = [90, 180, 270].includes(Number(req.body?.degrees)) ? Number(req.body.degrees) : 90
-    const buffer = await sharp(filePath).rotate(degrees).webp({ quality: 82 }).toBuffer()
-    await fs.writeFile(filePath, buffer)
-    res.json({ ok: true })
+    const incoming = Number(req.body?.degrees)
+    const delta = [90, 180, 270].includes(incoming) ? incoming : 90
+    const newRotation = ((rows[0].rotation || 0) + delta) % 360
+
+    await db.query('UPDATE procedure_photos SET rotation = $1 WHERE id = $2', [newRotation, req.params.photoId])
+    res.json({ ok: true, rotation: newRotation })
   } catch (err) {
     console.error('Rotate error:', err)
     res.status(500).json({ error: 'Erro ao rotacionar foto' })

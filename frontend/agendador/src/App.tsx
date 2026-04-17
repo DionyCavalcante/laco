@@ -77,7 +77,8 @@ interface Slot {
   taken: boolean;
 }
 
-type ProcPhotos = Record<string, { before: string[]; after: string[]; carousel: string[] }>;
+type Photo = { url: string; rotation: number };
+type ProcPhotos = Record<string, { before: Photo[]; after: Photo[]; carousel: Photo[] }>;
 
 interface BookingFormData {
   name: string;
@@ -148,11 +149,11 @@ async function apiLoadPhotos(procedures: Procedure[]): Promise<ProcPhotos> {
     procedures.map((p) =>
       fetch(`${API}/api/upload/procedure/${p.id}/photos`)
         .then((r) => (r.ok ? r.json() : []))
-        .then((photos: { side: string; url: string }[]) => ({
+        .then((photos: { side: string; url: string; rotation: number }[]) => ({
           id: p.id,
-          before: photos.filter((x) => x.side === 'before').map((x) => x.url),
-          after: photos.filter((x) => x.side === 'after').map((x) => x.url),
-          carousel: photos.filter((x) => x.side === 'carousel').map((x) => x.url),
+          before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0 })),
+          after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0 })),
+          carousel: photos.filter((x) => x.side === 'carousel').map((x) => ({ url: x.url, rotation: x.rotation || 0 })),
         }))
     )
   );
@@ -430,8 +431,8 @@ const GalleryPage = ({
     const photos = procPhotos[p.id] || { before: [], after: [] };
     return {
       proc: p,
-      before: photos.before[0] ? photoUrl(photos.before[0]) : null,
-      after: photos.after[0] ? photoUrl(photos.after[0]) : null,
+      before: photos.before[0] ? { url: photoUrl(photos.before[0].url), rotation: photos.before[0].rotation } : null,
+      after:  photos.after[0]  ? { url: photoUrl(photos.after[0].url),  rotation: photos.after[0].rotation  } : null,
     };
   });
 
@@ -514,7 +515,8 @@ const GalleryPage = ({
             <div className="relative h-64 flex">
               <div className="relative w-1/2 h-full overflow-hidden border-r border-white/20">
                 {before ? (
-                  <img className="w-full h-full object-cover" src={before} alt="Antes" />
+                  <img className="w-full h-full object-cover" src={before.url} alt="Antes"
+                    style={before.rotation ? { transform: `rotate(${before.rotation}deg)`, scale: before.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
                 ) : (
                   <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">Antes</div>
                 )}
@@ -522,7 +524,8 @@ const GalleryPage = ({
               </div>
               <div className="relative w-1/2 h-full overflow-hidden">
                 {after ? (
-                  <img className="w-full h-full object-cover" src={after} alt="Depois" />
+                  <img className="w-full h-full object-cover" src={after.url} alt="Depois"
+                    style={after.rotation ? { transform: `rotate(${after.rotation}deg)`, scale: after.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
                 ) : (
                   <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">Depois</div>
                 )}
@@ -630,16 +633,16 @@ const OfferPage = ({
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const allProcPhotos = selectedProc ? [
+  const allProcPhotos: Photo[] = selectedProc ? [
     ...(procPhotos[selectedProc.id]?.before || []),
     ...(procPhotos[selectedProc.id]?.after || []),
     ...(procPhotos[selectedProc.id]?.carousel || []),
-  ].map(photoUrl) : [];
-  const fallbackImages = [
+  ].map((p) => ({ url: photoUrl(p.url), rotation: p.rotation })) : [];
+  const fallbackImages: Photo[] = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
-  ];
+  ].map((url) => ({ url, rotation: 0 }));
   const images = allProcPhotos.length >= 1 ? allProcPhotos : fallbackImages;
 
   const revealMs = (portalSettings.reveal_delay || 5) * 1000;
@@ -682,8 +685,9 @@ const OfferPage = ({
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.5 }}
                 className="w-full h-full object-cover"
-                src={images[currentImg]}
+                src={images[currentImg].url}
                 alt="Procedimento"
+                style={images[currentImg].rotation ? { transform: `rotate(${images[currentImg].rotation}deg)`, scale: images[currentImg].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
