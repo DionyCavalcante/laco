@@ -630,14 +630,17 @@ const OfferPage = ({
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const carouselPhotos = selectedProc ? (procPhotos[selectedProc.id]?.carousel || []).map(photoUrl) : [];
-  const afterPhotos = selectedProc ? (procPhotos[selectedProc.id]?.after || []).map(photoUrl) : [];
+  const allProcPhotos = selectedProc ? [
+    ...(procPhotos[selectedProc.id]?.before || []),
+    ...(procPhotos[selectedProc.id]?.after || []),
+    ...(procPhotos[selectedProc.id]?.carousel || []),
+  ].map(photoUrl) : [];
   const fallbackImages = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
   ];
-  const images = carouselPhotos.length >= 1 ? carouselPhotos : afterPhotos.length >= 2 ? afterPhotos : fallbackImages;
+  const images = allProcPhotos.length >= 1 ? allProcPhotos : fallbackImages;
 
   const revealMs = (portalSettings.reveal_delay || 5) * 1000;
 
