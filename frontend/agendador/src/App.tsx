@@ -64,6 +64,7 @@ interface Procedure {
   benefit_2_desc?: string;
   benefit_3_title?: string;
   benefit_3_desc?: string;
+  photo_mode?: 'before_after' | 'results';
 }
 
 interface PortalSettings {
@@ -428,11 +429,17 @@ const GalleryPage = ({
 
   // Monta items de galeria a partir dos procedimentos reais
   const items = procedures.map((p) => {
-    const photos = procPhotos[p.id] || { before: [], after: [] };
+    const photos = procPhotos[p.id] || { before: [], after: [], carousel: [] };
+    const isResults = p.photo_mode === 'results';
     return {
       proc: p,
-      before: photos.before[0] ? { url: photoUrl(photos.before[0].url), rotation: photos.before[0].rotation } : null,
-      after:  photos.after[0]  ? { url: photoUrl(photos.after[0].url),  rotation: photos.after[0].rotation  } : null,
+      isResults,
+      before: isResults
+        ? (photos.after[0] ? { url: photoUrl(photos.after[0].url), rotation: photos.after[0].rotation } : null)
+        : (photos.before[0] ? { url: photoUrl(photos.before[0].url), rotation: photos.before[0].rotation } : null),
+      after: isResults
+        ? (photos.after[1] ? { url: photoUrl(photos.after[1].url), rotation: photos.after[1].rotation } : null)
+        : (photos.after[0]  ? { url: photoUrl(photos.after[0].url),  rotation: photos.after[0].rotation  } : null),
     };
   });
 
@@ -515,21 +522,21 @@ const GalleryPage = ({
             <div className="relative h-64 flex">
               <div className="relative w-1/2 h-full overflow-hidden border-r border-white/20">
                 {before ? (
-                  <img className="w-full h-full object-cover" src={before.url} alt="Antes"
+                  <img className="w-full h-full object-cover" src={before.url} alt={isResults ? 'Caso 1' : 'Antes'}
                     style={before.rotation ? { transform: `rotate(${before.rotation}deg)`, scale: before.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
                 ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">Antes</div>
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">{isResults ? 'Caso 1' : 'Antes'}</div>
                 )}
-                <span className="absolute bottom-3 left-3 ba-label">Antes</span>
+                <span className="absolute bottom-3 left-3 ba-label">{isResults ? 'Caso 1' : 'Antes'}</span>
               </div>
               <div className="relative w-1/2 h-full overflow-hidden">
                 {after ? (
-                  <img className="w-full h-full object-cover" src={after.url} alt="Depois"
+                  <img className="w-full h-full object-cover" src={after.url} alt={isResults ? 'Caso 2' : 'Depois'}
                     style={after.rotation ? { transform: `rotate(${after.rotation}deg)`, scale: after.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
                 ) : (
-                  <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">Depois</div>
+                  <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">{isResults ? 'Caso 2' : 'Depois'}</div>
                 )}
-                <span className="absolute bottom-3 right-3 ba-label">Depois</span>
+                <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
               </div>
             </div>
             <div className="p-6">

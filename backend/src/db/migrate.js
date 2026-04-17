@@ -195,6 +195,8 @@ async function migrate() {
       `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS storage_path TEXT`,
       // Ordem de exibição das fotos dentro de cada side
       `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`,
+      // Modo das fotos de agendamento: 'before_after' ou 'results' (Caso 1, Caso 2)
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS photo_mode TEXT DEFAULT 'before_after'`,
     ]
     for (const sql of alters) await client.query(sql)
 

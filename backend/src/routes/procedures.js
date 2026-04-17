@@ -42,7 +42,8 @@ router.patch('/:id', async (req, res) => {
   try {
     const { name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
             headline, subheadline,
-            benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc } = req.body
+            benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc,
+            photo_mode } = req.body
     const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(`
       UPDATE procedures SET
@@ -62,12 +63,14 @@ router.patch('/:id', async (req, res) => {
         benefit_2_title = COALESCE($14, benefit_2_title),
         benefit_2_desc  = COALESCE($15, benefit_2_desc),
         benefit_3_title = COALESCE($16, benefit_3_title),
-        benefit_3_desc  = COALESCE($17, benefit_3_desc)
-      WHERE id = $18 AND clinic_id = $19 RETURNING *
+        benefit_3_desc  = COALESCE($17, benefit_3_desc),
+        photo_mode      = COALESCE($18, photo_mode)
+      WHERE id = $19 AND clinic_id = $20 RETURNING *
     `, [name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
         headline || null, subheadline || null,
         benefit_1_title || null, benefit_1_desc || null, benefit_2_title || null, benefit_2_desc || null,
         benefit_3_title || null, benefit_3_desc || null,
+        photo_mode || null,
         req.params.id, clinicId])
     if (!rows.length) return res.status(404).json({ error: 'Procedimento não encontrado' })
     res.json(rows[0])
