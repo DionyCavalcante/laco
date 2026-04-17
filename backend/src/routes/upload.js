@@ -174,7 +174,8 @@ router.patch('/photo/:photoId', async (req, res) => {
     }
     res.json({ ok: true })
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao atualizar foto' })
+    console.error('PATCH /photo error:', err.message)
+    res.status(500).json({ error: err.message || 'Erro ao atualizar foto' })
   }
 })
 

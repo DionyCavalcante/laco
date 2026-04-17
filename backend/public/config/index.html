@@ -877,7 +877,10 @@ async function savePhotoPosition(photoId) {
       method: 'PATCH', headers: h(),
       body: JSON.stringify({ position_x: _posX, position_y: _posY })
     })
-    if (!r.ok) throw new Error()
+    if (!r.ok) {
+      const body = await r.json().catch(() => ({}))
+      throw new Error(`${r.status} ${body.error || ''}`)
+    }
     const thumb = document.getElementById('thumb-' + photoId)
     if (thumb) {
       const img = thumb.querySelector('img')
@@ -887,7 +890,7 @@ async function savePhotoPosition(photoId) {
     if (photo) { photo.position_x = _posX; photo.position_y = _posY }
     exitPositionMode()
     toast('Enquadramento salvo!')
-  } catch { toast('Erro ao salvar enquadramento', false) }
+  } catch(e) { toast('Erro: ' + e.message, false) }
 }
 
 /* ---- DRAG AND DROP ---- */
