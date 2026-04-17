@@ -510,7 +510,7 @@ const GalleryPage = ({
           <p className="text-center text-aura-slate/50 text-sm py-16">Nenhum procedimento disponível.</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {items.map(({ proc, before, after }, idx) => (
+        {items.map(({ proc, before, after, isResults }, idx) => (
           <motion.article
             key={proc.id}
             initial={{ opacity: 0, y: 20 }}
