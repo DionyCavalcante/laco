@@ -120,6 +120,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .photos-grid.drag-target{background:rgba(184,101,122,0.05);border-radius:8px}
 .mode-active{background:#B8657A!important;color:white!important;border-color:#B8657A!important}
 .mode-active span{color:rgba(255,255,255,0.75)!important}
+.photo-pos{position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s}
+.photo-thumb:hover .photo-pos{opacity:1}
+.photo-pos svg{width:10px;height:10px;stroke:white;fill:none}
+.photo-pos-overlay{position:absolute;inset:0;z-index:12;cursor:crosshair;background:rgba(0,0,0,0.18)}
+.pos-reticle{position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(184,101,122,0.85);border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.3);transform:translate(-50%,-50%);pointer-events:none;transition:left 0.05s,top 0.05s}
 .photo-del svg,.photo-rot svg,.photo-edit svg,.photo-move svg{width:10px;height:10px;stroke:white;fill:none}
 .photo-empty-slot{border-radius:8px;aspect-ratio:1;background:#F0EBE8;border:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
 .photo-uploading{position:absolute;inset:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:3}
@@ -792,7 +797,7 @@ function renderModalPhotoGrid(side, photos) {
       ondragleave="this.classList.remove('drag-over')"
       ondrop="photoDropOnThumb(event,'${p.id}','${side}')">
       <img src="${imgUrl(p.url)}" alt="${side}" loading="lazy"
-        style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
+        style="object-position:${p.position_x??50}% ${p.position_y??50}%;${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
       <button class="photo-edit" onclick="editorOpen('${p.id}','split')" title="Editar (girar/dividir)">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5"><path d="M11.5 2.5l2 2-8.5 8.5H3v-2L11.5 2.5z"/></svg>
       </button>
@@ -804,6 +809,9 @@ function renderModalPhotoGrid(side, photos) {
       </button>
       <button class="photo-move" onclick="movePhotoMenu('${p.id}','${side}',this)" title="Mover para outra seção">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M8 3v10M3 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="photo-pos" onclick="enterPositionMode('${p.id}',${p.position_x??50},${p.position_y??50})" title="Enquadrar posição">
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><circle cx="8" cy="8" r="2.5"/><line x1="8" y1="1" x2="8" y2="4" stroke-linecap="round"/><line x1="8" y1="12" x2="8" y2="15" stroke-linecap="round"/><line x1="1" y1="8" x2="4" y2="8" stroke-linecap="round"/><line x1="12" y1="8" x2="15" y2="8" stroke-linecap="round"/></svg>
       </button>
     </div>`).join('')
 }
@@ -826,6 +834,60 @@ function setPhotoMode(mode, silent = false) {
         .catch(() => toast('Erro ao salvar modo', false))
     }
   }
+}
+
+/* ---- ENQUADRAMENTO (FOCAL POINT) ---- */
+let _posPhotoId = null, _posX = 50, _posY = 50
+
+function enterPositionMode(photoId, x, y) {
+  exitPositionMode()
+  _posPhotoId = photoId; _posX = x; _posY = y
+  const thumb = document.getElementById('thumb-' + photoId)
+  if (!thumb) return
+  const overlay = document.createElement('div')
+  overlay.className = 'photo-pos-overlay'; overlay.id = 'pos-overlay-' + photoId
+  overlay.innerHTML = `
+    <div class="pos-reticle" id="pos-reticle-${photoId}" style="left:${x}%;top:${y}%"></div>
+    <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.65);color:white;font-size:9px;padding:2px 7px;border-radius:10px;white-space:nowrap;pointer-events:none">Clique para enquadrar</div>
+    <div style="position:absolute;bottom:4px;right:4px;display:flex;gap:3px">
+      <button onclick="event.stopPropagation();savePhotoPosition('${photoId}')" style="background:#B8657A;color:white;border:none;border-radius:5px;padding:3px 9px;font-size:10px;cursor:pointer;font-weight:600">✓</button>
+      <button onclick="event.stopPropagation();exitPositionMode()" style="background:rgba(0,0,0,0.5);color:white;border:none;border-radius:5px;padding:3px 7px;font-size:10px;cursor:pointer">✕</button>
+    </div>`
+  overlay.addEventListener('click', e => {
+    const rect = overlay.getBoundingClientRect()
+    _posX = parseFloat(((e.clientX - rect.left) / rect.width * 100).toFixed(1))
+    _posY = parseFloat(((e.clientY - rect.top) / rect.height * 100).toFixed(1))
+    const reticle = document.getElementById('pos-reticle-' + photoId)
+    if (reticle) { reticle.style.left = _posX + '%'; reticle.style.top = _posY + '%' }
+  })
+  thumb.appendChild(overlay)
+}
+
+function exitPositionMode() {
+  if (_posPhotoId) {
+    const overlay = document.getElementById('pos-overlay-' + _posPhotoId)
+    if (overlay) overlay.remove()
+    _posPhotoId = null
+  }
+}
+
+async function savePhotoPosition(photoId) {
+  try {
+    const r = await fetch(`${API}/api/upload/photo/${photoId}`, {
+      method: 'PATCH', headers: h(),
+      body: JSON.stringify({ position_x: _posX, position_y: _posY })
+    })
+    if (!r.ok) throw new Error()
+    const thumb = document.getElementById('thumb-' + photoId)
+    if (thumb) {
+      const img = thumb.querySelector('img')
+      if (img) img.style.objectPosition = `${_posX}% ${_posY}%`
+    }
+    const photo = modalPhotos.find(p => p.id == photoId)
+    if (photo) { photo.position_x = _posX; photo.position_y = _posY }
+    exitPositionMode()
+    toast('Enquadramento salvo!')
+  } catch { toast('Erro ao salvar enquadramento', false) }
 }
 
 /* ---- DRAG AND DROP ---- */
