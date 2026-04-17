@@ -51,7 +51,11 @@ app.use('/webhook',          require('./routes/webhook'))
 // Serve arquivos de upload (fotos antes/depois)
 const path = require('path')
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')
-app.use('/uploads', express.static(UPLOAD_DIR))
+app.use('/uploads', express.static(UPLOAD_DIR, {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+}))
 const pub = path.join(__dirname, '../public')
 app.get('/',           (req, res) => res.redirect('/login'))
 app.get('/painel',     (req, res) => res.sendFile(path.join(pub, 'painel.html')))
