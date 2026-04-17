@@ -114,8 +114,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .editor-overlay.on{display:flex}
 .editor-wrap{position:relative;max-width:90vw;max-height:70vh}
 .editor-wrap canvas{max-width:90vw;max-height:70vh;border-radius:8px;cursor:col-resize}
-.split-line{position:absolute;top:0;bottom:0;width:3px;background:#B8657A;cursor:col-resize;transform:translateX(-50%)}
+.split-line{position:absolute;background:#B8657A;transform:translate(-50%,-50%)}
+.split-line.vertical{top:0;bottom:0;left:50%;width:3px;height:100%;cursor:col-resize;transform:translateX(-50%)}
+.split-line.horizontal{left:0;right:0;top:50%;height:3px;width:100%;cursor:row-resize;transform:translateY(-50%)}
 .split-line::before{content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#B8657A;color:white;font-size:10px;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.split-line.horizontal::before{content:'▲ ▼'}
 .editor-toolbar{display:flex;gap:10px;margin-top:16px;align-items:center}
 .editor-toolbar button{padding:8px 18px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer}
 .btn-editor-rot{background:white;color:#111}
@@ -343,6 +346,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
     <button class="btn-editor-cancel" onclick="editorClose()">Cancelar</button>
     <button class="btn-editor-rot" onclick="editorRotate()">↺ Girar 90°</button>
     <button id="btn-split-toggle" class="btn-editor-rot" onclick="editorToggleSplit()">✂ Ativar Divisão</button>
+    <button id="btn-split-dir" class="btn-editor-rot" onclick="editorToggleDir()" style="display:none">↕ Horizontal</button>
     <button class="btn-editor-save" onclick="editorSave()">✓ Salvar</button>
   </div>
   <div class="editor-hint" id="editor-hint">Arraste a linha para definir o ponto de divisão</div>
@@ -1027,7 +1031,9 @@ let editorMode = 'rotate'
 let editorImg = new Image()
 let editorRotation = 0
 let editorSplitX = 0.5
+let editorSplitY = 0.5
 let editorSplitActive = false
+let editorSplitDir = 'vertical' // 'vertical' | 'horizontal'
 
 function editorOpen(photoId, mode) {
   const photo = ppPhotos.find(p => p.id === photoId)
@@ -1078,30 +1084,63 @@ function editorRotate() {
 
 function editorToggleSplit() {
   editorSplitActive = !editorSplitActive
-  document.getElementById('split-line').style.display = editorSplitActive ? 'block' : 'none'
+  const sl = document.getElementById('split-line')
+  const dirBtn = document.getElementById('btn-split-dir')
+  sl.style.display = editorSplitActive ? 'block' : 'none'
+  dirBtn.style.display = editorSplitActive ? 'inline-block' : 'none'
   document.getElementById('btn-split-toggle').textContent = editorSplitActive ? '✂ Desativar Divisão' : '✂ Ativar Divisão'
-  editorDraw()
+  if (editorSplitActive) editorApplySplitLine()
+}
+
+function editorToggleDir() {
+  editorSplitDir = editorSplitDir === 'vertical' ? 'horizontal' : 'vertical'
+  document.getElementById('btn-split-dir').textContent = editorSplitDir === 'vertical' ? '↕ Horizontal' : '↔ Vertical'
+  document.getElementById('editor-hint').textContent = editorSplitDir === 'vertical'
+    ? 'Arraste a linha vertical para definir o ponto de divisão'
+    : 'Arraste a linha horizontal para definir o ponto de divisão'
+  editorApplySplitLine()
+}
+
+function editorApplySplitLine() {
+  const sl = document.getElementById('split-line')
+  const rect = document.getElementById('editor-canvas').getBoundingClientRect()
+  sl.className = 'split-line ' + editorSplitDir
+  if (editorSplitDir === 'vertical') {
+    sl.style.left = (editorSplitX * rect.width) + 'px'
+    sl.style.top = ''
+  } else {
+    sl.style.top = (editorSplitY * rect.height) + 'px'
+    sl.style.left = ''
+  }
 }
 
 function editorInitSplit() {
   const sl = document.getElementById('split-line')
-  const wrap = document.getElementById('editor-wrap')
   let dragging = false
   sl.onmousedown = (e) => { dragging = true; e.preventDefault() }
   window.onmousemove = (e) => {
     if (!dragging) return
     const rect = document.getElementById('editor-canvas').getBoundingClientRect()
-    editorSplitX = Math.max(0.1, Math.min(0.9, (e.clientX - rect.left) / rect.width))
-    sl.style.left = (editorSplitX * rect.width) + 'px'
+    if (editorSplitDir === 'vertical') {
+      editorSplitX = Math.max(0.1, Math.min(0.9, (e.clientX - rect.left) / rect.width))
+      sl.style.left = (editorSplitX * rect.width) + 'px'
+    } else {
+      editorSplitY = Math.max(0.1, Math.min(0.9, (e.clientY - rect.top) / rect.height))
+      sl.style.top = (editorSplitY * rect.height) + 'px'
+    }
   }
   window.onmouseup = () => { dragging = false }
-  // Touch
   sl.ontouchstart = (e) => { dragging = true; e.preventDefault() }
   window.ontouchmove = (e) => {
     if (!dragging) return
     const rect = document.getElementById('editor-canvas').getBoundingClientRect()
-    editorSplitX = Math.max(0.1, Math.min(0.9, (e.touches[0].clientX - rect.left) / rect.width))
-    sl.style.left = (editorSplitX * rect.width) + 'px'
+    if (editorSplitDir === 'vertical') {
+      editorSplitX = Math.max(0.1, Math.min(0.9, (e.touches[0].clientX - rect.left) / rect.width))
+      sl.style.left = (editorSplitX * rect.width) + 'px'
+    } else {
+      editorSplitY = Math.max(0.1, Math.min(0.9, (e.touches[0].clientY - rect.top) / rect.height))
+      sl.style.top = (editorSplitY * rect.height) + 'px'
+    }
   }
   window.ontouchend = () => { dragging = false }
 }
@@ -1122,15 +1161,19 @@ async function editorSave() {
 
   try {
     if (editorSplitActive && editorMode === 'split') {
-      // Divide canvas em dois e faz upload de cada parte
       const w = canvas.width, h = canvas.height
-      const splitPx = Math.round(editorSplitX * w)
-
-      const left  = canvasSlice(canvas, 0, 0, splitPx, h)
-      const right = canvasSlice(canvas, splitPx, 0, w - splitPx, h)
-
-      await uploadProcessed(left,  photo.procedure_id, photo.side)
-      await uploadProcessed(right, photo.procedure_id, photo.side)
+      let partA, partB
+      if (editorSplitDir === 'vertical') {
+        const splitPx = Math.round(editorSplitX * w)
+        partA = canvasSlice(canvas, 0, 0, splitPx, h)
+        partB = canvasSlice(canvas, splitPx, 0, w - splitPx, h)
+      } else {
+        const splitPy = Math.round(editorSplitY * h)
+        partA = canvasSlice(canvas, 0, 0, w, splitPy)
+        partB = canvasSlice(canvas, 0, splitPy, w, h - splitPy)
+      }
+      await uploadProcessed(partA, photo.procedure_id, photo.side)
+      await uploadProcessed(partB, photo.procedure_id, photo.side)
       // Remove a foto original
       await fetch(`${API}/api/upload/photo/${editorPhotoId}`, { method: 'DELETE', headers: h() })
       toast('Foto dividida em 2!')
