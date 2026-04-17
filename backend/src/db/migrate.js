@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS procedures (
   price        INTEGER NOT NULL,
   price_old    INTEGER,
   payment_note TEXT,
+  description  TEXT,
   video_url    TEXT,
   images       JSONB DEFAULT '{}',
   reveal_delay INTEGER DEFAULT 5,
@@ -173,6 +174,7 @@ async function migrate() {
       `ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_interaction_at TIMESTAMPTZ`,
       `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS rescheduled_from UUID REFERENCES appointments(id)`,
       // Campos da página de detalhes do procedimento
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS description TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS headline TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS subheadline TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS benefit_1_title TEXT`,

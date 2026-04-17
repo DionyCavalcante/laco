@@ -15,7 +15,7 @@ router.get('/:slug', async (req, res) => {
     if (clinic.status === 'suspended') return res.status(402).json({ error: 'Portal suspenso' })
 
     const { rows: procedures } = await db.query(`
-      SELECT id, name, duration, price, price_old, payment_note, video_url,
+      SELECT id, name, duration, price, price_old, payment_note, description, video_url,
              headline, subheadline,
              benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc,
              photo_mode

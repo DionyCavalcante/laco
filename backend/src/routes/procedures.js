@@ -21,18 +21,18 @@ router.get('/', async (req, res) => {
 // POST /api/procedures
 router.post('/', async (req, res) => {
   try {
-    const { name, duration, price, price_old, payment_note, video_url } = req.body
+    const { name, duration, price, price_old, payment_note, description, video_url } = req.body
     const clinicId = await getEffectiveClinicId(req)
     if (!name || !duration || !price) {
       return res.status(400).json({ error: 'Nome, duração e preço obrigatórios' })
     }
     const { rows } = await db.query(`
-      INSERT INTO procedures (clinic_id, name, duration, price, price_old, payment_note, video_url, sort_order)
-      SELECT $1, $2, $3, $4, $5, $6, $7, COALESCE(MAX(sort_order), -1) + 1
+      INSERT INTO procedures (clinic_id, name, duration, price, price_old, payment_note, description, video_url, sort_order)
+      SELECT $1, $2, $3, $4, $5, $6, $7, $8, COALESCE(MAX(sort_order), -1) + 1
       FROM procedures
       WHERE clinic_id = $1
       RETURNING *
-    `, [clinicId, name, duration, price, price_old || null, payment_note || null, video_url || null])
+    `, [clinicId, name, duration, price, price_old || null, payment_note || null, description || null, video_url || null])
     res.status(201).json(rows[0])
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar procedimento' })
@@ -85,11 +85,12 @@ router.patch('/order', async (req, res) => {
 // PATCH /api/procedures/:id
 router.patch('/:id', async (req, res) => {
   try {
-    const { name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
+    const { name, duration, price, price_old, payment_note, description, video_url, active, sort_order, reveal_delay,
             headline, subheadline,
             benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc,
             photo_mode } = req.body
     const clinicId = await getEffectiveClinicId(req)
+    const hasDescription = Object.prototype.hasOwnProperty.call(req.body, 'description')
     const { rows } = await db.query(`
       UPDATE procedures SET
         name           = COALESCE($1, name),
@@ -109,13 +110,15 @@ router.patch('/:id', async (req, res) => {
         benefit_2_desc  = COALESCE($15, benefit_2_desc),
         benefit_3_title = COALESCE($16, benefit_3_title),
         benefit_3_desc  = COALESCE($17, benefit_3_desc),
-        photo_mode      = COALESCE($18, photo_mode)
-      WHERE id = $19 AND clinic_id = $20 RETURNING *
+        photo_mode      = COALESCE($18, photo_mode),
+        description     = CASE WHEN $19 THEN $20 ELSE description END
+      WHERE id = $21 AND clinic_id = $22 RETURNING *
     `, [name, duration, price, price_old, payment_note, video_url, active, sort_order, reveal_delay,
         headline || null, subheadline || null,
         benefit_1_title || null, benefit_1_desc || null, benefit_2_title || null, benefit_2_desc || null,
         benefit_3_title || null, benefit_3_desc || null,
         photo_mode || null,
+        hasDescription, description || null,
         req.params.id, clinicId])
     if (!rows.length) return res.status(404).json({ error: 'Procedimento não encontrado' })
     res.json(rows[0])
