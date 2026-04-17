@@ -783,7 +783,7 @@ function renderPhotoGrid(side, photos) {
     <div class="photo-thumb" id="thumb-${p.id}">
       <img src="${p.url}?t=${Date.now()}" alt="${side}" loading="lazy"
         style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
-      <button class="photo-rot" onclick="rotatePhoto('${p.id}')" title="Girar 90°">
+      <button class="photo-rot" onclick="rotatePhoto('${p.id}', true)" title="Girar 90°">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="photo-del" onclick="deletePhoto('${p.id}','${side}')" title="Remover">
@@ -823,11 +823,23 @@ async function uploadPhotos(e, side) {
 
 const _photoAngles = {}
 
-function rotatePhoto(photoId) {
-  // Apenas rotação visual — servidor só é chamado ao salvar
+function rotatePhoto(photoId, saveNow = false) {
   _photoAngles[photoId] = ((_photoAngles[photoId] || 0) + 90) % 360
   const img = document.querySelector(`#thumb-${photoId} img`)
-  if (img) img.style.transform = `rotate(${_photoAngles[photoId]}deg)`
+  const rot = _photoAngles[photoId]
+  if (img) {
+    img.style.transform = `rotate(${rot}deg)`
+    img.style.scale = rot % 180 !== 0 ? '1.4' : '1'
+  }
+  if (saveNow) {
+    fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      body: JSON.stringify({ rotation: rot })
+    }).then(r => { if (r.ok) toast('Foto girada!'); else toast('Erro ao girar', false) })
+      .catch(() => toast('Erro ao girar', false))
+    delete _photoAngles[photoId] // já salvo, remove dos pendentes
+  }
 }
 
 async function flushRotations() {
@@ -837,10 +849,9 @@ async function flushRotations() {
     fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-      body: JSON.stringify({ rotation })  // absoluto, não delta
+      body: JSON.stringify({ rotation })
     })
   ))
-  // Limpa ângulos após salvar
   pending.forEach(([photoId]) => delete _photoAngles[photoId])
 }
 
