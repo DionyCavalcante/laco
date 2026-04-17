@@ -112,8 +112,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .photo-del{top:4px;right:4px}
 .photo-rot{top:4px;right:30px}
 .photo-edit{top:4px;right:56px}
-.photo-thumb:hover .photo-del,.photo-thumb:hover .photo-rot,.photo-thumb:hover .photo-edit{opacity:1}
-.photo-del svg,.photo-rot svg,.photo-edit svg{width:10px;height:10px;stroke:white;fill:none}
+.photo-move{bottom:4px;left:4px}
+.photo-thumb:hover .photo-del,.photo-thumb:hover .photo-rot,.photo-thumb:hover .photo-edit,.photo-thumb:hover .photo-move{opacity:1}
+.photo-del svg,.photo-rot svg,.photo-edit svg,.photo-move svg{width:10px;height:10px;stroke:white;fill:none}
 .photo-empty-slot{border-radius:8px;aspect-ratio:1;background:#F0EBE8;border:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
 .photo-uploading{position:absolute;inset:0;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;z-index:3}
 .spinner-sm{width:18px;height:18px;border:2px solid rgba(184,101,122,0.2);border-top-color:#B8657A;border-radius:50%;animation:spin 0.7s linear infinite}
@@ -773,6 +774,9 @@ function renderModalPhotoGrid(side, photos) {
       <button class="photo-del" onclick="modalDeletePhoto('${p.id}')" title="Remover">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
       </button>
+      <button class="photo-move" onclick="movePhotoMenu('${p.id}','${side}',this)" title="Mover para outra seção">
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M8 3v10M3 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>`).join('')
 }
 
@@ -832,8 +836,50 @@ function rotatePhoto(photoId, saveNow = false) {
       body: JSON.stringify({ rotation: rot })
     }).then(r => { if (r.ok) toast('Foto girada!'); else toast('Erro ao girar', false) })
       .catch(() => toast('Erro ao girar', false))
-    delete _photoAngles[photoId]
+    // Mantém _photoAngles para permitir rotações consecutivas
   }
+}
+
+/* ---- MOVER FOTO ENTRE SEÇÕES ---- */
+function movePhotoMenu(photoId, currentSide, btnEl) {
+  document.querySelectorAll('.photo-move-menu').forEach(m => m.remove())
+  const labels = { before: 'Antes (agendamento)', after: 'Depois (agendamento)', carousel: 'Carrossel (procedimento)' }
+  const available = ['before', 'after', 'carousel'].filter(s => s !== currentSide)
+  const menu = document.createElement('div')
+  menu.className = 'photo-move-menu'
+  menu.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.78);border-radius:8px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;z-index:10;padding:8px'
+  menu.innerHTML = `
+    <div style="color:rgba(255,255,255,0.7);font-size:10px;font-weight:500;margin-bottom:2px">Mover para:</div>
+    ${available.map(s => `
+      <button onclick="movePhoto('${photoId}','${s}')" style="background:white;border:none;padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:500;color:#1A1614;width:100%">
+        ${labels[s]}
+      </button>`).join('')}
+    <button onclick="this.closest('.photo-move-menu').remove()" style="background:transparent;border:0.5px solid rgba(255,255,255,0.35);color:rgba(255,255,255,0.7);padding:4px 14px;border-radius:6px;font-size:10px;cursor:pointer;width:100%;margin-top:2px">
+      Cancelar
+    </button>`
+  btnEl.closest('.photo-thumb').appendChild(menu)
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!menu.contains(e.target) && e.target !== btnEl) {
+        menu.remove()
+        document.removeEventListener('click', handler)
+      }
+    })
+  }, 100)
+}
+
+async function movePhoto(photoId, targetSide) {
+  document.querySelectorAll('.photo-move-menu').forEach(m => m.remove())
+  const procId = document.getElementById('edit-id').value
+  try {
+    const r = await fetch(`${API}/api/upload/photo/${photoId}`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ side: targetSide })
+    })
+    if (!r.ok) throw new Error()
+    const labels = { before: 'Antes', after: 'Depois', carousel: 'Carrossel' }
+    toast(`Foto movida para ${labels[targetSide]}!`)
+    await loadModalPhotos(procId)
+  } catch { toast('Erro ao mover foto', false) }
 }
 
 async function flushRotations() {

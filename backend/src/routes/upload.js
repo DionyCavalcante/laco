@@ -104,6 +104,28 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
   }
 })
 
+// PATCH /api/upload/photo/:photoId — muda o side (before/after/carousel)
+router.patch('/photo/:photoId', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { side } = req.body
+    if (!['before', 'after', 'carousel'].includes(side)) {
+      return res.status(400).json({ error: 'Side inválido' })
+    }
+    const { rows } = await db.query(
+      `SELECT pp.id FROM procedure_photos pp
+       JOIN procedures p ON p.id = pp.procedure_id
+       WHERE pp.id = $1 AND p.clinic_id = $2`,
+      [req.params.photoId, clinicId]
+    )
+    if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
+    await db.query('UPDATE procedure_photos SET side = $1 WHERE id = $2', [side, req.params.photoId])
+    res.json({ ok: true, side })
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao mover foto' })
+  }
+})
+
 // DELETE /api/upload/photo/:photoId
 router.delete('/photo/:photoId', async (req, res) => {
   try {
