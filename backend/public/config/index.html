@@ -825,11 +825,13 @@ async function rotatePhoto(photoId, side, procId) {
     const r = await fetch(`${API}/api/upload/photo/${photoId}/rotate`, { method: 'POST', headers: h() })
     if (!r.ok) throw new Error()
     toast('Foto girada!')
-    // Recarrega a grid correta
-    if (procId) {
-      loadCarouselPhotos(procId)
-    } else {
-      await loadProcPhotos(currentProcForPhotos)
+    if (thumb) {
+      const img = thumb.querySelector('img')
+      if (img) {
+        const base = img.src.split('?')[0]
+        img.src = base + '?t=' + Date.now()
+      }
+      thumb.style.opacity = '1'
     }
   } catch {
     if (thumb) thumb.style.opacity = '1'
