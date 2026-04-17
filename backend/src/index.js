@@ -60,17 +60,17 @@ app.get('/cadastro',   (req, res) => res.sendFile(path.join(pub, 'cadastro/index
 app.get('/checkout',   (req, res) => res.sendFile(path.join(pub, 'checkout/index.html')))
 app.get('/onboarding', (req, res) => res.sendFile(path.join(pub, 'onboarding/index.html')))
 app.get('/superadmin', (req, res) => res.sendFile(path.join(pub, 'superadmin/index.html')))
-app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
-app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'painel.html')))
-
 // Serve o frontend estático em produção
 if (process.env.NODE_ENV === 'production') {
-  // CRM — rotas explícitas ANTES do static
-  app.get('/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
-
   // Assets estáticos (JS, CSS, imagens)
   app.use(express.static(pub, { index: false }))
 }
+
+// Rotas explícitas ANTES dos wildcards /:slug
+app.get('/config',        (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
+
+app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
+app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada' }))
