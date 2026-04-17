@@ -27,13 +27,58 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Nome, duração e preço obrigatórios' })
     }
     const { rows } = await db.query(`
-      INSERT INTO procedures (clinic_id, name, duration, price, price_old, payment_note, video_url)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO procedures (clinic_id, name, duration, price, price_old, payment_note, video_url, sort_order)
+      SELECT $1, $2, $3, $4, $5, $6, $7, COALESCE(MAX(sort_order), -1) + 1
+      FROM procedures
+      WHERE clinic_id = $1
       RETURNING *
     `, [clinicId, name, duration, price, price_old || null, payment_note || null, video_url || null])
     res.status(201).json(rows[0])
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar procedimento' })
+  }
+})
+
+// PATCH /api/procedures/order
+router.patch('/order', async (req, res) => {
+  const client = await db.pool.connect()
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { ids } = req.body
+
+    if (!Array.isArray(ids) || !ids.length) {
+      return res.status(400).json({ error: 'ids deve ser um array com procedimentos' })
+    }
+
+    const uniqueIds = [...new Set(ids)]
+    if (uniqueIds.length !== ids.length) {
+      return res.status(400).json({ error: 'ids contem procedimentos duplicados' })
+    }
+
+    const { rows } = await db.query(
+      'SELECT id FROM procedures WHERE clinic_id = $1 AND id = ANY($2::uuid[])',
+      [clinicId, ids]
+    )
+    if (rows.length !== ids.length) {
+      return res.status(404).json({ error: 'Um ou mais procedimentos nao pertencem a esta clinica' })
+    }
+
+    await client.query('BEGIN')
+    for (let i = 0; i < ids.length; i++) {
+      await client.query(
+        'UPDATE procedures SET sort_order = $1 WHERE id = $2 AND clinic_id = $3',
+        [i, ids[i], clinicId]
+      )
+    }
+    await client.query('COMMIT')
+
+    res.json({ ok: true })
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {})
+    console.error('Erro ao reordenar procedimentos:', err)
+    res.status(500).json({ error: 'Erro ao reordenar procedimentos' })
+  } finally {
+    client.release()
   }
 })
 

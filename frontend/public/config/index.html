@@ -47,6 +47,9 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 /* Procedure list */
 .proc-row{padding:12px 18px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:12px}
 .proc-row:last-child{border:none}
+.proc-row.dragging{opacity:0.45;background:#FAF7F5}
+.proc-row.drop-before{box-shadow:inset 0 2px 0 #9B6FA5}
+.proc-row.drop-after{box-shadow:inset 0 -2px 0 #9B6FA5}
 .drag-handle{color:#ccc;cursor:grab;font-size:14px;user-select:none;flex-shrink:0}
 .drag-handle:active{cursor:grabbing}
 .proc-info{flex:1;min-width:0}
@@ -390,7 +393,10 @@ function renderProcs(){
   const el=document.getElementById('proc-list')
   if(!procs.length){el.innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Nenhum procedimento cadastrado ainda.</div>';return}
   el.innerHTML=procs.map(p=>`
-    <div class="proc-row" data-id="${p.id}">
+    <div class="proc-row" data-id="${p.id}"
+      ondragover="onProcDragOver(event)"
+      ondragleave="onProcDragLeave(event)"
+      ondrop="onProcDrop(event,'${p.id}')">
       <span class="drag-handle">⠿</span>
       <div class="proc-info">
         <div class="proc-name">${esc(p.name)}</div>
@@ -402,6 +408,97 @@ function renderProcs(){
       </div>
       <div class="toggle ${p.active?'':'off'}" onclick="toggleProc('${p.id}',this)"></div>
     </div>`).join('')
+  bindProcDnD()
+}
+
+let draggedProcId = null
+
+function bindProcDnD(){
+  document.querySelectorAll('.proc-row').forEach(row=>{
+    const handle=row.querySelector('.drag-handle')
+    if(!handle)return
+    handle.setAttribute('draggable','true')
+    handle.setAttribute('title','Arraste para mudar a ordem no portal')
+    handle.addEventListener('dragstart',e=>onProcDragStart(e,row.dataset.id))
+    handle.addEventListener('dragend',onProcDragEnd)
+  })
+}
+
+function clearProcDropMarks(){
+  document.querySelectorAll('.proc-row').forEach(row=>{
+    row.classList.remove('drop-before','drop-after')
+  })
+}
+
+function procDropSide(row,e){
+  const rect=row.getBoundingClientRect()
+  return e.clientY < rect.top + rect.height / 2 ? 'before' : 'after'
+}
+
+function onProcDragStart(e,id){
+  draggedProcId=id
+  e.dataTransfer.effectAllowed='move'
+  e.dataTransfer.setData('text/plain',id)
+  e.currentTarget.closest('.proc-row')?.classList.add('dragging')
+}
+
+function onProcDragOver(e){
+  if(!draggedProcId)return
+  e.preventDefault()
+  const row=e.currentTarget
+  const targetId=row.dataset.id
+  clearProcDropMarks()
+  if(targetId!==draggedProcId){
+    row.classList.add(procDropSide(row,e)==='before'?'drop-before':'drop-after')
+  }
+}
+
+function onProcDragLeave(e){
+  e.currentTarget.classList.remove('drop-before','drop-after')
+}
+
+function onProcDragEnd(){
+  draggedProcId=null
+  document.querySelectorAll('.proc-row').forEach(row=>{
+    row.classList.remove('dragging','drop-before','drop-after')
+  })
+}
+
+async function onProcDrop(e,targetId){
+  e.preventDefault()
+  if(!draggedProcId || draggedProcId===targetId){onProcDragEnd();return}
+  const side=procDropSide(e.currentTarget,e)
+  const dragId=draggedProcId
+  onProcDragEnd()
+  await reorderProcs(dragId,targetId,side)
+}
+
+async function reorderProcs(dragId,targetId,side){
+  const previous=[...procs]
+  const moving=procs.find(p=>p.id===dragId)
+  if(!moving)return
+
+  const next=procs.filter(p=>p.id!==dragId)
+  const targetIndex=next.findIndex(p=>p.id===targetId)
+  if(targetIndex<0)return
+  next.splice(side==='after'?targetIndex+1:targetIndex,0,moving)
+
+  procs=next.map((p,i)=>({...p,sort_order:i}))
+  renderProcs()
+
+  try{
+    const r=await fetch(`${API}/api/procedures/order`,{
+      method:'PATCH',
+      headers:h(),
+      body:JSON.stringify({ids:procs.map(p=>p.id)})
+    })
+    if(!r.ok)throw new Error()
+    toast('Ordem atualizada no portal')
+  }catch{
+    procs=previous
+    renderProcs()
+    toast('Erro ao salvar ordem dos procedimentos',false)
+  }
 }
 
 function fmtPrice(cents){

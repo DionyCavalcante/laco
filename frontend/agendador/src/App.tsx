@@ -79,6 +79,7 @@ interface Slot {
 }
 
 type Photo = { url: string; rotation: number; position_x?: number; position_y?: number };
+type ApiPhoto = Photo & { side: string };
 type ProcPhotos = Record<string, { before: Photo[]; after: Photo[]; carousel: Photo[] }>;
 
 interface BookingFormData {
@@ -150,7 +151,7 @@ async function apiLoadPhotos(procedures: Procedure[]): Promise<ProcPhotos> {
     procedures.map((p) =>
       fetch(`${API}/api/upload/procedure/${p.id}/photos`)
         .then((r) => (r.ok ? r.json() : []))
-        .then((photos: { side: string; url: string; rotation: number }[]) => ({
+        .then((photos: ApiPhoto[]) => ({
           id: p.id,
           before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
           after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
@@ -431,15 +432,14 @@ const GalleryPage = ({
   const items = procedures.map((p) => {
     const photos = procPhotos[p.id] || { before: [], after: [], carousel: [] };
     const isResults = p.photo_mode === 'results';
+    const mapPhoto = (photo?: Photo) => photo
+      ? { url: photoUrl(photo.url), rotation: photo.rotation, position_x: photo.position_x, position_y: photo.position_y }
+      : null;
     return {
       proc: p,
       isResults,
-      before: isResults
-        ? (photos.after[0] ? { url: photoUrl(photos.after[0].url), rotation: photos.after[0].rotation } : null)
-        : (photos.before[0] ? { url: photoUrl(photos.before[0].url), rotation: photos.before[0].rotation } : null),
-      after: isResults
-        ? (photos.after[1] ? { url: photoUrl(photos.after[1].url), rotation: photos.after[1].rotation } : null)
-        : (photos.after[0]  ? { url: photoUrl(photos.after[0].url),  rotation: photos.after[0].rotation  } : null),
+      before: isResults ? mapPhoto(photos.after[0]) : mapPhoto(photos.before[0]),
+      after: isResults ? mapPhoto(photos.after[1]) : mapPhoto(photos.after[0]),
     };
   });
 
