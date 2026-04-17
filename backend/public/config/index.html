@@ -467,6 +467,8 @@ const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
 
 function promptApiKey(){const k=prompt('Chave de acesso (API_SECRET):');if(k)localStorage.setItem('laco_api_key',k);return k||''}
 function h(){return{'Content-Type':'application/json','x-api-key':API_KEY}}
+// Supabase URLs são absolutas; URLs legadas começam com /uploads
+function imgUrl(url){return url&&url.startsWith('http')?url:API+url}
 
 function switchTab(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'))
@@ -763,7 +765,7 @@ function renderModalPhotoGrid(side, photos) {
   photos.forEach(p => { _photoAngles[p.id] = p.rotation || 0 })
   el.innerHTML = photos.map(p => `
     <div class="photo-thumb" id="thumb-${p.id}">
-      <img src="${p.url}?t=${Date.now()}" alt="${side}" loading="lazy"
+      <img src="${imgUrl(p.url)}" alt="${side}" loading="lazy"
         style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
       <button class="photo-edit" onclick="editorOpen('${p.id}','split')" title="Editar (girar/dividir)">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5"><path d="M11.5 2.5l2 2-8.5 8.5H3v-2L11.5 2.5z"/></svg>
@@ -973,7 +975,7 @@ function editorOpen(photoId, mode) {
   editorImg = new Image()
   editorImg.crossOrigin = 'anonymous'
   editorImg.onload = () => { editorDraw(); editorInitSplit() }
-  editorImg.src = `${API}${photo.url}?t=${Date.now()}`
+  editorImg.src = imgUrl(photo.url)
 }
 
 function editorDraw() {

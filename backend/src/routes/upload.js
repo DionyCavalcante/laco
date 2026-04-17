@@ -2,10 +2,15 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const sharp = require('sharp')
-const fs = require('fs/promises')
-const path = require('path')
+const { createClient } = require('@supabase/supabase-js')
 const db = require('../db')
 const { getEffectiveClinicId } = require('../lib/tenant')
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
+const BUCKET = 'photos'
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -30,12 +35,9 @@ router.post('/procedure/:id/photos', upload.fields([
       'SELECT id FROM procedures WHERE id = $1 AND clinic_id = $2',
       [procId, clinicId]
     )
-    if (!procedure) return res.status(404).json({ error: 'Procedimento nao encontrado' })
+    if (!procedure) return res.status(404).json({ error: 'Procedimento não encontrado' })
 
     const saved = { before: [], after: [], carousel: [] }
-    const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
-    const clinicDir = path.join(uploadDir, String(clinicId), 'procedures', String(procId))
-    await fs.mkdir(clinicDir, { recursive: true })
 
     for (const side of ['before', 'after', 'carousel']) {
       const files = req.files?.[side] || []
@@ -45,16 +47,23 @@ router.post('/procedure/:id/photos', upload.fields([
           .webp({ quality: 82 })
           .toBuffer()
 
-        const filename = `${side}-${Date.now()}-${idx}.webp`
-        const filePath = path.join(clinicDir, filename)
-        await fs.writeFile(filePath, buffer)
-        const url = `/uploads/${clinicId}/procedures/${procId}/${filename}`
-        saved[side].push(url)
+        const filename = `${clinicId}/procedures/${procId}/${side}-${Date.now()}-${idx}.webp`
+        const { error } = await supabase.storage
+          .from(BUCKET)
+          .upload(filename, buffer, { contentType: 'image/webp', upsert: false })
 
-        await db.query(`
-          INSERT INTO procedure_photos (procedure_id, side, url)
-          VALUES ($1, $2, $3)
-        `, [procId, side, url])
+        if (error) throw new Error(`Storage: ${error.message}`)
+
+        const { data: { publicUrl } } = supabase.storage
+          .from(BUCKET)
+          .getPublicUrl(filename)
+
+        saved[side].push(publicUrl)
+
+        await db.query(
+          'INSERT INTO procedure_photos (procedure_id, side, url, storage_path) VALUES ($1, $2, $3, $4)',
+          [procId, side, publicUrl, filename]
+        )
       }
     }
 
@@ -91,7 +100,6 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
 
-    // Recebe rotação absoluta (0, 90, 180, 270)
     const rotation = [0, 90, 180, 270].includes(Number(req.body?.rotation))
       ? Number(req.body.rotation)
       : (((rows[0].rotation || 0) + 90) % 360)
@@ -99,7 +107,6 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
     await db.query('UPDATE procedure_photos SET rotation = $1 WHERE id = $2', [rotation, req.params.photoId])
     res.json({ ok: true, rotation })
   } catch (err) {
-    console.error('Rotate error:', err)
     res.status(500).json({ error: 'Erro ao rotacionar foto' })
   }
 })
@@ -131,12 +138,17 @@ router.delete('/photo/:photoId', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
     const { rows } = await db.query(
-      `SELECT pp.id FROM procedure_photos pp
+      `SELECT pp.id, pp.storage_path FROM procedure_photos pp
        JOIN procedures p ON p.id = pp.procedure_id
        WHERE pp.id = $1 AND p.clinic_id = $2`,
       [req.params.photoId, clinicId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
+
+    // Remove do Supabase Storage se tiver o path registrado
+    if (rows[0].storage_path) {
+      await supabase.storage.from(BUCKET).remove([rows[0].storage_path])
+    }
 
     await db.query('DELETE FROM procedure_photos WHERE id = $1', [req.params.photoId])
     res.json({ ok: true })
