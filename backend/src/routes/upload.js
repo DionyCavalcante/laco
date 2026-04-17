@@ -93,7 +93,8 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
 
     const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')
     const filePath = path.join(uploadDir, rows[0].url.replace('/uploads/', ''))
-    const buffer = await sharp(filePath).rotate(90).webp({ quality: 82 }).toBuffer()
+    const degrees = [90, 180, 270].includes(Number(req.body?.degrees)) ? Number(req.body.degrees) : 90
+    const buffer = await sharp(filePath).rotate(degrees).webp({ quality: 82 }).toBuffer()
     await fs.writeFile(filePath, buffer)
     res.json({ ok: true })
   } catch (err) {

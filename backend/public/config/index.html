@@ -510,6 +510,7 @@ async function saveProc(){
     const url=id?`${API}/api/procedures/${id}`:`${API}/api/procedures`
     const r=await fetch(url,{method:id?'PATCH':'POST',headers:h(),body:JSON.stringify(body)})
     if(!r.ok)throw new Error()
+    await flushRotations()
     toast(id?'Procedimento atualizado!':'Procedimento criado!')
     closeModal()
     loadProcs()
@@ -820,19 +821,25 @@ async function uploadPhotos(e, side) {
 
 const _photoAngles = {}
 
-async function rotatePhoto(photoId) {
-  // Rotação visual imediata via CSS — sem depender de URL ou cache
+function rotatePhoto(photoId) {
+  // Apenas rotação visual — servidor só é chamado ao salvar
   _photoAngles[photoId] = ((_photoAngles[photoId] || 0) + 90) % 360
   const img = document.querySelector(`#thumb-${photoId} img`)
   if (img) img.style.transform = `rotate(${_photoAngles[photoId]}deg)`
+}
 
-  // Salva no servidor em background
-  fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
-    method: 'POST', headers: { 'x-api-key': API_KEY }
-  }).then(r => {
-    if (r.ok) toast('Foto girada!')
-    else toast('Erro ao salvar rotação', false)
-  }).catch(() => toast('Erro ao salvar rotação', false))
+async function flushRotations() {
+  const pending = Object.entries(_photoAngles).filter(([, deg]) => deg !== 0)
+  if (!pending.length) return
+  await Promise.all(pending.map(([photoId, degrees]) =>
+    fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      body: JSON.stringify({ degrees })
+    })
+  ))
+  // Limpa ângulos após salvar
+  pending.forEach(([photoId]) => delete _photoAngles[photoId])
 }
 
 async function deletePhoto(photoId, side) {
