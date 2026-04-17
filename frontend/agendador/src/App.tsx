@@ -78,7 +78,7 @@ interface Slot {
   taken: boolean;
 }
 
-type Photo = { url: string; rotation: number };
+type Photo = { url: string; rotation: number; position_x?: number; position_y?: number };
 type ProcPhotos = Record<string, { before: Photo[]; after: Photo[]; carousel: Photo[] }>;
 
 interface BookingFormData {
@@ -152,9 +152,9 @@ async function apiLoadPhotos(procedures: Procedure[]): Promise<ProcPhotos> {
         .then((r) => (r.ok ? r.json() : []))
         .then((photos: { side: string; url: string; rotation: number }[]) => ({
           id: p.id,
-          before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0 })),
-          after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0 })),
-          carousel: photos.filter((x) => x.side === 'carousel').map((x) => ({ url: x.url, rotation: x.rotation || 0 })),
+          before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
+          after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
+          carousel: photos.filter((x) => x.side === 'carousel').map((x) => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
         }))
     )
   );
@@ -525,7 +525,7 @@ const GalleryPage = ({
                   <div className="absolute inset-0" style={{
                     backgroundImage: `url(${before.url})`,
                     backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    backgroundPosition: `${before.position_x ?? 50}% ${before.position_y ?? 50}%`,
                     transform: before.rotation ? `rotate(${before.rotation}deg)` : undefined,
                     scale: (before.rotation && before.rotation % 180 !== 0) ? '1.42' : undefined,
                   }} />
@@ -539,7 +539,7 @@ const GalleryPage = ({
                   <div className="absolute inset-0" style={{
                     backgroundImage: `url(${after.url})`,
                     backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    backgroundPosition: `${after.position_x ?? 50}% ${after.position_y ?? 50}%`,
                     transform: after.rotation ? `rotate(${after.rotation}deg)` : undefined,
                     scale: (after.rotation && after.rotation % 180 !== 0) ? '1.42' : undefined,
                   }} />

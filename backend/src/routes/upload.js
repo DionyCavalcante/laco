@@ -89,7 +89,7 @@ router.post('/procedure/:id/photos', upload.fields([
 router.get('/procedure/:id/photos', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT id, procedure_id, side, url, rotation, sort_order, created_at FROM procedure_photos
+      SELECT id, procedure_id, side, url, rotation, sort_order, position_x, position_y, created_at FROM procedure_photos
       WHERE procedure_id = $1
       ORDER BY side, sort_order, created_at
     `, [req.params.id])
@@ -147,14 +147,11 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
   }
 })
 
-// PATCH /api/upload/photo/:photoId — muda o side (before/after/carousel)
+// PATCH /api/upload/photo/:photoId — muda side e/ou enquadramento
 router.patch('/photo/:photoId', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
-    const { side } = req.body
-    if (!['before', 'after', 'carousel'].includes(side)) {
-      return res.status(400).json({ error: 'Side inválido' })
-    }
+    const { side, position_x, position_y } = req.body
     const { rows } = await db.query(
       `SELECT pp.id FROM procedure_photos pp
        JOIN procedures p ON p.id = pp.procedure_id
@@ -162,10 +159,22 @@ router.patch('/photo/:photoId', async (req, res) => {
       [req.params.photoId, clinicId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
-    await db.query('UPDATE procedure_photos SET side = $1 WHERE id = $2', [side, req.params.photoId])
-    res.json({ ok: true, side })
+
+    if (side !== undefined) {
+      if (!['before', 'after', 'carousel'].includes(side)) {
+        return res.status(400).json({ error: 'Side inválido' })
+      }
+      await db.query('UPDATE procedure_photos SET side = $1 WHERE id = $2', [side, req.params.photoId])
+    }
+    if (position_x !== undefined || position_y !== undefined) {
+      await db.query(
+        'UPDATE procedure_photos SET position_x = COALESCE($1, position_x), position_y = COALESCE($2, position_y) WHERE id = $3',
+        [position_x ?? null, position_y ?? null, req.params.photoId]
+      )
+    }
+    res.json({ ok: true })
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao mover foto' })
+    res.status(500).json({ error: 'Erro ao atualizar foto' })
   }
 })
 

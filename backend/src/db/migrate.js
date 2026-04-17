@@ -197,6 +197,9 @@ async function migrate() {
       `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`,
       // Modo das fotos de agendamento: 'before_after' ou 'results' (Caso 1, Caso 2)
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS photo_mode TEXT DEFAULT 'before_after'`,
+      // Ponto focal para enquadramento (0-100, default 50=centro)
+      `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS position_x INTEGER DEFAULT 50`,
+      `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS position_y INTEGER DEFAULT 50`,
     ]
     for (const sql of alters) await client.query(sql)
 
