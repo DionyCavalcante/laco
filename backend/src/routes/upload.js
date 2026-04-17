@@ -6,9 +6,13 @@ const { createClient } = require('@supabase/supabase-js')
 const db = require('../db')
 const { getEffectiveClinicId } = require('../lib/tenant')
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados — uploads vão falhar!')
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 )
 const BUCKET = 'clinicas'
 
@@ -29,6 +33,10 @@ router.post('/procedure/:id/photos', upload.fields([
   { name: 'carousel', maxCount: 10 },
 ]), async (req, res) => {
   try {
+    if (!process.env.SUPABASE_URL) {
+      return res.status(500).json({ error: 'Supabase não configurado. Adicione SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY nas variáveis de ambiente.' })
+    }
+
     const procId = req.params.id
     const clinicId = await getEffectiveClinicId(req)
     const { rows: [procedure] } = await db.query(
@@ -48,11 +56,14 @@ router.post('/procedure/:id/photos', upload.fields([
           .toBuffer()
 
         const filename = `${clinicId}/procedures/${procId}/${side}-${Date.now()}-${idx}.webp`
-        const { error } = await supabase.storage
+        const { error: storageErr } = await supabase.storage
           .from(BUCKET)
           .upload(filename, buffer, { contentType: 'image/webp', upsert: false })
 
-        if (error) throw new Error(`Storage: ${error.message}`)
+        if (storageErr) {
+          console.error('Supabase Storage error:', storageErr)
+          throw new Error(`Storage: ${storageErr.message}`)
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from(BUCKET)
@@ -145,7 +156,6 @@ router.delete('/photo/:photoId', async (req, res) => {
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
 
-    // Remove do Supabase Storage se tiver o path registrado
     if (rows[0].storage_path) {
       await supabase.storage.from(BUCKET).remove([rows[0].storage_path])
     }
@@ -154,6 +164,70 @@ router.delete('/photo/:photoId', async (req, res) => {
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: 'Erro ao deletar foto' })
+  }
+})
+
+// POST /api/upload/migrate — migra fotos locais antigas para Supabase Storage
+// Fotos sem storage_path: tenta re-fazer fetch da URL local e subir pro Supabase.
+// Fotos inacessíveis (arquivo perdido) são removidas do banco.
+router.post('/migrate', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+
+    const { rows: photos } = await db.query(`
+      SELECT pp.id, pp.url, pp.procedure_id, pp.side
+      FROM procedure_photos pp
+      JOIN procedures p ON p.id = pp.procedure_id
+      WHERE p.clinic_id = $1 AND (pp.storage_path IS NULL OR pp.storage_path = '')
+      ORDER BY pp.created_at
+    `, [clinicId])
+
+    const results = { migrated: 0, removed: 0, failed: 0 }
+
+    for (const photo of photos) {
+      try {
+        // Monta a URL completa para tentar buscar o arquivo local
+        const baseUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`
+        const fileUrl = photo.url.startsWith('http') ? photo.url : `${baseUrl}${photo.url}`
+
+        const fetchRes = await fetch(fileUrl)
+        if (!fetchRes.ok) {
+          // Arquivo não existe mais — remove o registro órfão
+          await db.query('DELETE FROM procedure_photos WHERE id = $1', [photo.id])
+          results.removed++
+          continue
+        }
+
+        const buffer = Buffer.from(await fetchRes.arrayBuffer())
+        const processed = await sharp(buffer)
+          .resize({ width: 900, withoutEnlargement: true })
+          .webp({ quality: 82 })
+          .toBuffer()
+
+        const filename = `${clinicId}/procedures/${photo.procedure_id}/${photo.side}-migrated-${Date.now()}.webp`
+        const { error: storageErr } = await supabase.storage
+          .from(BUCKET)
+          .upload(filename, processed, { contentType: 'image/webp', upsert: true })
+
+        if (storageErr) throw storageErr
+
+        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filename)
+
+        await db.query(
+          'UPDATE procedure_photos SET url = $1, storage_path = $2 WHERE id = $3',
+          [publicUrl, filename, photo.id]
+        )
+        results.migrated++
+      } catch (e) {
+        console.error(`Falha ao migrar foto ${photo.id}:`, e.message)
+        results.failed++
+      }
+    }
+
+    res.json({ ok: true, total: photos.length, ...results })
+  } catch (err) {
+    console.error('Migrate error:', err)
+    res.status(500).json({ error: err.message })
   }
 })
 
