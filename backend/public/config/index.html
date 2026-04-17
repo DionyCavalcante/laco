@@ -780,7 +780,7 @@ function renderPhotoGrid(side, photos) {
   el.innerHTML = photos.map(p => `
     <div class="photo-thumb" id="thumb-${p.id}">
       <img src="${p.url}?t=${Date.now()}" alt="${side}" loading="lazy">
-      <button class="photo-rot" onclick="rotatePhoto('${p.id}','${side}')" title="Girar 90°">
+      <button class="photo-rot" onclick="rotatePhoto('${p.id}')" title="Girar 90°">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="photo-del" onclick="deletePhoto('${p.id}','${side}')" title="Remover">
@@ -818,29 +818,21 @@ async function uploadPhotos(e, side) {
   }
 }
 
-async function rotatePhoto(photoId, side, procId) {
-  const thumb = document.getElementById(`thumb-${photoId}`)
-  const img = thumb ? thumb.querySelector('img') : null
-  if (thumb) thumb.style.opacity = '0.5'
-  try {
-    const r = await fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
-      method: 'POST',
-      headers: { 'x-api-key': API_KEY }
-    })
-    if (!r.ok) throw new Error()
-    // Usa o blob retornado diretamente — zero dependência de cache de URL
-    const blob = await r.blob()
-    if (img) {
-      const prev = img.src
-      img.src = URL.createObjectURL(blob)
-      if (prev.startsWith('blob:')) URL.revokeObjectURL(prev)
-    }
-    if (thumb) thumb.style.opacity = '1'
-    toast('Foto girada!')
-  } catch {
-    if (thumb) thumb.style.opacity = '1'
-    toast('Erro ao girar foto', false)
-  }
+const _photoAngles = {}
+
+async function rotatePhoto(photoId) {
+  // Rotação visual imediata via CSS — sem depender de URL ou cache
+  _photoAngles[photoId] = ((_photoAngles[photoId] || 0) + 90) % 360
+  const img = document.querySelector(`#thumb-${photoId} img`)
+  if (img) img.style.transform = `rotate(${_photoAngles[photoId]}deg)`
+
+  // Salva no servidor em background
+  fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
+    method: 'POST', headers: { 'x-api-key': API_KEY }
+  }).then(r => {
+    if (r.ok) toast('Foto girada!')
+    else toast('Erro ao salvar rotação', false)
+  }).catch(() => toast('Erro ao salvar rotação', false))
 }
 
 async function deletePhoto(photoId, side) {
@@ -922,7 +914,7 @@ function renderCarouselGrid(procId,photos){
   grid.innerHTML=photos.map(p=>`
     <div class="photo-thumb" id="thumb-${p.id}">
       <img src="${p.url}?t=${Date.now()}" alt="carousel" loading="lazy">
-      <button class="photo-rot" onclick="rotatePhoto('${p.id}',null,'${procId}')" title="Girar 90°">
+      <button class="photo-rot" onclick="rotatePhoto('${p.id}')" title="Girar 90°">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="photo-del" onclick="deleteCarouselPhoto('${p.id}','${procId}')" title="Remover">
