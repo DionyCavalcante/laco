@@ -91,12 +91,13 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
     )
     if (!rows.length) return res.status(404).json({ error: 'Foto não encontrada' })
 
-    const incoming = Number(req.body?.degrees)
-    const delta = [90, 180, 270].includes(incoming) ? incoming : 90
-    const newRotation = ((rows[0].rotation || 0) + delta) % 360
+    // Recebe rotação absoluta (0, 90, 180, 270)
+    const rotation = [0, 90, 180, 270].includes(Number(req.body?.rotation))
+      ? Number(req.body.rotation)
+      : (((rows[0].rotation || 0) + 90) % 360)
 
-    await db.query('UPDATE procedure_photos SET rotation = $1 WHERE id = $2', [newRotation, req.params.photoId])
-    res.json({ ok: true, rotation: newRotation })
+    await db.query('UPDATE procedure_photos SET rotation = $1 WHERE id = $2', [rotation, req.params.photoId])
+    res.json({ ok: true, rotation })
   } catch (err) {
     console.error('Rotate error:', err)
     res.status(500).json({ error: 'Erro ao rotacionar foto' })

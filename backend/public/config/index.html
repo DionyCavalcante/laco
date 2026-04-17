@@ -778,9 +778,11 @@ async function loadProcPhotos(procId) {
 function renderPhotoGrid(side, photos) {
   const el = document.getElementById(`photos-${side}`)
   if (!photos.length) { el.innerHTML = '<div class="photo-empty-slot">Sem fotos ainda</div>'; return }
+  photos.forEach(p => { _photoAngles[p.id] = p.rotation || 0 })
   el.innerHTML = photos.map(p => `
     <div class="photo-thumb" id="thumb-${p.id}">
-      <img src="${p.url}?t=${Date.now()}" alt="${side}" loading="lazy">
+      <img src="${p.url}?t=${Date.now()}" alt="${side}" loading="lazy"
+        style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
       <button class="photo-rot" onclick="rotatePhoto('${p.id}')" title="Girar 90°">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -831,11 +833,11 @@ function rotatePhoto(photoId) {
 async function flushRotations() {
   const pending = Object.entries(_photoAngles).filter(([, deg]) => deg !== 0)
   if (!pending.length) return
-  await Promise.all(pending.map(([photoId, degrees]) =>
+  await Promise.all(pending.map(([photoId, rotation]) =>
     fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-      body: JSON.stringify({ degrees })
+      body: JSON.stringify({ rotation })  // absoluto, não delta
     })
   ))
   // Limpa ângulos após salvar
@@ -918,9 +920,12 @@ async function loadCarouselPhotos(procId){
 function renderCarouselGrid(procId,photos){
   const grid=document.getElementById('carousel-grid')
   if(!photos.length){grid.innerHTML='<div style="color:#aaa;font-size:11px;padding:4px 0">Nenhuma imagem ainda</div>';return}
+  // Inicializa ângulos com o que está salvo no banco
+  photos.forEach(p => { _photoAngles[p.id] = p.rotation || 0 })
   grid.innerHTML=photos.map(p=>`
     <div class="photo-thumb" id="thumb-${p.id}">
-      <img src="${p.url}?t=${Date.now()}" alt="carousel" loading="lazy">
+      <img src="${p.url}?t=${Date.now()}" alt="carousel" loading="lazy"
+        style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
       <button class="photo-rot" onclick="rotatePhoto('${p.id}')" title="Girar 90°">
         <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
