@@ -633,11 +633,13 @@ const OfferPage = ({
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const allProcPhotos: Photo[] = selectedProc ? [
+  const carouselPhotos = selectedProc ? (procPhotos[selectedProc.id]?.carousel || []) : [];
+  const fallbackProcPhotos = selectedProc ? [
     ...(procPhotos[selectedProc.id]?.before || []),
     ...(procPhotos[selectedProc.id]?.after || []),
-    ...(procPhotos[selectedProc.id]?.carousel || []),
-  ].map((p) => ({ url: photoUrl(p.url), rotation: p.rotation })) : [];
+  ] : [];
+  const allProcPhotos: Photo[] = (carouselPhotos.length > 0 ? carouselPhotos : fallbackProcPhotos)
+    .map((p) => ({ url: photoUrl(p.url), rotation: p.rotation }));
   const fallbackImages: Photo[] = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
