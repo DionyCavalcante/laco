@@ -522,8 +522,13 @@ const GalleryPage = ({
             <div className="relative h-64 flex">
               <div className="relative w-1/2 h-full overflow-hidden border-r border-white/20">
                 {before ? (
-                  <img className="w-full h-full object-cover" src={before.url} alt={isResults ? 'Caso 1' : 'Antes'}
-                    style={before.rotation ? { transform: `rotate(${before.rotation}deg)`, scale: before.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: `url(${before.url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    transform: before.rotation ? `rotate(${before.rotation}deg)` : undefined,
+                    scale: (before.rotation && before.rotation % 180 !== 0) ? '1.42' : undefined,
+                  }} />
                 ) : (
                   <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">{isResults ? 'Caso 1' : 'Antes'}</div>
                 )}
@@ -531,8 +536,13 @@ const GalleryPage = ({
               </div>
               <div className="relative w-1/2 h-full overflow-hidden">
                 {after ? (
-                  <img className="w-full h-full object-cover" src={after.url} alt={isResults ? 'Caso 2' : 'Depois'}
-                    style={after.rotation ? { transform: `rotate(${after.rotation}deg)`, scale: after.rotation % 180 !== 0 ? '1.4' : '1' } : undefined} />
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: `url(${after.url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    transform: after.rotation ? `rotate(${after.rotation}deg)` : undefined,
+                    scale: (after.rotation && after.rotation % 180 !== 0) ? '1.42' : undefined,
+                  }} />
                 ) : (
                   <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">{isResults ? 'Caso 2' : 'Depois'}</div>
                 )}
