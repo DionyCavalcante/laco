@@ -100,6 +100,28 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .photo-thumb:hover .photo-del,.photo-thumb:hover .photo-rot{opacity:1}
 .photo-del svg,.photo-rot svg{width:10px;height:10px;stroke:white;fill:none}
 .photo-empty-slot{border-radius:8px;aspect-ratio:1;background:#F0EBE8;border:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
+
+/* Processar Fotos */
+.proc-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
+.proc-photo-item{background:#F0EBE8;border-radius:10px;overflow:hidden;border:0.5px solid rgba(0,0,0,0.08);position:relative}
+.proc-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.proc-photo-actions{padding:6px;display:flex;gap:4px;background:white;border-top:0.5px solid rgba(0,0,0,0.07)}
+.proc-photo-actions button{flex:1;padding:5px 0;font-size:10px;font-weight:600;border-radius:6px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.15);background:none;color:#555}
+.proc-photo-actions button:hover{background:#FAF7F5}
+.proc-photo-actions .btn-split{color:#B8657A;border-color:#B8657A}
+.proc-photo-actions .btn-rot{color:#555}
+.editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.editor-overlay.on{display:flex}
+.editor-wrap{position:relative;max-width:90vw;max-height:70vh}
+.editor-wrap canvas{max-width:90vw;max-height:70vh;border-radius:8px;cursor:col-resize}
+.split-line{position:absolute;top:0;bottom:0;width:3px;background:#B8657A;cursor:col-resize;transform:translateX(-50%)}
+.split-line::before{content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#B8657A;color:white;font-size:10px;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.editor-toolbar{display:flex;gap:10px;margin-top:16px;align-items:center}
+.editor-toolbar button{padding:8px 18px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer}
+.btn-editor-rot{background:white;color:#111}
+.btn-editor-save{background:#B8657A;color:white}
+.btn-editor-cancel{background:rgba(255,255,255,0.15);color:white}
+.editor-hint{color:rgba(255,255,255,0.6);font-size:12px;margin-top:10px;text-align:center}
 </style>
 </head>
 <body>
@@ -115,6 +137,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 <div class="nav">
   <div class="nav-tab on" onclick="switchTab('procedimentos',this)">Procedimentos</div>
   <div class="nav-tab" onclick="switchTab('fotos',this)">Fotos antes/depois</div>
+  <div class="nav-tab" onclick="switchTab('processar',this)">✂ Processar Fotos</div>
   <div class="nav-tab" onclick="switchTab('portal',this)">Portal</div>
   <div class="nav-tab" onclick="switchTab('horarios',this)">Horários</div>
   <div class="nav-tab" onclick="switchTab('clinica',this)">Clínica</div>
@@ -283,6 +306,46 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
       </div>
     </div>
   </div>
+</div>
+
+<!-- PROCESSAR FOTOS -->
+<div class="panel" id="panel-processar">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Processar Fotos</div>
+          <div class="section-sub">Gire, corte ou divida fotos compostas (antes+depois na mesma imagem)</div>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-bottom:0.5px solid rgba(0,0,0,0.07)">
+        <select id="pp-proc-select" style="width:100%;padding:9px 12px;font-size:13px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;outline:none" onchange="ppLoadPhotos(this.value)">
+          <option value="">Selecione um procedimento...</option>
+        </select>
+      </div>
+      <div id="pp-grid-wrap" style="padding:16px 20px;display:none">
+        <div style="font-size:12px;color:#aaa;margin-bottom:8px">Clique em <strong>Girar</strong> para corrigir orientação · <strong>Dividir</strong> para separar 2 fotos em uma</div>
+        <div id="pp-grid" class="proc-photo-grid"></div>
+      </div>
+      <div id="pp-empty" style="padding:40px;text-align:center;color:#aaa;font-size:13px">Selecione um procedimento acima.</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR DE FOTO -->
+<div class="editor-overlay" id="photo-editor">
+  <div style="text-align:center;color:white;font-size:15px;font-weight:500;margin-bottom:12px" id="editor-title">Editando foto</div>
+  <div class="editor-wrap" id="editor-wrap">
+    <canvas id="editor-canvas"></canvas>
+    <div class="split-line" id="split-line" style="display:none;left:50%"></div>
+  </div>
+  <div class="editor-toolbar">
+    <button class="btn-editor-cancel" onclick="editorClose()">Cancelar</button>
+    <button class="btn-editor-rot" onclick="editorRotate()">↺ Girar 90°</button>
+    <button id="btn-split-toggle" class="btn-editor-rot" onclick="editorToggleSplit()">✂ Ativar Divisão</button>
+    <button class="btn-editor-save" onclick="editorSave()">✓ Salvar</button>
+  </div>
+  <div class="editor-hint" id="editor-hint">Arraste a linha para definir o ponto de divisão</div>
 </div>
 
 <!-- MODAL: criar/editar procedimento -->
@@ -916,6 +979,208 @@ window.switchTab = function(name, el) {
 loadProcs()
 loadHours()
 initClinic()
+
+/* ---- PROCESSAR FOTOS ---- */
+let ppCurrentProc = null
+let ppPhotos = []
+
+async function ppInit() {
+  const sel = document.getElementById('pp-proc-select')
+  if (!procs.length) await loadProcs()
+  sel.innerHTML = '<option value="">Selecione um procedimento...</option>' +
+    procs.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')
+}
+
+async function ppLoadPhotos(procId) {
+  ppCurrentProc = procId
+  if (!procId) {
+    document.getElementById('pp-grid-wrap').style.display = 'none'
+    document.getElementById('pp-empty').style.display = 'block'
+    return
+  }
+  document.getElementById('pp-grid-wrap').style.display = 'block'
+  document.getElementById('pp-empty').style.display = 'none'
+  document.getElementById('pp-grid').innerHTML = '<div style="color:#aaa;font-size:12px">Carregando...</div>'
+  const r = await fetch(`${API}/api/upload/procedure/${procId}/photos`, { headers: h() })
+  ppPhotos = r.ok ? await r.json() : []
+  ppRenderGrid()
+}
+
+function ppRenderGrid() {
+  const grid = document.getElementById('pp-grid')
+  if (!ppPhotos.length) { grid.innerHTML = '<div style="color:#aaa;font-size:12px">Nenhuma foto.</div>'; return }
+  grid.innerHTML = ppPhotos.map(p => `
+    <div class="proc-photo-item" id="ppi-${p.id}">
+      <img src="${API}${p.url}?t=${Date.now()}" loading="lazy"
+        style="${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.5':'1'}` : ''}">
+      <div style="font-size:10px;color:#aaa;text-align:center;padding:2px 0">${p.side} ${p.rotation ? '· '+p.rotation+'°' : ''}</div>
+      <div class="proc-photo-actions">
+        <button class="btn-rot" onclick="editorOpen('${p.id}','rotate')">↺ Girar</button>
+        <button class="btn-split" onclick="editorOpen('${p.id}','split')">✂ Dividir</button>
+      </div>
+    </div>`).join('')
+}
+
+/* ---- EDITOR CANVAS ---- */
+let editorPhotoId = null
+let editorMode = 'rotate'
+let editorImg = new Image()
+let editorRotation = 0
+let editorSplitX = 0.5
+let editorSplitActive = false
+
+function editorOpen(photoId, mode) {
+  const photo = ppPhotos.find(p => p.id === photoId)
+  if (!photo) return
+  editorPhotoId = photoId
+  editorMode = mode
+  editorRotation = photo.rotation || 0
+  editorSplitActive = false
+  editorSplitX = 0.5
+
+  document.getElementById('photo-editor').classList.add('on')
+  document.getElementById('editor-title').textContent = mode === 'split' ? 'Dividir foto em 2' : 'Girar / corrigir orientação'
+  document.getElementById('editor-hint').style.display = mode === 'split' ? 'block' : 'none'
+  document.getElementById('btn-split-toggle').style.display = mode === 'split' ? 'inline-block' : 'none'
+  document.getElementById('split-line').style.display = 'none'
+
+  editorImg = new Image()
+  editorImg.crossOrigin = 'anonymous'
+  editorImg.onload = () => { editorDraw(); if (mode === 'split') editorInitSplit() }
+  editorImg.src = `${API}${photo.url}?t=${Date.now()}`
+}
+
+function editorDraw() {
+  const canvas = document.getElementById('editor-canvas')
+  const ctx = canvas.getContext('2d')
+  const rad = editorRotation * Math.PI / 180
+  const sw = editorImg.naturalWidth, sh = editorImg.naturalHeight
+  const rotated = editorRotation % 180 !== 0
+  canvas.width  = rotated ? sh : sw
+  canvas.height = rotated ? sw : sh
+  ctx.save()
+  ctx.translate(canvas.width/2, canvas.height/2)
+  ctx.rotate(rad)
+  ctx.drawImage(editorImg, -sw/2, -sh/2)
+  ctx.restore()
+  // Atualiza posição da split line
+  if (editorSplitActive) {
+    const sl = document.getElementById('split-line')
+    const rect = canvas.getBoundingClientRect()
+    sl.style.left = (editorSplitX * rect.width) + 'px'
+  }
+}
+
+function editorRotate() {
+  editorRotation = (editorRotation + 90) % 360
+  editorDraw()
+}
+
+function editorToggleSplit() {
+  editorSplitActive = !editorSplitActive
+  document.getElementById('split-line').style.display = editorSplitActive ? 'block' : 'none'
+  document.getElementById('btn-split-toggle').textContent = editorSplitActive ? '✂ Desativar Divisão' : '✂ Ativar Divisão'
+  editorDraw()
+}
+
+function editorInitSplit() {
+  const sl = document.getElementById('split-line')
+  const wrap = document.getElementById('editor-wrap')
+  let dragging = false
+  sl.onmousedown = (e) => { dragging = true; e.preventDefault() }
+  window.onmousemove = (e) => {
+    if (!dragging) return
+    const rect = document.getElementById('editor-canvas').getBoundingClientRect()
+    editorSplitX = Math.max(0.1, Math.min(0.9, (e.clientX - rect.left) / rect.width))
+    sl.style.left = (editorSplitX * rect.width) + 'px'
+  }
+  window.onmouseup = () => { dragging = false }
+  // Touch
+  sl.ontouchstart = (e) => { dragging = true; e.preventDefault() }
+  window.ontouchmove = (e) => {
+    if (!dragging) return
+    const rect = document.getElementById('editor-canvas').getBoundingClientRect()
+    editorSplitX = Math.max(0.1, Math.min(0.9, (e.touches[0].clientX - rect.left) / rect.width))
+    sl.style.left = (editorSplitX * rect.width) + 'px'
+  }
+  window.ontouchend = () => { dragging = false }
+}
+
+function editorClose() {
+  document.getElementById('photo-editor').classList.remove('on')
+  window.onmousemove = null; window.onmouseup = null
+  window.ontouchmove = null; window.ontouchend = null
+}
+
+async function editorSave() {
+  const canvas = document.getElementById('editor-canvas')
+  const photo = ppPhotos.find(p => p.id === editorPhotoId)
+  if (!photo) return
+
+  const btn = document.querySelector('.btn-editor-save')
+  btn.textContent = 'Salvando...'; btn.disabled = true
+
+  try {
+    if (editorSplitActive && editorMode === 'split') {
+      // Divide canvas em dois e faz upload de cada parte
+      const w = canvas.width, h = canvas.height
+      const splitPx = Math.round(editorSplitX * w)
+
+      const left  = canvasSlice(canvas, 0, 0, splitPx, h)
+      const right = canvasSlice(canvas, splitPx, 0, w - splitPx, h)
+
+      await uploadProcessed(left,  photo.procedure_id, photo.side)
+      await uploadProcessed(right, photo.procedure_id, photo.side)
+      // Remove a foto original
+      await fetch(`${API}/api/upload/photo/${editorPhotoId}`, { method: 'DELETE', headers: h() })
+      toast('Foto dividida em 2!')
+    } else {
+      // Apenas rotação — envia canvas como novo arquivo, remove original
+      const blob = await canvasToBlob(canvas)
+      await uploadProcessedBlob(blob, photo.procedure_id, photo.side)
+      await fetch(`${API}/api/upload/photo/${editorPhotoId}`, { method: 'DELETE', headers: h() })
+      toast('Foto salva!')
+    }
+    editorClose()
+    await ppLoadPhotos(ppCurrentProc)
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message, false)
+  } finally {
+    btn.textContent = '✓ Salvar'; btn.disabled = false
+  }
+}
+
+function canvasSlice(src, x, y, w, h) {
+  const c = document.createElement('canvas')
+  c.width = w; c.height = h
+  c.getContext('2d').drawImage(src, x, y, w, h, 0, 0, w, h)
+  return c
+}
+
+function canvasToBlob(canvas) {
+  return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92))
+}
+
+async function uploadProcessed(canvas, procId, side) {
+  const blob = await canvasToBlob(canvas)
+  return uploadProcessedBlob(blob, procId, side)
+}
+
+async function uploadProcessedBlob(blob, procId, side) {
+  const fd = new FormData()
+  fd.append(side, new File([blob], 'processed.jpg', { type: 'image/jpeg' }))
+  const r = await fetch(`${API}/api/upload/procedure/${procId}/photos`, {
+    method: 'POST', headers: { 'x-api-key': API_KEY }, body: fd
+  })
+  if (!r.ok) throw new Error('Upload falhou')
+  return r.json()
+}
+
+const _switchTabOrig = window.switchTab
+window.switchTab = function(name, el) {
+  _switchTabOrig(name, el)
+  if (name === 'processar') ppInit()
+}
 
 /* ---- CAROUSEL de imagens ---- */
 async function loadCarouselPhotos(procId){
