@@ -1051,7 +1051,7 @@ function renderLead(l) {
       ? new Date(l.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})
       : '—'
   return `
-    <div class="trow" onclick="window.location.href='/cliente.html?id=${l.id}'" style="cursor:pointer">
+    <div class="trow" onclick="window.location.href='/'+SLUG+'/cliente?id=${l.id}'" style="cursor:pointer">
       <div class="av ${avClass}">${initials}</div>
       <div class="col-name">
         <div class="c-name">${esc(l.name)}</div>

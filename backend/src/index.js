@@ -77,6 +77,7 @@ app.get('/:slug/agendar',   (req, res) => res.sendFile(path.join(pub, 'index.htm
 app.get('/:slug/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 app.get('/:slug/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
 app.get('/:slug/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
+app.get('/:slug/cliente',   (req, res) => res.sendFile(path.join(pub, 'cliente.html')))
 app.get('/:slug',           (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // 404

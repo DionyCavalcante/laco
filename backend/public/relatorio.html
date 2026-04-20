@@ -9,13 +9,25 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
-.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.brand{display:flex;align-items:center;gap:8px}
-.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
-.brand-dot svg{width:13px;height:13px;fill:white}
-.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
-.back-btn{font-size:12px;color:#B8657A;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0}
-.back-btn:hover{text-decoration:underline}
+/* ── Navbar ── */
+.navbar{height:56px;background:white;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;padding:0 24px;gap:0;position:sticky;top:0;z-index:100}
+.nb-brand{display:flex;align-items:center;gap:9px;margin-right:32px;flex-shrink:0}
+.nb-mark{width:30px;height:30px;border-radius:9px;background:#B8657A;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(184,101,122,0.28);flex-shrink:0}
+.nb-mark svg{width:14px;height:14px;fill:white}
+.nb-logo-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;color:#1A1614;letter-spacing:0.02em;line-height:1}
+.nb-nav{display:flex;align-items:center;gap:2px}
+.nb-link{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#6B5E59;transition:background 0.15s,color 0.15s;white-space:nowrap;text-decoration:none}
+.nb-link svg{width:14px;height:14px;opacity:0.7}
+.nb-link:hover{background:#F5F1EE;color:#1A1614}
+.nb-link.active{background:rgba(184,101,122,0.09);color:#B8657A}
+.nb-link.active svg{opacity:1}
+.nb-spacer{flex:1}
+.nb-right{display:flex;align-items:center;gap:8px}
+.clinic-pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#6B5E59;background:#F5F1EE;border:1px solid rgba(0,0,0,0.11);border-radius:20px;padding:5px 12px;white-space:nowrap}
+.clinic-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:#2D8C66;flex-shrink:0}
+.nb-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#A89890;transition:background 0.15s,color 0.15s;text-decoration:none;cursor:pointer}
+.nb-icon svg{width:16px;height:16px}
+.nb-icon:hover{background:#F5F1EE;color:#1A1614}
 .page{max-width:900px;margin:0 auto;padding:24px}
 .page-title{font-size:18px;font-weight:500;margin-bottom:4px}
 .page-sub{font-size:13px;color:#666;margin-bottom:24px}
@@ -75,7 +87,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .period-cmd-bar{
   background:white;
   border-bottom:2px solid rgba(0,0,0,0.08);
-  position:sticky;top:52px;z-index:9;
+  position:sticky;top:56px;z-index:9;
   box-shadow:0 2px 12px rgba(0,0,0,0.05);
 }
 .period-cmd-bar::before{
@@ -151,13 +163,36 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
-    <span class="brand-name">Laço</span>
+<header class="navbar">
+  <div class="nb-brand">
+    <div class="nb-mark"><svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3.2"/><path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
+    <span class="nb-logo-name">Laço</span>
   </div>
-  <button class="back-btn" id="back-btn">← Voltar</button>
-</div>
+  <nav class="nb-nav">
+    <a id="nav-painel" href="#" class="nb-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+      <span>Painel</span>
+    </a>
+    <a id="nav-hoje" href="#" class="nb-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+      <span>Hoje</span>
+    </a>
+    <a id="nav-relatorio" href="#" class="nb-link active">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/><line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg>
+      <span>Relatório</span>
+    </a>
+  </nav>
+  <div class="nb-spacer"></div>
+  <div class="nb-right">
+    <span class="clinic-pill" id="clinic-name">Carregando...</span>
+    <a id="nav-config" href="#" class="nb-icon" title="Configurações">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/></svg>
+    </a>
+    <button onclick="logout()" class="nb-icon" title="Sair">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg>
+    </button>
+  </div>
+</header>
 
 <!-- ═══ PERIOD COMMAND BAR ═══ -->
 <div class="period-cmd-bar">
@@ -218,7 +253,35 @@ if (!localStorage.getItem("token")) {
 
 const API = window.location.origin
 const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.getItem('laco_slug') || ''
-document.getElementById('back-btn').onclick = () => location.href = '/' + SLUG + '/'
+
+;(function setNavLinks() {
+  const base = SLUG ? '/' + SLUG : ''
+  document.getElementById('nav-painel').href    = base + '/'
+  document.getElementById('nav-hoje').href      = base + '/hoje'
+  document.getElementById('nav-relatorio').href = base + '/relatorio'
+  document.getElementById('nav-config').href    = base + '/config'
+})()
+
+;(async function loadClinicName() {
+  try {
+    const r = await fetch(`${API}/api/portal/${SLUG}`)
+    if (r.ok) {
+      const d = await r.json()
+      const el = document.getElementById('clinic-name')
+      if (el) el.textContent = d.clinic.name
+    }
+  } catch(e) {}
+})()
+
+function logout() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('user')
+  localStorage.removeItem('laco_slug')
+  localStorage.removeItem('laco_onboarding_step')
+  location.href = '/login'
+}
+
 let dateFrom = null, dateTo = null
 function h() { const jwt = localStorage.getItem('token'); return jwt ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt } : {} }
 
