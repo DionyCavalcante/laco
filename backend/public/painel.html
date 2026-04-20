@@ -877,9 +877,16 @@ const API = window.location.origin
 // URL é fonte primária do slug — evita que localStorage desatualizado cause inconsistência
 const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.getItem('laco_slug') || ''
 
-// Slug guard: se a sessão pertence a outro slug, redireciona para o correto
+// Slug guard
 ;(function slugGuard() {
   const slugFromStorage = localStorage.getItem('laco_slug')
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  // Superadmin sem clínica não deve acessar /:slug/ diretamente
+  if (user.role === 'superadmin') {
+    location.replace('/superadmin')
+    return
+  }
+  // Sessão de outra clínica → redireciona para a correta
   if (slugFromStorage && SLUG && SLUG !== slugFromStorage) {
     location.replace('/' + slugFromStorage + '/')
   }
