@@ -490,6 +490,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 <div class="toast" id="toast"></div>
 
 <script>
+if (!localStorage.getItem('token')) {
+  location.href = '/login'
+}
+
 const API = window.location.origin
 // Extrai slug do pathname (funciona em /:slug/config e /config)
 const SLUG = location.pathname.split('/').filter(Boolean)[0] !== 'config'
