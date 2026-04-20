@@ -902,6 +902,33 @@ function headers() {
   return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
 }
 
+async function authFetch(url, opts = {}) {
+  opts.headers = { ...headers(), ...(opts.headers || {}) }
+  let res = await fetch(url, opts)
+  if (res.status === 401) {
+    const rt = localStorage.getItem('refreshToken')
+    if (rt) {
+      const rr = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt })
+      })
+      if (rr.ok) {
+        const d = await rr.json()
+        localStorage.setItem('token', d.token)
+        localStorage.setItem('refreshToken', d.refreshToken)
+        opts.headers['Authorization'] = 'Bearer ' + d.token
+        res = await fetch(url, opts)
+      } else {
+        logout(); return res
+      }
+    } else {
+      logout(); return res
+    }
+  }
+  return res
+}
+
 function logout() {
   localStorage.removeItem('token')
   localStorage.removeItem('refreshToken')
@@ -992,8 +1019,8 @@ async function loadStats() {
   try {
     const dp = buildDateParams()
     const [lr, ar] = await Promise.all([
-      fetch(`${API}/api/leads/stats${dp}`, { headers: headers() }),
-      fetch(`${API}/api/appointments/stats${dp}`, { headers: headers() })
+      authFetch(`${API}/api/leads/stats${dp}`),
+      authFetch(`${API}/api/appointments/stats${dp}`)
     ])
     if (lr.ok) {
       const d = await lr.json()
@@ -1022,7 +1049,7 @@ async function loadLeads(search = '') {
       url += `status=${currentFilter}&`
     }
     if (search) url += `search=${encodeURIComponent(search)}`
-    const r = await fetch(url, { headers: headers() })
+    const r = await authFetch(url)
     if (!r.ok) { list.innerHTML = '<div class="empty">Erro ao carregar dados.</div>'; return }
     const leads = await r.json()
     if (!leads.length) { list.innerHTML = '<div class="empty">Nenhum cliente encontrado.</div>'; return }
@@ -1074,7 +1101,7 @@ function renderLead(l) {
 
 async function loadAptStats() {
   try {
-    const r = await fetch(`${API}/api/appointments/stats`, { headers: headers() })
+    const r = await authFetch(`${API}/api/appointments/stats`)
     if (!r.ok) return
     const d = await r.json()
     document.getElementById('a-total').textContent     = d.total     || 0
@@ -1087,7 +1114,7 @@ async function loadAppointments() {
   const list = document.getElementById('apt-list')
   list.innerHTML = '<div class="loading">Carregando...</div>'
   try {
-    const r = await fetch(`${API}/api/appointments${buildDateParams()}`, { headers: headers() })
+    const r = await authFetch(`${API}/api/appointments${buildDateParams()}`)
     if (!r.ok) { list.innerHTML = '<div class="empty">Erro ao carregar.</div>'; return }
     const apts = await r.json()
     if (!apts.length) { list.innerHTML = '<div class="empty">Nenhum agendamento ainda.</div>'; return }
@@ -1131,7 +1158,7 @@ async function deleteLead(id, e) {
   e.stopPropagation()
   if (!confirm('Excluir este cliente e todos os agendamentos dele?')) return
   try {
-    await fetch(API+'/api/leads/'+id, { method:'DELETE', headers:headers() })
+    await authFetch(API+'/api/leads/'+id, { method:'DELETE' })
     loadLeads(document.querySelector('.search-wrap input').value)
     loadStats()
   } catch(e) {}
@@ -1140,8 +1167,8 @@ async function deleteLead(id, e) {
 async function updateAptStatus(id, status, sel) {
   if(sel){sel.className='inline-sel s-'+status}
   try {
-    await fetch(API+'/api/appointments/'+id+'/status', {
-      method:'PATCH', headers:headers(), body:JSON.stringify({status})
+    await authFetch(API+'/api/appointments/'+id+'/status', {
+      method:'PATCH', body:JSON.stringify({status})
     })
     loadStats()
   } catch(e) {}
@@ -1189,8 +1216,8 @@ document.addEventListener('click', function(e) {
 async function updateLeadStatus(id, status, sel) {
   if(sel){sel.className='inline-sel s-'+status}
   try {
-    await fetch(API+'/api/leads/'+id+'/status', {
-      method:'PATCH', headers:headers(), body:JSON.stringify({status})
+    await authFetch(API+'/api/leads/'+id+'/status', {
+      method:'PATCH', body:JSON.stringify({status})
     })
     loadLeads(document.querySelector('.search-wrap input').value)
     loadStats()
