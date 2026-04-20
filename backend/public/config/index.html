@@ -491,7 +491,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 
 <script>
 const API = window.location.origin
-const API_KEY = localStorage.getItem('laco_api_key') || promptApiKey()
 // Extrai slug do pathname (funciona em /:slug/config e /config)
 const SLUG = location.pathname.split('/').filter(Boolean)[0] !== 'config'
   ? location.pathname.split('/').filter(Boolean)[0]
@@ -502,8 +501,21 @@ const SLUG = location.pathname.split('/').filter(Boolean)[0] !== 'config'
   if (link && SLUG) link.href = '/' + SLUG + '/'
 })()
 
+// Usa JWT do login se disponível; fallback para API key (acesso direto sem login)
+function h() {
+  const jwt = localStorage.getItem('token')
+  if (jwt) return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt }
+  const key = localStorage.getItem('laco_api_key') || promptApiKey()
+  return { 'Content-Type': 'application/json', 'x-api-key': key }
+}
+// Para uploads (FormData) — sem Content-Type, deixa o browser setar o boundary
+function hUpload() {
+  const jwt = localStorage.getItem('token')
+  if (jwt) return { 'Authorization': 'Bearer ' + jwt }
+  const key = localStorage.getItem('laco_api_key') || promptApiKey()
+  return { 'x-api-key': key }
+}
 function promptApiKey(){const k=prompt('Chave de acesso (API_SECRET):');if(k)localStorage.setItem('laco_api_key',k);return k||''}
-function h(){return{'Content-Type':'application/json','x-api-key':API_KEY}}
 // Supabase URLs são absolutas; URLs legadas começam com /uploads
 function imgUrl(url){return url&&url.startsWith('http')?url:API+url}
 
@@ -1076,7 +1088,7 @@ async function modalUploadPhotos(e, side) {
   try {
     bar.style.width = '40%'
     const r = await fetch(`${API}/api/upload/procedure/${procId}/photos`, {
-      method: 'POST', headers: { 'x-api-key': API_KEY }, body: fd
+      method: 'POST', headers: { ...hUpload() }, body: fd
     })
     bar.style.width = '100%'
     if (!r.ok) throw new Error()
@@ -1113,7 +1125,7 @@ function rotatePhoto(photoId, saveNow = false) {
   if (saveNow) {
     fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      headers: { ...h() },
       body: JSON.stringify({ rotation: rot })
     }).then(r => { if (r.ok) toast('Foto girada!'); else toast('Erro ao girar', false) })
       .catch(() => toast('Erro ao girar', false))
@@ -1169,7 +1181,7 @@ async function flushRotations() {
   await Promise.all(pending.map(([photoId, rotation]) =>
     fetch(`${API}/api/upload/photo/${photoId}/rotate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      headers: { ...h() },
       body: JSON.stringify({ rotation })
     })
   ))
@@ -1417,7 +1429,7 @@ async function uploadProcessedBlob(blob, procId, side) {
   const fd = new FormData()
   fd.append(side, new File([blob], 'processed.jpg', { type: 'image/jpeg' }))
   const r = await fetch(`${API}/api/upload/procedure/${procId}/photos`, {
-    method: 'POST', headers: { 'x-api-key': API_KEY }, body: fd
+    method: 'POST', headers: { ...hUpload() }, body: fd
   })
   if (!r.ok) throw new Error('Upload falhou')
   return r.json()
