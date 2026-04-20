@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laço — Relatório</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
+.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
+.brand-dot svg{width:13px;height:13px;fill:white}
+.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
+.back-btn{font-size:12px;color:#B8657A;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0}
+.back-btn:hover{text-decoration:underline}
+.page{max-width:900px;margin:0 auto;padding:24px}
+.page-title{font-size:18px;font-weight:500;margin-bottom:4px}
+.page-sub{font-size:13px;color:#666;margin-bottom:24px}
+
+/* Stats grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:16px 18px}
+.kpi-label{font-size:11px;color:#888;margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:500;line-height:1}
+.kpi-sub{font-size:11px;color:#aaa;margin-top:4px}
+.kpi-val.green{color:#2E8C66}
+.kpi-val.purple{color:#B8657A}
+.kpi-val.amber{color:#9A6B10}
+.kpi-val.red{color:#A32D2D}
+
+/* Charts row */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px}
+.chart-title{font-size:13px;font-weight:500;margin-bottom:16px}
+
+/* Funnel */
+.funnel{display:flex;flex-direction:column;gap:8px}
+.funnel-row{display:flex;align-items:center;gap:10px}
+.funnel-label{font-size:12px;color:#666;width:110px;flex-shrink:0;text-align:right}
+.funnel-bar-wrap{flex:1;height:28px;background:#F0EBE8;border-radius:6px;overflow:hidden;position:relative}
+.funnel-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:500;color:white;white-space:nowrap;min-width:32px;transition:width 0.6s ease}
+.funnel-count{font-size:12px;font-weight:500;width:32px;text-align:right;flex-shrink:0}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#555}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-val{font-weight:500;color:#111;margin-left:auto;padding-left:12px}
+
+/* Rejection reasons */
+.reason-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px;margin-bottom:14px}
+.reason-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.reason-row:last-child{margin:0}
+.reason-name{font-size:13px;flex:1}
+.reason-bar-wrap{flex:2;height:8px;background:#F0EBE8;border-radius:4px;overflow:hidden}
+.reason-bar{height:100%;border-radius:4px;background:#F0997B}
+.reason-pct{font-size:12px;font-weight:500;color:#A04830;width:36px;text-align:right}
+
+/* Proc table */
+.proc-table{width:100%;border-collapse:collapse}
+.proc-table th{font-size:11px;color:#aaa;font-weight:500;text-align:left;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,0.08)}
+.proc-table td{font-size:13px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.proc-table tr:last-child td{border:none}
+.proc-table td:not(:first-child){text-align:right}
+.conv-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+
+.loading{padding:64px;text-align:center;color:#aaa;font-size:13px}
+
+/* ── Period Command Bar ── */
+.period-cmd-bar{
+  background:white;
+  border-bottom:2px solid rgba(0,0,0,0.08);
+  position:sticky;top:52px;z-index:9;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+}
+.period-cmd-bar::before{
+  content:'';display:block;height:2px;
+  background:linear-gradient(90deg,#B8657A 0%,#D4899A 60%,transparent 100%);
+  opacity:0.5;
+}
+.period-cmd-inner{
+  max-width:900px;margin:0 auto;
+  padding:0 24px;height:50px;
+  display:flex;align-items:center;gap:0;
+}
+.pcb-status{
+  display:flex;align-items:center;gap:9px;
+  flex-shrink:0;padding-right:20px;margin-right:16px;
+  border-right:1px solid rgba(0,0,0,0.08);
+}
+.pcb-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#D4CCC8;transition:background 0.25s,box-shadow 0.25s;flex-shrink:0;
+}
+.pcb-dot.live{background:#B8657A;box-shadow:0 0 0 3px rgba(184,101,122,0.18)}
+.pcb-info{display:flex;flex-direction:column;gap:1px;line-height:1}
+.pcb-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#A89890}
+.pcb-range{font-size:12.5px;font-weight:600;color:#B8657A;letter-spacing:-0.1px;white-space:nowrap}
+.pcb-pills{display:flex;gap:2px;flex:1;align-items:center;overflow-x:auto;scrollbar-width:none}
+.pcb-pills::-webkit-scrollbar{display:none}
+.pcb-pill{
+  padding:5px 13px;font-size:11.5px;font-weight:500;
+  border:1px solid transparent;border-radius:20px;
+  cursor:pointer;color:#6B5E59;background:none;
+  white-space:nowrap;transition:all 0.12s;font-family:'Inter',sans-serif;flex-shrink:0;
+}
+.pcb-pill:hover:not(.on){background:#F5F1EE;color:#1A1614}
+.pcb-pill.on{background:rgba(184,101,122,0.09);border-color:rgba(184,101,122,0.22);color:#B8657A;font-weight:600}
+.pcb-sep{width:1px;height:20px;background:rgba(0,0,0,0.08);flex-shrink:0;margin:0 12px}
+.pcb-custom-wrap{position:relative;flex-shrink:0}
+.pcb-custom{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 13px;font-size:11.5px;font-weight:500;
+  border:1px dashed rgba(0,0,0,0.15);border-radius:20px;
+  cursor:pointer;color:#A89890;background:none;
+  font-family:'Inter',sans-serif;transition:all 0.12s;
+}
+.pcb-custom:hover{background:#F5F1EE;color:#6B5E59;border-color:#D4899A;border-style:solid}
+.pcb-custom.on{background:rgba(184,101,122,0.09);border-color:rgba(184,101,122,0.25);color:#B8657A;border-style:solid}
+.pcb-custom svg{width:11px;height:11px}
+.date-picker-panel{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;
+  background:white;border:1px solid rgba(0,0,0,0.1);border-radius:14px;
+  padding:16px;z-index:50;min-width:240px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+.date-picker-panel.on{display:block}
+.dp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dp-label{font-size:11px;color:#6B5E59;width:24px;flex-shrink:0;font-weight:500}
+.dp-input{
+  flex:1;padding:7px 10px;font-size:12px;border:1px solid rgba(0,0,0,0.1);
+  border-radius:8px;background:#FAF7F5;color:#1A1614;
+  outline:none;font-family:'Inter',sans-serif;
+}
+.dp-input:focus{border-color:#B8657A;box-shadow:0 0 0 2px rgba(184,101,122,0.18)}
+.dp-actions{display:flex;gap:6px;margin-top:10px}
+.dp-apply{flex:1;padding:8px;background:#B8657A;border:none;border-radius:9px;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
+.dp-clear{padding:8px 12px;background:none;border:1px solid rgba(0,0,0,0.1);border-radius:9px;color:#6B5E59;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .pcb-status{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
+    <span class="brand-name">Laço</span>
+  </div>
+  <button class="back-btn" id="back-btn">← Voltar</button>
+</div>
+
+<!-- ═══ PERIOD COMMAND BAR ═══ -->
+<div class="period-cmd-bar">
+  <div class="period-cmd-inner">
+    <div class="pcb-status">
+      <div class="pcb-dot" id="pcb-dot"></div>
+      <div class="pcb-info">
+        <span class="pcb-label">Exibindo dados de</span>
+        <span class="pcb-range" id="period-display">Todos os períodos</span>
+      </div>
+    </div>
+    <div class="pcb-pills">
+      <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
+      <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
+      <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
+      <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
+      <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
+    </div>
+    <div class="pcb-sep"></div>
+    <div class="pcb-custom-wrap" id="date-filter-wrap">
+      <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+          <line x1="5" y1="1.5" x2="5" y2="4.5"/>
+          <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+          <line x1="2" y1="7" x2="14" y2="7"/>
+        </svg>
+        Personalizar
+      </button>
+      <div class="date-picker-panel" id="date-picker-panel">
+        <div class="dp-row">
+          <span class="dp-label">De</span>
+          <input type="date" class="dp-input" id="dp-from">
+        </div>
+        <div class="dp-row">
+          <span class="dp-label">Até</span>
+          <input type="date" class="dp-input" id="dp-to">
+        </div>
+        <div class="dp-actions">
+          <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+          <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-title">Relatório de conversão</div>
+  <div class="page-sub">Visão geral de leads, agendamentos e motivos de recusa</div>
+  <div id="report"><div class="loading">Carregando dados...</div></div>
+</div>
+
+<script>
+if (!localStorage.getItem("token")) {
+  location.href = "/login"
+}
+
+const API = window.location.origin
+const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.getItem('laco_slug') || ''
+document.getElementById('back-btn').onclick = () => location.href = '/' + SLUG + '/'
+let dateFrom = null, dateTo = null
+function h() { const jwt = localStorage.getItem('token'); return jwt ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt } : {} }
+
+const fmtISO = d => d.toISOString().slice(0,10)
+const fmtPT  = s => new Date(s + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})
+function buildDP() {
+  const p = []
+  if (dateFrom) p.push(`date_from=${dateFrom}`)
+  if (dateTo)   p.push(`date_to=${dateTo}`)
+  return p.length ? '?' + p.join('&') : ''
+}
+
+function quickPeriod(type, el) {
+  const today = new Date()
+  let from, to, label
+  if (type === 'hoje') {
+    from = to = fmtISO(today); label = 'Hoje'
+  } else if (type === 'semana') {
+    const mon = new Date(today); mon.setDate(today.getDate() - ((today.getDay() + 6) % 7))
+    from = fmtISO(mon); to = fmtISO(today); label = 'Esta semana'
+  } else if (type === '15dias') {
+    const d = new Date(today); d.setDate(today.getDate() - 14)
+    from = fmtISO(d); to = fmtISO(today); label = 'Últimos 15 dias'
+  } else if (type === '30dias') {
+    const d = new Date(today); d.setDate(today.getDate() - 29)
+    from = fmtISO(d); to = fmtISO(today); label = 'Últimos 30 dias'
+  } else if (type === 'ano') {
+    from = today.getFullYear() + '-01-01'; to = fmtISO(today); label = 'Ano todo'
+  }
+  dateFrom = from; dateTo = to
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('date-filter-btn').classList.remove('on')
+  if (el) el.classList.add('on')
+  updatePeriodDisplay(label, from, to)
+  load()
+}
+
+function updatePeriodDisplay(label, from, to) {
+  const dot = document.getElementById('pcb-dot')
+  const display = document.getElementById('period-display')
+  if (!from && !to) {
+    dot && dot.classList.remove('live')
+    display && (display.textContent = 'Todos os períodos')
+  } else {
+    dot && dot.classList.add('live')
+    const range = from === to ? fmtPT(from) : `${fmtPT(from)} → ${fmtPT(to)}`
+    display && (display.textContent = label ? `${label}  ·  ${range}` : range)
+  }
+}
+
+function toggleDatePicker() {
+  document.getElementById('date-picker-panel').classList.toggle('on')
+}
+function applyDateFilter() {
+  dateFrom = document.getElementById('dp-from').value || null
+  dateTo   = document.getElementById('dp-to').value   || null
+  document.getElementById('date-picker-panel').classList.remove('on')
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('date-filter-btn').classList.toggle('on', !!(dateFrom || dateTo))
+  updatePeriodDisplay('Personalizado', dateFrom, dateTo)
+  load()
+}
+function clearDateFilter() {
+  dateFrom = null; dateTo = null
+  document.getElementById('dp-from').value = ''
+  document.getElementById('dp-to').value   = ''
+  document.getElementById('date-filter-btn').classList.remove('on')
+  document.querySelectorAll('.pcb-pill').forEach(p => p.classList.remove('on'))
+  document.getElementById('date-picker-panel').classList.remove('on')
+  updatePeriodDisplay(null, null, null)
+  load()
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('date-filter-wrap')
+  if (wrap && !wrap.contains(e.target)) document.getElementById('date-picker-panel').classList.remove('on')
+})
+
+async function load() {
+  document.getElementById('report').innerHTML = '<div class="loading">Carregando dados...</div>'
+  const dp = buildDP()
+  try {
+    const [ls, as_, leads, apts] = await Promise.all([
+      fetch(`${API}/api/leads/stats${dp}`, { headers: h() }).then(r => r.json()),
+      fetch(`${API}/api/appointments/stats${dp}`, { headers: h() }).then(r => r.json()),
+      fetch(`${API}/api/leads${dp || '?'}${dp ? '&' : ''}status=todos`, { headers: h() }).then(r => r.json()),
+      fetch(`${API}/api/appointments${dp}`, { headers: h() }).then(r => r.json()),
+    ])
+    render(ls, as_, Array.isArray(leads) ? leads : [], Array.isArray(apts) ? apts : [])
+  } catch(e) {
+    document.getElementById('report').innerHTML = '<div class="loading">Erro ao carregar relatório.</div>'
+  }
+}
+
+function render(ls, as_, leads, apts) {
+  const total = parseInt(ls.total) || 0
+  const scheduled = parseInt(ls.scheduled) || 0
+  const rejected = parseInt(ls.rejected) || 0
+  const linkSent = parseInt(ls.link_sent) || 0
+  const newLeads = parseInt(ls.new_leads) || 0
+  const convRate = total > 0 ? Math.round(scheduled / total * 100) : 0
+  const rejRate  = total > 0 ? Math.round(rejected / total * 100) : 0
+
+  // Rejection reasons
+  const reasons = {}
+  leads.filter(l => l.reject_reason).forEach(l => {
+    const r = l.reject_reason
+    reasons[r] = (reasons[r] || 0) + 1
+  })
+  const reasonLabels = { orcamento: 'Fora do orçamento', outro: 'Quer ver outro procedimento' }
+  const totalRejected = Object.values(reasons).reduce((a,b)=>a+b,0)
+
+  // Procedures conversion
+  const procMap = {}
+  leads.forEach(l => {
+    if (!l.procedure_name) return
+    if (!procMap[l.procedure_name]) procMap[l.procedure_name] = { views:0, scheduled:0, rejected:0 }
+    procMap[l.procedure_name].views++
+    if (l.status === 'scheduled') procMap[l.procedure_name].scheduled++
+    if (l.status === 'rejected')  procMap[l.procedure_name].rejected++
+  })
+  const procs = Object.entries(procMap).sort((a,b) => b[1].views - a[1].views)
+
+  // Donut data
+  const donutData = [
+    { label:'Agendados',    val: scheduled, color:'#B8657A' },
+    { label:'Não agendaram',val: rejected,  color:'#F0997B' },
+    { label:'Link enviado', val: linkSent,  color:'#EF9F27' },
+    { label:'Novos',        val: newLeads,  color:'#ddd' },
+  ].filter(d => d.val > 0)
+
+  document.getElementById('report').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total de leads</div><div class="kpi-val">${total}</div><div class="kpi-sub">Todos os contatos</div></div>
+      <div class="kpi"><div class="kpi-label">Agendamentos</div><div class="kpi-val green">${scheduled}</div><div class="kpi-sub">${convRate}% de conversão</div></div>
+      <div class="kpi"><div class="kpi-label">Não agendaram</div><div class="kpi-val red">${rejected}</div><div class="kpi-sub">${rejRate}% de recusa</div></div>
+      <div class="kpi"><div class="kpi-label">Confirmados</div><div class="kpi-val purple">${parseInt(as_.confirmed)||0}</div><div class="kpi-sub">de ${parseInt(as_.total)||0} agendamentos</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Funil de conversão</div>
+        <div class="funnel">
+          ${renderFunnelRow('Leads captados', total, total, '#B8657A')}
+          ${renderFunnelRow('Link enviado', linkSent + scheduled + rejected, total, '#D4899A')}
+          ${renderFunnelRow('Visualizaram', rejected + scheduled, total, '#EF9F27')}
+          ${renderFunnelRow('Agendaram', scheduled, total, '#2E8C66')}
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Status dos leads</div>
+        <div class="donut-wrap">
+          ${renderDonut(donutData, total)}
+          <div class="donut-legend">
+            ${donutData.map(d => `
+              <div class="legend-item">
+                <div class="legend-dot" style="background:${d.color}"></div>
+                <span>${d.label}</span>
+                <span class="legend-val">${d.val}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${Object.keys(reasons).length ? `
+    <div class="reason-card">
+      <div class="chart-title" style="margin-bottom:14px">Motivos de recusa</div>
+      ${Object.entries(reasons).map(([k,v]) => `
+        <div class="reason-row">
+          <span class="reason-name">${reasonLabels[k]||k}</span>
+          <div class="reason-bar-wrap"><div class="reason-bar" style="width:${totalRejected>0?Math.round(v/totalRejected*100):0}%"></div></div>
+          <span class="reason-pct">${totalRejected>0?Math.round(v/totalRejected*100):0}%</span>
+        </div>`).join('')}
+    </div>` : ''}
+
+    ${procs.length ? `
+    <div class="chart-card" style="background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px">
+      <div class="chart-title">Conversão por procedimento</div>
+      <table class="proc-table">
+        <thead><tr>
+          <th>Procedimento</th>
+          <th>Visualizações</th>
+          <th>Agendaram</th>
+          <th>Recusaram</th>
+          <th>Conversão</th>
+        </tr></thead>
+        <tbody>
+          ${procs.map(([name, d]) => {
+            const conv = d.views > 0 ? Math.round(d.scheduled / d.views * 100) : 0
+            const color = conv >= 50 ? '#E0F4EE' : conv >= 25 ? '#FEF3E2' : '#FAECE7'
+            const tcolor = conv >= 50 ? '#27500A' : conv >= 25 ? '#633806' : '#712B13'
+            return `<tr>
+              <td>${esc(name)}</td>
+              <td>${d.views}</td>
+              <td>${d.scheduled}</td>
+              <td>${d.rejected}</td>
+              <td><span class="conv-pill" style="background:${color};color:${tcolor}">${conv}%</span></td>
+            </tr>`
+          }).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+  `
+}
+
+function renderFunnelRow(label, val, total, color) {
+  const pct = total > 0 ? Math.max(8, Math.round(val / total * 100)) : 8
+  return `
+    <div class="funnel-row">
+      <span class="funnel-label">${label}</span>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${pct}%;background:${color}">${val > 0 ? val : ''}</div>
+      </div>
+      <span class="funnel-count">${val}</span>
+    </div>`
+}
+
+function renderDonut(data, total) {
+  if (!total) return '<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="#eee" stroke-width="16"/></svg>'
+  const r = 35, cx = 50, cy = 50, circ = 2 * Math.PI * r
+  let offset = -circ * 0.25 // start from top
+  const slices = data.map(d => {
+    const frac = d.val / total
+    const dash = frac * circ
+    const slice = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="16"
+      stroke-dasharray="${dash} ${circ - dash}"
+      stroke-dashoffset="${-offset + circ * 0.25}"
+      transform="rotate(-90,${cx},${cy})"/>`
+    offset += dash
+    return slice
+  })
+  return `
+    <svg class="donut-svg" width="110" height="110" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="35" fill="none" stroke="#f0f0f0" stroke-width="16"/>
+      ${slices.join('')}
+      <text x="50" y="47" text-anchor="middle" font-size="16" font-weight="500" fill="#111">${total}</text>
+      <text x="50" y="59" text-anchor="middle" font-size="9" fill="#aaa">leads</text>
+    </svg>`
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+quickPeriod('30dias', document.getElementById('pcb-30'))
+</script>
+</body>
+</html>

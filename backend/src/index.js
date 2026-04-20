@@ -75,8 +75,8 @@ app.get('/config',        (req, res) => res.sendFile(path.join(pub, 'config/inde
 
 app.get('/:slug/agendar',   (req, res) => res.sendFile(path.join(pub, 'index.html')))
 app.get('/:slug/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
-app.get('/:slug/hoje',      (req, res) => res.sendFile(path.join(pub, 'painel.html')))
-app.get('/:slug/relatorio', (req, res) => res.sendFile(path.join(pub, 'painel.html')))
+app.get('/:slug/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
+app.get('/:slug/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
 app.get('/:slug',           (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // 404
