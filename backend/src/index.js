@@ -73,9 +73,11 @@ if (process.env.NODE_ENV === 'production') {
 // Rotas explícitas ANTES dos wildcards /:slug
 app.get('/config',        (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 
-app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
-app.get('/:slug/config',  (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
-app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'painel.html')))
+app.get('/:slug/agendar',   (req, res) => res.sendFile(path.join(pub, 'index.html')))
+app.get('/:slug/config',    (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
+app.get('/:slug/hoje',      (req, res) => res.sendFile(path.join(pub, 'painel.html')))
+app.get('/:slug/relatorio', (req, res) => res.sendFile(path.join(pub, 'painel.html')))
+app.get('/:slug',           (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada' }))
