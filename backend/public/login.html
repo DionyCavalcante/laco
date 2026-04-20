@@ -39,12 +39,13 @@
       localStorage.setItem('token', data.token)
       localStorage.setItem('refreshToken', data.refreshToken)
       localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.removeItem('superadminToken') // limpa token de impersonação anterior
       if (data.clinic) {
         localStorage.setItem('laco_slug', data.clinic.slug)
         localStorage.setItem('laco_onboarding_step', data.clinic.onboarding_step)
       }
       if (data.user.role === 'superadmin') location.href = '/superadmin'
-      else if (data.clinic && data.clinic.onboarding_step >= 4) location.href = '/painel'
+      else if (data.clinic && data.clinic.onboarding_step >= 4) location.href = '/' + data.clinic.slug + '/'
       else location.href = '/onboarding'
     })
   </script>

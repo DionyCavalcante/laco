@@ -74,6 +74,7 @@ if (process.env.NODE_ENV === 'production') {
 app.get('/config',        (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 
 app.get('/:slug/agendar', (req, res) => res.sendFile(path.join(pub, 'index.html')))
+app.get('/:slug/config',  (req, res) => res.sendFile(path.join(pub, 'config/index.html')))
 app.get('/:slug',         (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 
 // 404

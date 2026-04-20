@@ -229,11 +229,11 @@ router.patch('/users/:id/active', async (req, res) => {
 })
 
 router.post('/impersonate/:clinicId', async (req, res) => {
-  const { rows: [clinic] } = await query('SELECT id, name FROM clinics WHERE id = $1', [req.params.clinicId])
+  const { rows: [clinic] } = await query('SELECT id, name, slug FROM clinics WHERE id = $1', [req.params.clinicId])
   if (!clinic) return res.status(404).json({ error: 'Clinica nao encontrada' })
   const user = { id: req.user.id, clinic_id: clinic.id, role: 'admin' }
   await audit(req.user.id, 'clinic.impersonate', 'clinic', clinic.id)
-  res.json({ token: signAccessToken(user), banner: `Voce esta como admin de ${clinic.name}` })
+  res.json({ token: signAccessToken(user), slug: clinic.slug, banner: `Voce esta como admin de ${clinic.name}` })
 })
 
 module.exports = router

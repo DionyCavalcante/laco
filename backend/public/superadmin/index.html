@@ -67,7 +67,7 @@
 
     async function api(path, opts = {}) {
       const r = await fetch('/api/superadmin' + path, { ...opts, headers: { ...headers, ...opts.headers } })
-      if (r.status === 401 || r.status === 403) location.href = '/login'
+      if (r.status === 401 || r.status === 403) { location.href = '/login'; return {} }
       const data = await r.json().catch(() => ({}))
       if (!r.ok) throw new Error(data.error || 'Erro na requisicao')
       return data
@@ -118,7 +118,7 @@
     function filterAccounts(){ const q = search.value.toLowerCase(); renderAccounts(accountsData.filter(a => `${a.clinic_name} ${a.slug} ${a.users.map(u => u.email).join(' ')}`.toLowerCase().includes(q))) }
     async function createClinic(){ await api('/clinics',{method:'POST',body:JSON.stringify({name:name.value,admin_email:email.value,admin_password:pass.value})}); name.value=email.value=pass.value=''; await load() }
     async function statusClinic(id,status){ await api('/clinics/'+id+'/status',{method:'PATCH',body:JSON.stringify({status})}); await load() }
-    async function impersonate(id, target, newTab = false){ localStorage.setItem('superadminToken', originalToken); const r = await api('/impersonate/'+id,{method:'POST'}); localStorage.setItem('token',r.token); sessionStorage.setItem('impersonationBanner',r.banner); if (newTab) window.open(target || '/painel','_blank'); else location.href = target || '/painel' }
+    async function impersonate(id, target, newTab = false){ localStorage.setItem('superadminToken', originalToken); const r = await api('/impersonate/'+id,{method:'POST'}); localStorage.setItem('token',r.token); if (r.slug) localStorage.setItem('laco_slug', r.slug); sessionStorage.setItem('impersonationBanner',r.banner); const dest = target === '/painel' && r.slug ? '/'+r.slug+'/' : (target || (r.slug ? '/'+r.slug+'/' : '/painel')); if (newTab) window.open(dest,'_blank'); else location.href = dest }
     async function editEmail(id,current){ const next = prompt('Novo email', current); if(next) { await api('/users/'+id+'/email',{method:'PATCH',body:JSON.stringify({email:next})}); await load() } }
     async function saveEmail(id){ const value = document.getElementById('email-'+id).value; await api('/users/'+id+'/email',{method:'PATCH',body:JSON.stringify({email:value})}); await load() }
     async function resetPassword(id){ const password = prompt('Nova senha'); if(password) { await api('/users/'+id+'/password',{method:'PATCH',body:JSON.stringify({password})}); alert('Senha atualizada') } }

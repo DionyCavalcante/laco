@@ -159,7 +159,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
     <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
     <span class="brand-name">Laço</span>
   </div>
-  <a href="/" class="back-link">← Voltar para plataforma</a>
+  <a id="back-link" href="/" class="back-link">← Voltar para plataforma</a>
 </div>
 
 <div class="nav">
@@ -490,9 +490,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 <div class="toast" id="toast"></div>
 
 <script>
-const API = window.location.origin.replace('/config','').replace('/config/','')
+const API = window.location.origin
 const API_KEY = localStorage.getItem('laco_api_key') || promptApiKey()
-const SLUG = localStorage.getItem('laco_slug') || 'bella-estetica'
+// Extrai slug do pathname (funciona em /:slug/config e /config)
+const SLUG = location.pathname.split('/').filter(Boolean)[0] !== 'config'
+  ? location.pathname.split('/').filter(Boolean)[0]
+  : (localStorage.getItem('laco_slug') || '')
+// Link "Voltar" aponta para o dashboard da clínica
+;(function setBackLink() {
+  const link = document.getElementById('back-link')
+  if (link && SLUG) link.href = '/' + SLUG + '/'
+})()
 
 function promptApiKey(){const k=prompt('Chave de acesso (API_SECRET):');if(k)localStorage.setItem('laco_api_key',k);return k||''}
 function h(){return{'Content-Type':'application/json','x-api-key':API_KEY}}

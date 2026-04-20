@@ -627,14 +627,14 @@ select option{background:white;color:var(--t0)}
       </svg>
       <span>Painel</span>
     </span>
-    <a href="/hoje" class="nb-link">
+    <a id="nav-hoje" href="#" class="nb-link">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
         <rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/>
         <line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/>
       </svg>
       <span>Hoje</span>
     </a>
-    <a href="/relatorio.html" class="nb-link">
+    <a id="nav-relatorio" href="#" class="nb-link">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
         <line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/>
         <line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/>
@@ -648,7 +648,7 @@ select option{background:white;color:var(--t0)}
 
   <div class="nb-right">
     <span class="clinic-pill" id="clinic-name">Carregando...</span>
-    <a href="/config" class="nb-icon" title="Configurações">
+    <a id="nav-config" href="#" class="nb-icon" title="Configurações">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="8" r="2.2"/>
         <path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/>
@@ -874,7 +874,24 @@ if (!localStorage.getItem('token')) {
 }
 
 const API = window.location.origin
-const SLUG = localStorage.getItem('laco_slug') || location.pathname.split('/').filter(Boolean)[0] || ''
+// URL é fonte primária do slug — evita que localStorage desatualizado cause inconsistência
+const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.getItem('laco_slug') || ''
+
+// Slug guard: se a sessão pertence a outro slug, redireciona para o correto
+;(function slugGuard() {
+  const slugFromStorage = localStorage.getItem('laco_slug')
+  if (slugFromStorage && SLUG && SLUG !== slugFromStorage) {
+    location.replace('/' + slugFromStorage + '/')
+  }
+})()
+
+// Links de navegação com slug correto
+;(function setNavLinks() {
+  const base = SLUG ? '/' + SLUG : ''
+  document.getElementById('nav-hoje').href      = base + '/hoje'
+  document.getElementById('nav-relatorio').href = base + '/relatorio'
+  document.getElementById('nav-config').href    = base + '/config'
+})()
 let currentFilter = 'todos'
 let dateFrom = null
 let dateTo = null
