@@ -51,6 +51,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
 .btn-ghost:hover{background:#F5F1EE}
 .btn-green{background:#25D366;color:white;font-size:11px}
+.btn-danger{background:none;border:0.5px solid rgba(176,48,48,0.3);color:#A32D2D;font-size:11px}
+.btn-danger:hover{background:#FAECE7}
 
 /* Sections */
 .section{background:white;border-radius:14px;border:0.5px solid rgba(0,0,0,0.08);margin-bottom:14px;overflow:hidden}
@@ -272,6 +274,10 @@ function render() {
           <option value="scheduled"  ${lead.status==='scheduled'?'selected':''}>Agendado</option>
           <option value="rejected"   ${lead.status==='rejected'?'selected':''}>Não agendou</option>
         </select>
+        <button class="btn btn-danger" onclick="deleteLead()">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2 4 14 4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/></svg>
+          Excluir contato
+        </button>
       </div>
     </div>
 
@@ -349,6 +355,15 @@ async function updateStatus(status) {
     toast('Status atualizado')
     render()
   } catch { toast('Erro ao atualizar status', false) }
+}
+
+async function deleteLead() {
+  if (!confirm('Excluir este cliente e todos os agendamentos dele? Esta ação não pode ser desfeita.')) return
+  try {
+    const r = await fetch(`${API}/api/leads/${LEAD_ID}`, { method:'DELETE', headers:h() })
+    if (!r.ok) throw new Error()
+    location.href = '/' + SLUG + '/'
+  } catch { toast('Erro ao excluir cliente', false) }
 }
 
 async function updateAptStatus(aptId, status) {
