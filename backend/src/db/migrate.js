@@ -204,6 +204,20 @@ async function migrate() {
       `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS position_y NUMERIC(5,1) DEFAULT 50`,
       `ALTER TABLE procedure_photos ALTER COLUMN position_x TYPE NUMERIC(5,1) USING position_x::NUMERIC`,
       `ALTER TABLE procedure_photos ALTER COLUMN position_y TYPE NUMERIC(5,1) USING position_y::NUMERIC`,
+      // Campos da página de procedimento — Fase 2 (PRD prd-pagina-produto.md)
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS category TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS authority_note TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS main_pain TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS emotional_desire TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS day_to_day_fit TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS how_it_works TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_session_duration TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_result_duration TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_pain_discomfort TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_maintenance TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_aftercare TEXT`,
+      `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS closing_note TEXT`,
+      `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
     ]
     for (const sql of alters) await client.query(sql)
 

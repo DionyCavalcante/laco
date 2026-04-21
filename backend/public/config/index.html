@@ -477,6 +477,60 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
           <div class="field"><label>Tópico 3 — Título</label><input type="text" id="f-b3-title" placeholder="Ex: Segurança Máxima"></div>
           <div class="field"><label>Tópico 3 — Descrição</label><input type="text" id="f-b3-desc" placeholder="Ex: Protocolos rigorosos."></div>
         </div>
+
+        <!-- Seção: Autoridade da clínica -->
+        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
+          Autoridade da clínica
+        </div>
+        <div class="field">
+          <label>Frase de autoridade</label>
+          <textarea id="f-authority-note" placeholder="Ex: Na clínica, cada atendimento começa por entender o que combina com você." style="min-height:52px"></textarea>
+          <div class="field-hint">Se vazio, usa texto automático</div>
+        </div>
+
+        <!-- Seção: Para quem é -->
+        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
+          Para quem é
+        </div>
+        <div class="field"><label>Dor principal</label><input type="text" id="f-main-pain" placeholder="Ex: sobrancelhas falhadas ou sem formato"></div>
+        <div class="field"><label>Desejo</label><input type="text" id="f-emotional-desire" placeholder="Ex: quer realçar o olhar sem exagero"></div>
+        <div class="field">
+          <label>Rotina / dia a dia</label>
+          <input type="text" id="f-day-to-day-fit" placeholder="Ex: quer se sentir mais arrumada sem depender de maquiagem">
+          <div class="field-hint">Se todos vazios, usa texto automático</div>
+        </div>
+
+        <!-- Seção: Como funciona -->
+        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
+          Como funciona
+        </div>
+        <div class="field">
+          <textarea id="f-how-it-works" placeholder="Ex: a profissional avalia o formato do seu rosto, define o desenho e remove apenas o necessário." style="min-height:60px"></textarea>
+          <div class="field-hint">Se vazio, usa texto automático</div>
+        </div>
+
+        <!-- Seção: Dúvidas rápidas (FAQ) -->
+        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
+          Dúvidas rápidas (FAQ)
+        </div>
+        <div class="field"><label>Quanto tempo leva?</label><input type="text" id="f-faq-duration" placeholder="Ex: Em média 30 a 40 minutos"><div class="field-hint">Se vazio, usa duração cadastrada (${duração} minutos)</div></div>
+        <div class="field"><label>Quanto tempo dura o resultado?</label><input type="text" id="f-faq-result" placeholder="Ex: 15 a 30 dias"></div>
+        <div class="field"><label>Dói ou incomoda?</label><input type="text" id="f-faq-pain" placeholder="Ex: Pode haver leve desconforto, mas costuma ser bem tolerado"></div>
+        <div class="field">
+          <label>Manutenção</label>
+          <input type="text" id="f-faq-maintenance" placeholder="Ex: A cada 15 a 30 dias">
+          <div class="field-hint">Se vazio e "Cuidados pós" preenchido, usa a pergunta de cuidados</div>
+        </div>
+        <div class="field"><label>Cuidados pós-procedimento <span style="font-size:10px;color:#bbb;font-weight:400">(alternativa à manutenção)</span></label><input type="text" id="f-faq-aftercare" placeholder="Ex: Evitar molhar a área nas primeiras 24h"></div>
+
+        <!-- Seção: Fechamento -->
+        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
+          Fechamento personalizado
+        </div>
+        <div class="field">
+          <textarea id="f-closing-note" placeholder="Ex: o objetivo não é mudança drástica. É realçar o que já existe em você." style="min-height:52px"></textarea>
+          <div class="field-hint">Aparece antes do botão de agendamento. Se vazio, usa texto automático com nome da cliente</div>
+        </div>
       </div>
 
     </div>
@@ -711,6 +765,17 @@ function openModal(proc=null){
   document.getElementById('f-b2-desc').value=proc?proc.benefit_2_desc||'':''
   document.getElementById('f-b3-title').value=proc?proc.benefit_3_title||'':''
   document.getElementById('f-b3-desc').value=proc?proc.benefit_3_desc||'':''
+  document.getElementById('f-authority-note').value=proc?proc.authority_note||'':''
+  document.getElementById('f-main-pain').value=proc?proc.main_pain||'':''
+  document.getElementById('f-emotional-desire').value=proc?proc.emotional_desire||'':''
+  document.getElementById('f-day-to-day-fit').value=proc?proc.day_to_day_fit||'':''
+  document.getElementById('f-how-it-works').value=proc?proc.how_it_works||'':''
+  document.getElementById('f-faq-duration').value=proc?proc.faq_session_duration||'':''
+  document.getElementById('f-faq-result').value=proc?proc.faq_result_duration||'':''
+  document.getElementById('f-faq-pain').value=proc?proc.faq_pain_discomfort||'':''
+  document.getElementById('f-faq-maintenance').value=proc?proc.faq_maintenance||'':''
+  document.getElementById('f-faq-aftercare').value=proc?proc.faq_aftercare||'':''
+  document.getElementById('f-closing-note').value=proc?proc.closing_note||'':''
   setPhotoMode(proc?proc.photo_mode||'before_after':'before_after', true)
   goToStep(1)
   document.getElementById('proc-modal').classList.add('on')
@@ -741,6 +806,17 @@ async function saveProc(){
     benefit_3_title:document.getElementById('f-b3-title').value.trim()||null,
     benefit_3_desc:document.getElementById('f-b3-desc').value.trim()||null,
     photo_mode: document.getElementById('mode-btn-res').classList.contains('mode-active') ? 'results' : 'before_after',
+    authority_note:document.getElementById('f-authority-note').value.trim()||null,
+    main_pain:document.getElementById('f-main-pain').value.trim()||null,
+    emotional_desire:document.getElementById('f-emotional-desire').value.trim()||null,
+    day_to_day_fit:document.getElementById('f-day-to-day-fit').value.trim()||null,
+    how_it_works:document.getElementById('f-how-it-works').value.trim()||null,
+    faq_session_duration:document.getElementById('f-faq-duration').value.trim()||null,
+    faq_result_duration:document.getElementById('f-faq-result').value.trim()||null,
+    faq_pain_discomfort:document.getElementById('f-faq-pain').value.trim()||null,
+    faq_maintenance:document.getElementById('f-faq-maintenance').value.trim()||null,
+    faq_aftercare:document.getElementById('f-faq-aftercare').value.trim()||null,
+    closing_note:document.getElementById('f-closing-note').value.trim()||null,
   }
   if(!body.name||!body.price){toast('Nome e preço são obrigatórios',false);return}
   try{

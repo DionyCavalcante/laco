@@ -44,6 +44,7 @@ interface ClinicData {
   name: string;
   slug: string;
   phone: string | null;
+  address: string | null;
 }
 
 interface Procedure {
@@ -65,6 +66,19 @@ interface Procedure {
   benefit_3_title?: string;
   benefit_3_desc?: string;
   photo_mode?: 'before_after' | 'results';
+  // Fase 2 — campos da página de procedimento
+  category?: string;
+  authority_note?: string;
+  main_pain?: string;
+  emotional_desire?: string;
+  day_to_day_fit?: string;
+  how_it_works?: string;
+  faq_session_duration?: string;
+  faq_result_duration?: string;
+  faq_pain_discomfort?: string;
+  faq_maintenance?: string;
+  faq_aftercare?: string;
+  closing_note?: string;
 }
 
 interface PortalSettings {
@@ -633,6 +647,7 @@ const OfferPage = ({
   procPhotos,
   portalSettings,
   clinicName,
+  clinicAddress,
   clientName,
   onNext,
   onBack,
@@ -642,6 +657,7 @@ const OfferPage = ({
   procPhotos: ProcPhotos;
   portalSettings: PortalSettings;
   clinicName: string;
+  clinicAddress: string | null;
   clientName: string;
   onNext: () => void;
   onBack: () => void;
@@ -697,44 +713,61 @@ const OfferPage = ({
       ? selectedProc.description.slice(0, 90) + (selectedProc.description.length > 90 ? '...' : '')
       : 'Resultado que respeita quem você é, com a atenção que você merece.');
 
-  const authorityNote = `Na ${clinic}, cada atendimento começa por entender o que combina com você.`;
+  const authorityNote = selectedProc?.authority_note ||
+    `Na ${clinic}, cada atendimento começa por entender o que combina com você.`;
 
-  const forWhomText = selectedProc?.description && selectedProc.description.length > 40
+  // Para quem é: Fase 2 usa bullets dos campos; Fase 1 usa description
+  const forWhomBullets = [
+    selectedProc?.main_pain,
+    selectedProc?.emotional_desire,
+    selectedProc?.day_to_day_fit,
+  ].filter(Boolean) as string[];
+
+  const forWhomFallback = selectedProc?.description && selectedProc.description.length > 40
     ? selectedProc.description.slice(0, 150) + (selectedProc.description.length > 150 ? '...' : '')
     : `Para quem quer cuidar da aparência com atenção personalizada e resultado que respeita a sua naturalidade.`;
 
-  const howItWorks = selectedProc?.description && selectedProc.description.length > 80
-    ? selectedProc.description
-    : `A profissional avalia o que combina com você, realiza o procedimento com cuidado e orienta cada passo antes de você sair.`;
+  const howItWorks = selectedProc?.how_it_works ||
+    (selectedProc?.description && selectedProc.description.length > 80
+      ? selectedProc.description
+      : `A profissional avalia o que combina com você, realiza o procedimento com cuidado e orienta cada passo antes de você sair.`);
+
+  // FAQ — 4ª pergunta: manutenção ou cuidados pós
+  const faq4 = selectedProc?.faq_maintenance
+    ? { q: 'Quando preciso fazer manutenção?', a: selectedProc.faq_maintenance }
+    : selectedProc?.faq_aftercare
+      ? { q: 'Quais cuidados preciso ter depois?', a: selectedProc.faq_aftercare }
+      : { q: 'Quando preciso fazer manutenção?', a: 'A profissional orienta a frequência ideal durante a consulta, conforme seu caso.' };
+
+  // 5ª pergunta — endereço
+  const clinicLocationAnswer = clinicAddress
+    ? `O atendimento é realizado na ${clinic} (${clinicAddress}). Não fazemos visitas a domicílio.`
+    : `O atendimento é realizado na ${clinic}, de forma presencial. Não fazemos visitas a domicílio.`;
 
   const faqItems: { q: string; a: string }[] = [
     {
       q: 'Quanto tempo leva?',
-      a: selectedProc?.duration
-        ? `Em média ${selectedProc.duration} minutos, podendo variar conforme a avaliação individual.`
-        : 'O tempo varia conforme a avaliação individual. A profissional informa antes de começar.',
+      a: selectedProc?.faq_session_duration ||
+        (selectedProc?.duration
+          ? `Em média ${selectedProc.duration} minutos, podendo variar conforme a avaliação individual.`
+          : 'O tempo varia conforme a avaliação individual. A profissional informa antes de começar.'),
     },
     {
       q: 'Quanto tempo dura o resultado?',
-      a: 'O resultado pode variar conforme seus cuidados e características individuais.',
+      a: selectedProc?.faq_result_duration || 'O resultado pode variar conforme seus cuidados e características individuais.',
     },
     {
       q: 'Dói ou incomoda?',
-      a: 'Pode haver um leve desconforto. A profissional orienta durante todo o atendimento.',
+      a: selectedProc?.faq_pain_discomfort || 'Pode haver um leve desconforto. A profissional orienta durante todo o atendimento.',
     },
-    {
-      q: 'Quando preciso fazer manutenção?',
-      a: 'A profissional orienta a frequência ideal durante a consulta, conforme seu caso.',
-    },
-    {
-      q: 'Onde fica a clínica?',
-      a: `O atendimento é realizado na ${clinic}, de forma presencial. Não fazemos visitas a domicílio.`,
-    },
+    faq4,
+    { q: 'Onde fica a clínica?', a: clinicLocationAnswer },
   ];
 
-  const closingNote = firstName
-    ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
-    : 'O objetivo não é mudança drástica. É realçar o que já existe em você.';
+  const closingNote = selectedProc?.closing_note ||
+    (firstName
+      ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
+      : 'O objetivo não é mudança drástica. É realçar o que já existe em você.');
 
   return (
     <div className="pb-64 min-h-screen flex flex-col bg-white">
@@ -827,9 +860,20 @@ const OfferPage = ({
         {/* ── Blocos 5 + 6: Para quem é / Como funciona ── */}
         <section className="bg-surface-container-low rounded-2xl p-6 mb-8">
           <h3 className="text-base font-extrabold text-primary mb-3">Para quem é</h3>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mb-6">
-            {forWhomText}
-          </p>
+          {forWhomBullets.length > 0 ? (
+            <ul className="space-y-1 mb-6">
+              {forWhomBullets.map((bullet, i) => (
+                <li key={i} className="flex items-start gap-2 text-[12px] text-on-surface-variant leading-relaxed">
+                  <span className="text-secondary mt-0.5 shrink-0">·</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[12px] text-on-surface-variant leading-relaxed mb-6">
+              {forWhomFallback}
+            </p>
+          )}
           <div className="border-t border-outline-variant/10 pt-4">
             <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">
               Como funciona na {clinic}
@@ -1936,6 +1980,7 @@ export default function App() {
               procPhotos={procPhotos}
               portalSettings={portalSettings}
               clinicName={clinicData?.name || ''}
+              clinicAddress={clinicData?.address || null}
               clientName={clientName}
               onNext={() => setCurrentStep('booking')}
               onBack={() => setCurrentStep('exit')}

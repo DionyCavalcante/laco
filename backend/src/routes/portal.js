@@ -18,13 +18,19 @@ router.get('/:slug', async (req, res) => {
       SELECT id, name, duration, price, price_old, payment_note, description, video_url,
              headline, subheadline,
              benefit_1_title, benefit_1_desc, benefit_2_title, benefit_2_desc, benefit_3_title, benefit_3_desc,
-             photo_mode
+             photo_mode,
+             category, authority_note, main_pain, emotional_desire, day_to_day_fit, how_it_works,
+             faq_session_duration, faq_result_duration, faq_pain_discomfort, faq_maintenance, faq_aftercare,
+             closing_note
       FROM procedures
       WHERE clinic_id = $1 AND active = true
       ORDER BY sort_order, name
     `, [clinic.id])
 
-    res.json({ clinic: { id: clinic.id, name: clinic.name, slug: clinic.slug, phone: clinic.phone || null }, procedures })
+    res.json({
+      clinic: { id: clinic.id, name: clinic.name, slug: clinic.slug, phone: clinic.phone || null, address: clinic.address || null },
+      procedures
+    })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao carregar portal' })
