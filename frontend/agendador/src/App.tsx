@@ -633,6 +633,7 @@ const OfferPage = ({
   procPhotos,
   portalSettings,
   clinicName,
+  clientName,
   onNext,
   onBack,
   onShowExit,
@@ -641,12 +642,14 @@ const OfferPage = ({
   procPhotos: ProcPhotos;
   portalSettings: PortalSettings;
   clinicName: string;
+  clientName: string;
   onNext: () => void;
   onBack: () => void;
   onShowExit: () => void;
 }) => {
   const [currentImg, setCurrentImg] = useState(0);
   const [showFooter, setShowFooter] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -679,21 +682,77 @@ const OfferPage = ({
       ? Math.round(((selectedProc.price_old - selectedProc.price) / selectedProc.price_old) * 100)
       : null;
 
+  // ── Derivações de conteúdo ──────────────────────────────────────────────
+  const firstName = clientName ? clientName.split(' ')[0] : null;
+  const procName = selectedProc?.name || 'este procedimento';
+  const clinic = clinicName || 'a clínica';
+
+  const headline = selectedProc?.headline ||
+    (firstName
+      ? `${firstName}, veja como ${procName} pode realçar o que é seu`
+      : `Veja como ${procName} pode realçar sua beleza natural`);
+
+  const subheadline = selectedProc?.subheadline ||
+    (selectedProc?.description
+      ? selectedProc.description.slice(0, 90) + (selectedProc.description.length > 90 ? '...' : '')
+      : 'Resultado que respeita quem você é, com a atenção que você merece.');
+
+  const authorityNote = `Na ${clinic}, cada atendimento começa por entender o que combina com você.`;
+
+  const forWhomText = selectedProc?.description && selectedProc.description.length > 40
+    ? selectedProc.description.slice(0, 150) + (selectedProc.description.length > 150 ? '...' : '')
+    : `Para quem quer cuidar da aparência com atenção personalizada e resultado que respeita a sua naturalidade.`;
+
+  const howItWorks = selectedProc?.description && selectedProc.description.length > 80
+    ? selectedProc.description
+    : `A profissional avalia o que combina com você, realiza o procedimento com cuidado e orienta cada passo antes de você sair.`;
+
+  const faqItems: { q: string; a: string }[] = [
+    {
+      q: 'Quanto tempo leva?',
+      a: selectedProc?.duration
+        ? `Em média ${selectedProc.duration} minutos, podendo variar conforme a avaliação individual.`
+        : 'O tempo varia conforme a avaliação individual. A profissional informa antes de começar.',
+    },
+    {
+      q: 'Quanto tempo dura o resultado?',
+      a: 'O resultado pode variar conforme seus cuidados e características individuais.',
+    },
+    {
+      q: 'Dói ou incomoda?',
+      a: 'Pode haver um leve desconforto. A profissional orienta durante todo o atendimento.',
+    },
+    {
+      q: 'Quando preciso fazer manutenção?',
+      a: 'A profissional orienta a frequência ideal durante a consulta, conforme seu caso.',
+    },
+    {
+      q: 'Onde fica a clínica?',
+      a: `O atendimento é realizado na ${clinic}, de forma presencial. Não fazemos visitas a domicílio.`,
+    },
+  ];
+
+  const closingNote = firstName
+    ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
+    : 'O objetivo não é mudança drástica. É realçar o que já existe em você.';
+
   return (
     <div className="pb-64 min-h-screen flex flex-col bg-white">
       <Header onBack={onBack} showExitIntent={onShowExit} clinicName={clinicName} />
       <main className="pt-16 px-6 max-w-lg mx-auto flex-1 flex flex-col">
+
+        {/* ── Bloco 1: Header personalizado ── */}
         <section className="text-center mb-8">
           <span className="text-secondary font-bold text-[10px] mb-2 block uppercase tracking-[0.2em]">Estética</span>
           <h2 className="text-[22px] font-extrabold text-primary tracking-tight leading-tight mb-2">
-            {selectedProc?.headline || selectedProc?.name || 'Procedimento Selecionado'}
+            {headline}
           </h2>
           <p className="text-on-surface-variant font-medium text-[11px] leading-relaxed max-w-[280px] mx-auto opacity-80">
-            {selectedProc?.subheadline || selectedProc?.description ||
-              'Personalização completa para realçar sua beleza natural com sofisticação e segurança.'}
+            {subheadline}
           </p>
         </section>
 
+        {/* ── Bloco 2: Carrossel principal ── */}
         <section className="mb-8 relative flex-1 min-h-[450px]">
           <div className="absolute inset-0 rounded-2xl overflow-hidden bg-surface-container shadow-2xl">
             <AnimatePresence mode="wait">
@@ -739,30 +798,19 @@ const OfferPage = ({
           </div>
         </section>
 
-        <section className="flex flex-col items-center gap-2 mb-8">
-          <div className="flex -space-x-3">
-            {[1, 2, 3].map((i) => (
-              <img
-                key={i}
-                className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                src={`https://picsum.photos/seed/user${i}/100/100`}
-                alt="User"
-              />
-            ))}
-            <div className="w-8 h-8 rounded-full border-2 border-white bg-secondary-container flex items-center justify-center text-[9px] font-bold text-white">
-              +800
-            </div>
-          </div>
-          <p className="text-[11px] font-semibold text-on-surface-variant opacity-70 uppercase tracking-wider">
-            Centenas de clientes satisfeitas
+        {/* ── Bloco 3: Frase de autoridade ── */}
+        <section className="mb-8">
+          <p className="text-center text-[12px] text-on-surface-variant leading-relaxed italic max-w-[300px] mx-auto opacity-80">
+            {authorityNote}
           </p>
         </section>
 
-        <section className="grid gap-3 mb-10">
+        {/* ── Bloco 4: Três benefícios ── */}
+        <section className="grid gap-3 mb-8">
           {[
-            { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado Natural', desc: selectedProc?.benefit_1_desc || 'Preservamos sua essência com toques artísticos.' },
-            { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Recuperação Imediata', desc: selectedProc?.benefit_2_desc || 'Protocolos que permitem retorno rápido à rotina.' },
-            { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Segurança Máxima', desc: selectedProc?.benefit_3_desc || 'Ambiente com os mais rigorosos protocolos.' },
+            { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Respeitamos o que é seu — o resultado combina com você, não com um padrão.' },
+            { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O procedimento se encaixa no seu dia a dia sem exigir cuidados complexos.' },
+            { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Profissional que te orienta', desc: selectedProc?.benefit_3_desc || 'Você não sai com dúvidas. Cada etapa é explicada antes e depois.' },
           ].map((benefit, idx) => (
             <div key={idx} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm border border-outline-variant/5">
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
@@ -776,26 +824,63 @@ const OfferPage = ({
           ))}
         </section>
 
-        <section className="bg-surface-container-low p-6 rounded-2xl mb-12">
-          <h3 className="text-lg font-extrabold text-primary mb-4 flex items-center gap-2">
-            A Clínica <span className="w-8 h-[2px] bg-secondary-container" />
-          </h3>
-          <div className="space-y-4">
-            {[
-              { icon: <Stethoscope size={18} />, title: 'Equipe Especialista', desc: 'Profissionais certificados.' },
-              { icon: <Building2 size={18} />, title: 'Ambiente Premium', desc: 'Conforto absoluto e design contemporâneo.' },
-              { icon: <Cpu size={18} />, title: 'Tecnologia de Ponta', desc: 'Equipamentos de última geração.' },
-            ].map((item, idx) => (
-              <div key={idx} className="bg-white p-4 rounded-xl flex items-start gap-4 shadow-sm">
-                <div className="text-secondary shrink-0">{item.icon}</div>
-                <div>
-                  <span className="block font-bold text-primary text-xs uppercase tracking-wider">{item.title}</span>
-                  <p className="text-[10px] text-on-surface-variant opacity-70">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+        {/* ── Blocos 5 + 6: Para quem é / Como funciona ── */}
+        <section className="bg-surface-container-low rounded-2xl p-6 mb-8">
+          <h3 className="text-base font-extrabold text-primary mb-3">Para quem é</h3>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mb-6">
+            {forWhomText}
+          </p>
+          <div className="border-t border-outline-variant/10 pt-4">
+            <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">
+              Como funciona na {clinic}
+            </h3>
+            <p className="text-[12px] text-on-surface-variant leading-relaxed">
+              {howItWorks}
+            </p>
           </div>
         </section>
+
+        {/* ── Bloco 7: FAQ ── */}
+        <section className="mb-8">
+          {faqItems.map((item, idx) => (
+            <div key={idx} className="border-b border-outline-variant/10">
+              <button
+                className="w-full flex justify-between items-center py-3 text-left"
+                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+              >
+                <span className="text-[13px] font-semibold text-primary pr-4">{item.q}</span>
+                <ChevronRight
+                  size={14}
+                  className={cn('text-secondary shrink-0 transition-transform duration-200', openFaq === idx ? 'rotate-90' : '')}
+                />
+              </button>
+              <AnimatePresence initial={false}>
+                {openFaq === idx && (
+                  <motion.div
+                    key="answer"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <p className="text-[11px] text-on-surface-variant leading-relaxed pb-3 pt-0.5">
+                      {item.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </section>
+
+        {/* ── Bloco 8: Fechamento ── */}
+        <section className="mb-10">
+          <p className="text-center text-[11px] text-on-surface-variant leading-relaxed italic max-w-[280px] mx-auto opacity-70">
+            {closingNote}
+          </p>
+        </section>
+
       </main>
 
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.18)] rounded-t-[2.5rem] px-8 pt-4 pb-3 h-[175px]" style={{ background: '#2C2010' }}>
@@ -1851,6 +1936,7 @@ export default function App() {
               procPhotos={procPhotos}
               portalSettings={portalSettings}
               clinicName={clinicData?.name || ''}
+              clientName={clientName}
               onNext={() => setCurrentStep('booking')}
               onBack={() => setCurrentStep('exit')}
               onShowExit={() => setIsExitIntentOpen(true)}
