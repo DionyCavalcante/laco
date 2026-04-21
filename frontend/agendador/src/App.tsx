@@ -710,13 +710,23 @@ const OfferPage = ({
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/10">
-                <PlayCircle className="text-white" size={16} />
-                <span className="text-white text-[10px] font-bold tracking-wider uppercase">
-                  {selectedProc?.duration ? `${selectedProc.duration} min` : 'Ver Protocolo'}
-                </span>
-              </div>
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImg((prev) => (prev - 1 + images.length) % images.length)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  onClick={() => setCurrentImg((prev) => (prev + 1) % images.length)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </>
+            )}
+            <div className="absolute bottom-6 left-6 right-6 flex justify-end items-end">
               <div className="flex gap-1.5">
                 {images.map((_, i) => (
                   <div
