@@ -21,12 +21,25 @@ app.use(express.json({
 }))
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 
-// Garante constraints críticas no banco (idempotente)
+// Garante constraints e colunas novas no banco (todos idempotentes com IF NOT EXISTS)
 const db = require('./db')
-db.query(`
-  ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique;
-  ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone);
-`).catch(e => console.warn('constraint migration:', e.message))
+;[
+  `ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_clinic_phone_unique`,
+  `ALTER TABLE leads ADD CONSTRAINT leads_clinic_phone_unique UNIQUE (clinic_id, phone)`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS category TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS authority_note TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS main_pain TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS emotional_desire TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS day_to_day_fit TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS how_it_works TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_session_duration TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_result_duration TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_pain_discomfort TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_maintenance TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_aftercare TEXT`,
+  `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS closing_note TEXT`,
+  `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
+].forEach(sql => db.query(sql).catch(e => console.warn('startup alter:', e.message)))
 
 // Health check — Railway usa isso
 app.get('/health', (req, res) => res.json({ ok: true, ts: new Date() }))
