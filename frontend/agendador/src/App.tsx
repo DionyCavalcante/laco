@@ -714,15 +714,15 @@ const OfferPage = ({
               <>
                 <button
                   onClick={() => setCurrentImg((prev) => (prev - 1 + images.length) % images.length)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/15 flex items-center justify-center text-white/70 hover:bg-black/30 hover:text-white transition-all"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={14} />
                 </button>
                 <button
                   onClick={() => setCurrentImg((prev) => (prev + 1) % images.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/15 flex items-center justify-center text-white/70 hover:bg-black/30 hover:text-white transition-all"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={14} />
                 </button>
               </>
             )}
