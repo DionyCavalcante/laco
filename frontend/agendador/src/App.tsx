@@ -712,10 +712,10 @@ const OfferPage = ({
   const subheadline = selectedProc?.subheadline ||
     (selectedProc?.description
       ? selectedProc.description.slice(0, 90) + (selectedProc.description.length > 90 ? '...' : '')
-      : 'Resultado que realça o que você já tem — respeitando sua identidade, sem criar algo artificial.');
+      : 'Sobrancelhas mais alinhadas, definidas e naturais — sem perder sua identidade.');
 
   const authorityNote = selectedProc?.authority_note ||
-    `Na ${clinic} cada atendimento começa entendendo o que realmente combina com você.`;
+    `Na ${clinic}, cada atendimento começa entendendo o que realmente combina com você.`;
 
   // Para quem é: Fase 2 usa bullets dos campos; Fase 1 usa description
   const forWhomBullets = [
@@ -725,7 +725,7 @@ const OfferPage = ({
   ].filter(Boolean) as string[];
 
   const forWhomFallbackBullets = [
-    'Para quem sente que a sobrancelha não valoriza o próprio olhar.',
+    'Para quem sente que a sobrancelha não valoriza o olhar.',
     'Para quem busca mais definição sem perder naturalidade.',
     firstName
       ? `Para quem quer se sentir pronta no dia a dia, ${firstName}, sem depender de maquiagem.`
@@ -735,9 +735,9 @@ const OfferPage = ({
   const howItWorks = selectedProc?.how_it_works || null;
 
   const howItWorksSteps = selectedProc?.how_it_works ? null : [
-    { num: '1', title: 'Avaliação personalizada', desc: 'Antes de qualquer procedimento, avaliamos o que realmente combina com você.' },
-    { num: '2', title: 'Procedimento com técnica', desc: `O ${procName} é realizado com cuidado, respeitando suas características naturais.` },
-    { num: '3', title: 'Você sai orientada', desc: 'Com o resultado desejado — e sabendo exatamente como manter o efeito no dia a dia.' },
+    { num: '1', title: 'Avaliação personalizada', desc: 'Avaliamos o que realmente combina com você.' },
+    { num: '2', title: 'Procedimento com técnica', desc: 'Depois, realizamos o procedimento com técnica e cuidado, respeitando seu desenho natural.' },
+    { num: '3', title: 'Você sai orientada', desc: 'Você sai com o olhar mais definido — e sabendo como manter o resultado no dia a dia.' },
   ];
 
   // FAQ — 4ª pergunta: manutenção ou cuidados pós
@@ -745,19 +745,19 @@ const OfferPage = ({
     ? { q: 'Preciso de manutenção?', a: selectedProc.faq_maintenance }
     : selectedProc?.faq_aftercare
       ? { q: 'Quais cuidados preciso ter depois?', a: selectedProc.faq_aftercare }
-      : { q: 'Preciso de manutenção?', a: 'Sim, mas de forma simples e espaçada — você será orientada sobre o melhor intervalo.' };
+      : { q: 'Preciso de manutenção?', a: 'Sim, de forma simples e espaçada — você será orientada.' };
 
   // 5ª pergunta — endereço
   const clinicLocationAnswer = clinicAddress
     ? `O atendimento é realizado na ${clinic} (${clinicAddress}). Não fazemos visitas a domicílio.`
-    : `Você recebe todas as informações após escolher seu horário.`;
+    : `Você recebe todas as informações ao escolher seu horário.`;
 
   const faqItems: { q: string; a: string }[] = [
     {
       q: 'Vai ficar artificial?',
       a: selectedProc?.faq_pain_discomfort || (firstName
-        ? `Não, ${firstName}. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.`
-        : 'Não. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.'),
+        ? `Não, ${firstName}. O procedimento respeita seu formato natural, evitando qualquer efeito marcado.`
+        : 'Não. O procedimento respeita seu formato natural, evitando qualquer efeito marcado.'),
     },
     {
       q: 'Dói ou incomoda?',
@@ -765,7 +765,7 @@ const OfferPage = ({
     },
     {
       q: 'Quanto tempo dura o resultado?',
-      a: selectedProc?.faq_result_duration || 'O efeito se mantém por semanas, mantendo o olhar alinhado e definido no dia a dia.',
+      a: selectedProc?.faq_result_duration || 'O efeito se mantém por semanas, mantendo o olhar alinhado no dia a dia.',
     },
     faq4,
     { q: 'Onde fica a clínica?', a: clinicLocationAnswer },
@@ -773,8 +773,8 @@ const OfferPage = ({
 
   const closingNote = selectedProc?.closing_note ||
     (firstName
-      ? `Antes de agendar, ${firstName}, o objetivo não é mudar quem você é. É realçar o que já existe em você.`
-      : 'O objetivo não é mudança drástica. É realçar o que já existe em você.');
+      ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
+      : 'Antes de agendar: o objetivo não é mudar quem você é. É realçar o que já existe em você.');
 
   return (
     <div className="pb-64 min-h-screen flex flex-col bg-white">
@@ -856,9 +856,9 @@ const OfferPage = ({
           </div>
           <div className="space-y-3">
             {[
-              { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Seu formato é respeitado. O objetivo é realçar o que você já tem — não criar algo artificial.' },
-              { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O efeito se mantém no dia a dia, sem precisar de maquiagem ou ajustes constantes.' },
-              { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza antes, durante e depois.' },
+              { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Realçamos o que você já tem — sem criar algo artificial.' },
+              { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'Você mantém o efeito no dia a dia, sem depender de maquiagem.' },
+              { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza.' },
             ].map((benefit, idx) => (
               <div key={idx} className="bg-white rounded-2xl px-5 py-5 flex items-start gap-4 shadow-[0_2px_20px_rgba(0,0,0,0.07)] border border-outline-variant/[0.06]">
                 <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
@@ -881,8 +881,8 @@ const OfferPage = ({
           </div>
           <div className="space-y-4">
             {[
-              'Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu.',
-              'Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu.',
+              'Eu nunca gostei muito da minha sobrancelha… depois do procedimento, ficou leve, natural — parece que já era meu.',
+              'Fiquei com medo de ficar artificial, mas ficou exatamente como eu queria: mais definido, mas ainda sendo eu.',
             ].map((quote, i) => (
               <div key={i} className="rounded-2xl px-6 py-6 border border-secondary/15" style={{ background: '#fdfcf9' }}>
                 <div className="flex gap-0.5 mb-3">
@@ -893,7 +893,7 @@ const OfferPage = ({
             ))}
           </div>
           <p className="text-center text-[10px] text-on-surface-variant opacity-45 mt-5 leading-relaxed">
-            {firstName ? `${firstName}, cada` : 'Cada'} resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
+            {firstName ? `${firstName}, cada` : 'Cada'} resultado é pensado para valorizar o seu rosto — nunca seguir um padrão.
           </p>
         </section>
 
@@ -955,10 +955,13 @@ const OfferPage = ({
               O objetivo não é<br />mudar você
             </h3>
             <p className="text-[14px] text-on-surface-variant leading-relaxed mb-4">
-              Aqui, o foco não é transformar seu rosto — é realçar o que já é seu{firstName ? `, ${firstName}` : ''}.
+              O foco é realçar o que já é seu{firstName ? `, ${firstName}` : ''}.
             </p>
-            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65">
-              Cada detalhe respeita seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial. O resultado é leve, harmônico — feito para combinar com você.
+            <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-70 mb-3">
+              Respeitamos seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial.
+            </p>
+            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-55">
+              Um resultado leve, harmônico e feito para combinar com você — não com um padrão.
             </p>
             <div className="w-8 h-[1px] bg-secondary/35 mx-auto mt-7" />
           </div>
