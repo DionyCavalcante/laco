@@ -711,7 +711,7 @@ const OfferPage = ({
   const subheadline = selectedProc?.subheadline ||
     (selectedProc?.description
       ? selectedProc.description.slice(0, 90) + (selectedProc.description.length > 90 ? '...' : '')
-      : 'Resultado que respeita quem você é, com a atenção que você merece.');
+      : 'Resultado que realça o que você já tem — respeitando sua identidade, sem criar algo artificial.');
 
   const authorityNote = selectedProc?.authority_note ||
     `Na ${clinic}, cada atendimento começa por entender o que combina com você.`;
@@ -723,42 +723,39 @@ const OfferPage = ({
     selectedProc?.day_to_day_fit,
   ].filter(Boolean) as string[];
 
-  const forWhomFallback = selectedProc?.description && selectedProc.description.length > 40
-    ? selectedProc.description.slice(0, 150) + (selectedProc.description.length > 150 ? '...' : '')
-    : `Para quem quer cuidar da aparência com atenção personalizada e resultado que respeita a sua naturalidade.`;
+  const forWhomFallbackBullets = [
+    'Para quem sente que a aparência não valoriza o que já existe em você.',
+    'Para quem busca mais definição sem perder naturalidade.',
+    'Para quem quer se sentir mais arrumada sem depender de maquiagem todos os dias.',
+  ];
 
   const howItWorks = selectedProc?.how_it_works ||
-    (selectedProc?.description && selectedProc.description.length > 80
-      ? selectedProc.description
-      : `A profissional avalia o que combina com você, realiza o procedimento com cuidado e orienta cada passo antes de você sair.`);
+    `Antes de qualquer procedimento, avaliamos o que realmente combina com você. A partir disso, o atendimento é realizado com técnica e cuidado, respeitando suas características naturais. Você sai com o resultado desejado — e sabendo exatamente como mantê-lo no dia a dia.`;
 
   // FAQ — 4ª pergunta: manutenção ou cuidados pós
   const faq4 = selectedProc?.faq_maintenance
-    ? { q: 'Quando preciso fazer manutenção?', a: selectedProc.faq_maintenance }
+    ? { q: 'Preciso de manutenção?', a: selectedProc.faq_maintenance }
     : selectedProc?.faq_aftercare
       ? { q: 'Quais cuidados preciso ter depois?', a: selectedProc.faq_aftercare }
-      : { q: 'Quando preciso fazer manutenção?', a: 'A profissional orienta a frequência ideal durante a consulta, conforme seu caso.' };
+      : { q: 'Preciso de manutenção?', a: 'Sim, mas de forma simples e espaçada — você será orientada sobre o melhor intervalo.' };
 
   // 5ª pergunta — endereço
   const clinicLocationAnswer = clinicAddress
     ? `O atendimento é realizado na ${clinic} (${clinicAddress}). Não fazemos visitas a domicílio.`
-    : `O atendimento é realizado na ${clinic}, de forma presencial. Não fazemos visitas a domicílio.`;
+    : `Você recebe todas as informações após escolher seu horário.`;
 
   const faqItems: { q: string; a: string }[] = [
     {
-      q: 'Quanto tempo leva?',
-      a: selectedProc?.faq_session_duration ||
-        (selectedProc?.duration
-          ? `Em média ${selectedProc.duration} minutos, podendo variar conforme a avaliação individual.`
-          : 'O tempo varia conforme a avaliação individual. A profissional informa antes de começar.'),
-    },
-    {
-      q: 'Quanto tempo dura o resultado?',
-      a: selectedProc?.faq_result_duration || 'O resultado pode variar conforme seus cuidados e características individuais.',
+      q: 'Vai ficar artificial?',
+      a: selectedProc?.faq_pain_discomfort || 'Não. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.',
     },
     {
       q: 'Dói ou incomoda?',
-      a: selectedProc?.faq_pain_discomfort || 'Pode haver um leve desconforto. A profissional orienta durante todo o atendimento.',
+      a: selectedProc?.faq_session_duration || 'É um processo tranquilo e confortável para a maioria das clientes.',
+    },
+    {
+      q: 'Quanto tempo dura o resultado?',
+      a: selectedProc?.faq_result_duration || 'O efeito se mantém por semanas, mantendo o olhar alinhado e definido no dia a dia.',
     },
     faq4,
     { q: 'Onde fica a clínica?', a: clinicLocationAnswer },
@@ -839,41 +836,58 @@ const OfferPage = ({
         </section>
 
         {/* ── Bloco 4: Três benefícios ── */}
-        <section className="grid gap-3 mb-8">
-          {[
-            { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Respeitamos o que é seu — o resultado combina com você, não com um padrão.' },
-            { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O procedimento se encaixa no seu dia a dia sem exigir cuidados complexos.' },
-            { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Profissional que te orienta', desc: selectedProc?.benefit_3_desc || 'Você não sai com dúvidas. Cada etapa é explicada antes e depois.' },
-          ].map((benefit, idx) => (
-            <div key={idx} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm border border-outline-variant/5">
-              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
-                {benefit.icon}
+        <section className="mb-8">
+          <h3 className="text-base font-extrabold text-primary mb-4 text-center">Um resultado que valoriza, não transforma</h3>
+          <div className="grid gap-3">
+            {[
+              { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Seu formato é respeitado. O objetivo é realçar o que você já tem — não criar algo artificial.' },
+              { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O efeito se mantém no dia a dia, sem precisar de maquiagem ou ajustes constantes.' },
+              { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza antes, durante e depois.' },
+            ].map((benefit, idx) => (
+              <div key={idx} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm border border-outline-variant/5">
+                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                  {benefit.icon}
+                </div>
+                <div>
+                  <h4 className="font-bold text-primary text-sm">{benefit.title}</h4>
+                  <p className="text-[10px] text-on-surface-variant leading-tight opacity-70">{benefit.desc}</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-primary text-sm">{benefit.title}</h4>
-                <p className="text-[10px] text-on-surface-variant leading-tight opacity-70">{benefit.desc}</p>
-              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Prova social ── */}
+        <section className="mb-8">
+          <h3 className="text-base font-extrabold text-primary mb-4 text-center">Resultados que falam por si</h3>
+          <div className="space-y-3">
+            <div className="bg-surface-container-low rounded-2xl p-4">
+              <p className="text-[12px] text-on-surface-variant leading-relaxed italic opacity-80">
+                "Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu."
+              </p>
             </div>
-          ))}
+            <div className="bg-surface-container-low rounded-2xl p-4">
+              <p className="text-[12px] text-on-surface-variant leading-relaxed italic opacity-80">
+                "Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu."
+              </p>
+            </div>
+          </div>
+          <p className="text-center text-[10px] text-on-surface-variant opacity-60 mt-3 leading-relaxed">
+            Cada resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
+          </p>
         </section>
 
         {/* ── Blocos 5 + 6: Para quem é / Como funciona ── */}
         <section className="bg-surface-container-low rounded-2xl p-6 mb-8">
           <h3 className="text-base font-extrabold text-primary mb-3">Para quem é</h3>
-          {forWhomBullets.length > 0 ? (
-            <ul className="space-y-1 mb-6">
-              {forWhomBullets.map((bullet, i) => (
-                <li key={i} className="flex items-start gap-2 text-[12px] text-on-surface-variant leading-relaxed">
-                  <span className="text-secondary mt-0.5 shrink-0">·</span>
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[12px] text-on-surface-variant leading-relaxed mb-6">
-              {forWhomFallback}
-            </p>
-          )}
+          <ul className="space-y-1 mb-6">
+            {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
+              <li key={i} className="flex items-start gap-2 text-[12px] text-on-surface-variant leading-relaxed">
+                <span className="text-secondary mt-0.5 shrink-0">·</span>
+                <span>{bullet}</span>
+              </li>
+            ))}
+          </ul>
           <div className="border-t border-outline-variant/10 pt-4">
             <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">
               Como funciona na {clinic}
@@ -884,8 +898,23 @@ const OfferPage = ({
           </div>
         </section>
 
+        {/* ── Quebra de crença ── */}
+        <section className="mb-8">
+          <h3 className="text-base font-extrabold text-primary mb-3">O objetivo não é mudar você</h3>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed">
+            Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
+          </p>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2">
+            Cada detalhe é pensado para respeitar seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial.
+          </p>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2">
+            O resultado é leve, harmônico e feito para combinar com você — não com um padrão.
+          </p>
+        </section>
+
         {/* ── Bloco 7: FAQ ── */}
         <section className="mb-8">
+          <h3 className="text-base font-extrabold text-primary mb-4">Dúvidas comuns</h3>
           {faqItems.map((item, idx) => (
             <div key={idx} className="border-b border-outline-variant/10">
               <button
@@ -919,9 +948,20 @@ const OfferPage = ({
         </section>
 
         {/* ── Bloco 8: Fechamento ── */}
-        <section className="mb-10">
+        <section className="mb-8">
           <p className="text-center text-[11px] text-on-surface-variant leading-relaxed italic max-w-[280px] mx-auto opacity-70">
             {closingNote}
+          </p>
+        </section>
+
+        {/* ── Escassez leve ── */}
+        <section className="mb-10 bg-surface-container-low rounded-2xl p-6">
+          <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">Atendimento com tempo e cuidado</h3>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed">
+            Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
+          </p>
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2 opacity-80">
+            Por isso, os horários disponíveis podem variar rapidamente.
           </p>
         </section>
 
