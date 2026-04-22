@@ -28,6 +28,7 @@ import {
   Leaf,
   ChevronRight,
   ChevronLeft,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -729,8 +730,13 @@ const OfferPage = ({
     'Para quem quer se sentir mais arrumada sem depender de maquiagem todos os dias.',
   ];
 
-  const howItWorks = selectedProc?.how_it_works ||
-    `Antes de qualquer procedimento, avaliamos o que realmente combina com você. A partir disso, o atendimento é realizado com técnica e cuidado, respeitando suas características naturais. Você sai com o resultado desejado — e sabendo exatamente como mantê-lo no dia a dia.`;
+  const howItWorks = selectedProc?.how_it_works || null;
+
+  const howItWorksSteps = selectedProc?.how_it_works ? null : [
+    { num: '1', title: 'Avaliação personalizada', desc: 'Entendemos o que realmente combina com você antes de qualquer coisa.' },
+    { num: '2', title: 'Procedimento com cuidado', desc: 'Executado com técnica e atenção, respeitando suas características naturais.' },
+    { num: '3', title: 'Você sai orientada', desc: 'Com o resultado desejado e sabendo como mantê-lo no dia a dia.' },
+  ];
 
   // FAQ — 4ª pergunta: manutenção ou cuidados pós
   const faq4 = selectedProc?.faq_maintenance
@@ -861,16 +867,14 @@ const OfferPage = ({
         <section className="mb-8">
           <h3 className="text-base font-extrabold text-primary mb-4 text-center">Resultados que falam por si</h3>
           <div className="space-y-3">
-            <div className="bg-surface-container-low rounded-2xl p-4">
-              <p className="text-[12px] text-on-surface-variant leading-relaxed italic opacity-80">
-                "Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu."
-              </p>
-            </div>
-            <div className="bg-surface-container-low rounded-2xl p-4">
-              <p className="text-[12px] text-on-surface-variant leading-relaxed italic opacity-80">
-                "Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu."
-              </p>
-            </div>
+            {[
+              '"Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu."',
+              '"Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu."',
+            ].map((quote, i) => (
+              <div key={i} className="bg-secondary/5 border border-secondary/10 rounded-2xl p-5 shadow-sm">
+                <p className="text-[12px] text-on-surface-variant leading-relaxed italic">{quote}</p>
+              </div>
+            ))}
           </div>
           <p className="text-center text-[10px] text-on-surface-variant opacity-60 mt-3 leading-relaxed">
             Cada resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
@@ -878,73 +882,97 @@ const OfferPage = ({
         </section>
 
         {/* ── Blocos 5 + 6: Para quem é / Como funciona ── */}
-        <section className="bg-surface-container-low rounded-2xl p-6 mb-8">
-          <h3 className="text-base font-extrabold text-primary mb-3">Para quem é</h3>
-          <ul className="space-y-1 mb-6">
-            {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
-              <li key={i} className="flex items-start gap-2 text-[12px] text-on-surface-variant leading-relaxed">
-                <span className="text-secondary mt-0.5 shrink-0">·</span>
-                <span>{bullet}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="border-t border-outline-variant/10 pt-4">
-            <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">
+        <section className="mb-8 space-y-4">
+          {/* Para quem é */}
+          <div className="bg-surface-container-low rounded-2xl p-6">
+            <h3 className="text-base font-extrabold text-primary mb-4">Para quem é</h3>
+            <ul className="space-y-3">
+              {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check size={11} className="text-secondary" />
+                  </div>
+                  <span className="text-[13px] text-on-surface-variant leading-relaxed">{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* Como funciona */}
+          <div className="bg-surface-container-low rounded-2xl p-6">
+            <h3 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">
               Como funciona na {clinic}
             </h3>
-            <p className="text-[12px] text-on-surface-variant leading-relaxed">
-              {howItWorks}
-            </p>
+            {howItWorksSteps ? (
+              <div className="space-y-4">
+                {howItWorksSteps.map((step) => (
+                  <div key={step.num} className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                      <span className="text-[11px] font-bold text-secondary">{step.num}</span>
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold text-primary leading-snug">{step.title}</p>
+                      <p className="text-[11px] text-on-surface-variant leading-relaxed mt-0.5 opacity-80">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[12px] text-on-surface-variant leading-relaxed">{howItWorks}</p>
+            )}
           </div>
         </section>
 
         {/* ── Quebra de crença ── */}
-        <section className="mb-8">
-          <h3 className="text-base font-extrabold text-primary mb-3">O objetivo não é mudar você</h3>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed">
+        <section className="mb-8 text-center py-2">
+          <div className="w-10 h-px bg-secondary/30 mx-auto mb-6" />
+          <h3 className="text-[17px] font-extrabold text-primary mb-4 leading-tight">O objetivo não é mudar você</h3>
+          <p className="text-[13px] text-on-surface-variant leading-relaxed max-w-[300px] mx-auto">
             Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
           </p>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2">
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-3 max-w-[290px] mx-auto opacity-75">
             Cada detalhe é pensado para respeitar seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial.
           </p>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2">
+          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-3 max-w-[290px] mx-auto opacity-75">
             O resultado é leve, harmônico e feito para combinar com você — não com um padrão.
           </p>
+          <div className="w-10 h-px bg-secondary/30 mx-auto mt-6" />
         </section>
 
         {/* ── Bloco 7: FAQ ── */}
         <section className="mb-8">
           <h3 className="text-base font-extrabold text-primary mb-4">Dúvidas comuns</h3>
-          {faqItems.map((item, idx) => (
-            <div key={idx} className="border-b border-outline-variant/10">
-              <button
-                className="w-full flex justify-between items-center py-3 text-left"
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-              >
-                <span className="text-[13px] font-semibold text-primary pr-4">{item.q}</span>
-                <ChevronRight
-                  size={14}
-                  className={cn('text-secondary shrink-0 transition-transform duration-200', openFaq === idx ? 'rotate-90' : '')}
-                />
-              </button>
-              <AnimatePresence initial={false}>
-                {openFaq === idx && (
-                  <motion.div
-                    key="answer"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    <p className="text-[11px] text-on-surface-variant leading-relaxed pb-3 pt-0.5">
-                      {item.a}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+          <div className="bg-surface-container-low rounded-2xl overflow-hidden">
+            {faqItems.map((item, idx) => (
+              <div key={idx} className={cn('px-5', idx < faqItems.length - 1 && 'border-b border-outline-variant/10')}>
+                <button
+                  className="w-full flex justify-between items-center py-4 text-left"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                >
+                  <span className="text-[13px] font-semibold text-primary pr-4">{item.q}</span>
+                  <ChevronRight
+                    size={14}
+                    className={cn('text-secondary shrink-0 transition-transform duration-200', openFaq === idx ? 'rotate-90' : '')}
+                  />
+                </button>
+                <AnimatePresence initial={false}>
+                  {openFaq === idx && (
+                    <motion.div
+                      key="answer"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-[11px] text-on-surface-variant leading-relaxed pb-4 pt-0.5 opacity-80">
+                        {item.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── Bloco 8: Fechamento ── */}
@@ -955,12 +983,17 @@ const OfferPage = ({
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="mb-10 bg-surface-container-low rounded-2xl p-6">
-          <h3 className="text-sm font-bold text-primary mb-2 uppercase tracking-wider">Atendimento com tempo e cuidado</h3>
+        <section className="mb-10 rounded-2xl p-6 bg-secondary/5 border border-secondary/15">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+              <Clock size={12} className="text-secondary" />
+            </div>
+            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Atendimento com tempo e cuidado</h3>
+          </div>
           <p className="text-[12px] text-on-surface-variant leading-relaxed">
             Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
           </p>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-2 opacity-80">
+          <p className="text-[12px] text-secondary font-medium leading-relaxed mt-2">
             Por isso, os horários disponíveis podem variar rapidamente.
           </p>
         </section>
