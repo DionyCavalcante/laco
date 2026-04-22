@@ -715,7 +715,7 @@ const OfferPage = ({
       : 'Resultado que realça o que você já tem — respeitando sua identidade, sem criar algo artificial.');
 
   const authorityNote = selectedProc?.authority_note ||
-    `Na ${clinic}, cada atendimento começa por entender o que combina com você.`;
+    `Na ${clinic} cada atendimento começa entendendo o que realmente combina com você.`;
 
   // Para quem é: Fase 2 usa bullets dos campos; Fase 1 usa description
   const forWhomBullets = [
@@ -725,17 +725,19 @@ const OfferPage = ({
   ].filter(Boolean) as string[];
 
   const forWhomFallbackBullets = [
-    'Para quem sente que a aparência não valoriza o que já existe em você.',
+    'Para quem sente que a sobrancelha não valoriza o próprio olhar.',
     'Para quem busca mais definição sem perder naturalidade.',
-    'Para quem quer se sentir mais arrumada sem depender de maquiagem todos os dias.',
+    firstName
+      ? `Para quem quer se sentir pronta no dia a dia, ${firstName}, sem depender de maquiagem.`
+      : 'Para quem quer se sentir pronta no dia a dia, sem depender de maquiagem.',
   ];
 
   const howItWorks = selectedProc?.how_it_works || null;
 
   const howItWorksSteps = selectedProc?.how_it_works ? null : [
-    { num: '1', title: 'Avaliação personalizada', desc: 'Entendemos o que realmente combina com você antes de qualquer coisa.' },
-    { num: '2', title: 'Procedimento com cuidado', desc: 'Executado com técnica e atenção, respeitando suas características naturais.' },
-    { num: '3', title: 'Você sai orientada', desc: 'Com o resultado desejado e sabendo como mantê-lo no dia a dia.' },
+    { num: '1', title: 'Avaliação personalizada', desc: 'Antes de qualquer procedimento, avaliamos o que realmente combina com você.' },
+    { num: '2', title: 'Procedimento com técnica', desc: `O ${procName} é realizado com cuidado, respeitando suas características naturais.` },
+    { num: '3', title: 'Você sai orientada', desc: 'Com o resultado desejado — e sabendo exatamente como manter o efeito no dia a dia.' },
   ];
 
   // FAQ — 4ª pergunta: manutenção ou cuidados pós
@@ -753,7 +755,9 @@ const OfferPage = ({
   const faqItems: { q: string; a: string }[] = [
     {
       q: 'Vai ficar artificial?',
-      a: selectedProc?.faq_pain_discomfort || 'Não. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.',
+      a: selectedProc?.faq_pain_discomfort || (firstName
+        ? `Não, ${firstName}. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.`
+        : 'Não. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.'),
     },
     {
       q: 'Dói ou incomoda?',
@@ -769,7 +773,7 @@ const OfferPage = ({
 
   const closingNote = selectedProc?.closing_note ||
     (firstName
-      ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
+      ? `Antes de agendar, ${firstName}, o objetivo não é mudar quem você é. É realçar o que já existe em você.`
       : 'O objetivo não é mudança drástica. É realçar o que já existe em você.');
 
   return (
@@ -888,7 +892,7 @@ const OfferPage = ({
             ))}
           </div>
           <p className="text-center text-[10px] text-on-surface-variant opacity-45 mt-4 leading-relaxed">
-            Cada resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
+            {firstName ? `${firstName}, cada` : 'Cada'} resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
           </p>
         </section>
 
@@ -914,7 +918,9 @@ const OfferPage = ({
         <section className="mb-12">
           <div className="mb-6">
             <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">processo</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">Como funciona na {clinic}</h3>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">
+              {firstName ? `${firstName}, veja` : 'Veja'} como funciona na {clinic}
+            </h3>
           </div>
           {howItWorksSteps ? (
             <div>
@@ -947,7 +953,7 @@ const OfferPage = ({
               O objetivo não é<br />mudar você
             </h3>
             <p className="text-[13px] text-on-surface-variant leading-relaxed mb-3 max-w-[270px] mx-auto">
-              Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
+              Aqui, o foco não é transformar seu rosto — é realçar o que já é seu{firstName ? `, ${firstName}` : ''}.
             </p>
             <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65 max-w-[260px] mx-auto">
               Cada detalhe respeita seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial. O resultado é leve, harmônico — feito para combinar com você.
