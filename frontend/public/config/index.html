@@ -388,10 +388,16 @@ let procs=[]
 async function loadProcs(){
   try{
     const r=await fetch(`${API}/api/procedures`,{headers:h()})
-    if(!r.ok)throw new Error()
+    if(r.status===401){
+      document.getElementById('proc-list').innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Chave de acesso inválida. <a href="/login.html" style="color:#9B6FA5">Fazer login novamente</a></div>'
+      return
+    }
+    if(!r.ok)throw new Error('server')
     procs=await r.json()
     renderProcs()
-  }catch{document.getElementById('proc-list').innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Erro ao carregar. Verifique a chave de acesso.</div>'}
+  }catch{
+    document.getElementById('proc-list').innerHTML='<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Erro ao carregar procedimentos. <button onclick="loadProcs()" style="background:none;border:none;color:#9B6FA5;cursor:pointer;font-size:13px;text-decoration:underline">Tentar novamente</button></div>'
+  }
 }
 
 function renderProcs(){
@@ -908,6 +914,18 @@ window.switchTab = function(name, el) {
 loadProcs()
 loadHours()
 initClinic()
+
+// Recarrega dados quando a aba volta ao foco após ficar em background
+let hiddenAt = null
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    hiddenAt = Date.now()
+  } else if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) {
+    // Aba ficou em background por mais de 5 minutos — recarrega procedimentos
+    loadProcs()
+    hiddenAt = null
+  }
+})
 
 </script>
 </body>
