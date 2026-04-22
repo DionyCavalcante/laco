@@ -779,146 +779,175 @@ const OfferPage = ({
   return (
     <div className="pb-64 min-h-screen flex flex-col bg-white">
       <Header onBack={onBack} showExitIntent={onShowExit} clinicName={clinicName} />
-      <main className="pt-16 px-6 max-w-lg mx-auto flex-1 flex flex-col">
+      <main className="pt-16 flex-1 flex flex-col">
 
-        {/* ── Bloco 1: Header personalizado ── */}
-        <section className="text-center mb-12 pt-4">
-          <span className="text-secondary font-semibold text-[9px] mb-3 block uppercase tracking-[0.25em]">Estética</span>
-          <h2 className="text-[26px] font-extrabold text-primary tracking-tight leading-tight mb-4">
-            {headline}
-          </h2>
-          <div className="w-10 h-[2px] bg-secondary/50 mx-auto rounded-full mb-4" />
-          <p className="text-on-surface-variant text-[13px] leading-relaxed max-w-[260px] mx-auto opacity-70">
-            {subheadline}
-          </p>
+        {/* ── HERO: Headline + Imagem Âncora ── */}
+        <section className="px-6 pt-6 pb-8 text-center max-w-lg mx-auto w-full">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <span className="text-secondary font-bold text-[9px] mb-4 block uppercase tracking-[0.3em]">
+              {selectedProc?.category || 'Estética'}
+            </span>
+            <h2 className="text-[28px] font-extrabold text-primary tracking-tight leading-[1.15] mb-5">
+              {headline}
+            </h2>
+            <p className="text-on-surface-variant text-[13px] leading-relaxed opacity-65 max-w-[270px] mx-auto">
+              {subheadline}
+            </p>
+          </motion.div>
         </section>
 
-        {/* ── Bloco 2: Carrossel principal ── */}
-        <section className="mb-10 relative flex-1 min-h-[450px]">
-          <div className="absolute inset-0 rounded-2xl overflow-hidden bg-surface-container shadow-2xl">
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={currentImg}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
-                className="w-full h-full object-cover"
-                src={images[currentImg].url}
-                alt="Procedimento"
-                style={images[currentImg].rotation ? { transform: `rotate(${images[currentImg].rotation}deg)`, scale: images[currentImg].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
-              />
-            </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={() => setCurrentImg((prev) => (prev - 1 + images.length) % images.length)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/15 flex items-center justify-center text-white/70 hover:bg-black/30 hover:text-white transition-all"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                <button
-                  onClick={() => setCurrentImg((prev) => (prev + 1) % images.length)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/15 flex items-center justify-center text-white/70 hover:bg-black/30 hover:text-white transition-all"
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </>
-            )}
-            <div className="absolute bottom-6 left-6 right-6 flex justify-end items-end">
-              <div className="flex gap-1.5">
-                {images.map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn('h-1.5 rounded-full transition-all duration-300', currentImg === i ? 'w-6 bg-white' : 'w-1.5 bg-white/40')}
-                  />
-                ))}
+        {/* Imagem âncora — card tall com overlay editorial */}
+        <section className="px-5 pb-14 max-w-lg mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.25, duration: 0.8 }}
+            className="relative rounded-[28px] overflow-hidden"
+            style={{ boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
+          >
+            <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={currentImg}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-full h-full object-cover"
+                  src={images[currentImg].url}
+                  alt="Procedimento"
+                  style={images[currentImg].rotation ? { transform: `rotate(${images[currentImg].rotation}deg)`, scale: images[currentImg].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
+                />
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/75 via-transparent to-transparent" />
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setCurrentImg((prev) => (prev - 1 + images.length) % images.length)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-white/80 hover:bg-black/35 transition-all"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    onClick={() => setCurrentImg((prev) => (prev + 1) % images.length)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-white/80 hover:bg-black/35 transition-all"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </>
+              )}
+              {/* Overlay editorial */}
+              <div className="absolute bottom-0 inset-x-0 p-6 text-left">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex gap-0.5">
+                    {[0,1,2,3,4].map(s => <Star key={s} size={11} className="text-secondary fill-secondary" />)}
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/75">Resultado Natural</span>
+                </div>
+                <p className="font-serif text-white/90 italic text-[15px] leading-snug">
+                  {firstName ? `Personalizado para ${firstName}.` : 'Personalizado para você.'}
+                </p>
+                {images.length > 1 && (
+                  <div className="flex gap-1.5 mt-3">
+                    {images.map((_, i) => (
+                      <div key={i} className={cn('h-1 rounded-full transition-all duration-300', currentImg === i ? 'w-6 bg-white' : 'w-1.5 bg-white/35')} />
+                    ))}
+                  </div>
+                )}
               </div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── Pain & Promise ── */}
+        <section className="px-6 pb-20 max-w-lg mx-auto w-full">
+          <div className="space-y-8 text-primary/85 leading-relaxed">
+            <p className="text-[15px] leading-loose">
+              {authorityNote}
+            </p>
+            <div className="border-l-4 border-secondary/60 pl-6 py-3 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.07)' }}>
+              <h3 className="font-extrabold text-primary text-[18px] mb-3 leading-tight">
+                {procName} não é apenas um procedimento.
+              </h3>
+              <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-80">
+                {firstName
+                  ? `É a liberdade de acordar como você mesma, ${firstName} — com o olhar definido e pronto.`
+                  : 'É a liberdade de acordar pronta — com o olhar definido e natural.'}
+              </p>
             </div>
           </div>
         </section>
 
-        {/* ── Bloco 3: Frase de autoridade ── */}
-        <section className="mb-14">
-          <p className="text-center text-[13px] text-on-surface-variant leading-relaxed italic max-w-[280px] mx-auto opacity-70">
-            {authorityNote}
-          </p>
-        </section>
-
-        {/* ── Bloco 4: Três benefícios — hero secundário ── */}
-        <section className="mb-16 -mx-6 px-6 py-10" style={{ background: 'linear-gradient(180deg, #faf9f7 0%, #ffffff 100%)' }}>
-          <div className="text-center mb-8">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">por que escolher</span>
-            <h3 className="text-[23px] font-extrabold text-primary mt-2 leading-tight">
-              Um resultado que valoriza,{'\u00A0'}não transforma
-            </h3>
-          </div>
-          <div className="space-y-3">
-            {[
-              { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Realçamos o que você já tem — sem criar algo artificial.' },
-              { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'Você mantém o efeito no dia a dia, sem depender de maquiagem.' },
-              { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza.' },
-            ].map((benefit, idx) => (
-              <div key={idx} className="bg-white rounded-2xl px-5 py-5 flex items-start gap-4 shadow-[0_2px_20px_rgba(0,0,0,0.07)] border border-outline-variant/[0.06]">
-                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
-                  {benefit.icon}
+        {/* ── Três benefícios ── */}
+        <section className="py-16 px-6" style={{ background: '#ffffff', borderTop: '1px solid rgba(198,198,206,0.12)', borderBottom: '1px solid rgba(198,198,206,0.12)' }}>
+          <div className="max-w-lg mx-auto">
+            <div className="text-center mb-8">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">por que escolher</span>
+              <h3 className="text-[22px] font-extrabold text-primary mt-2 leading-tight">
+                Um resultado que valoriza,{'\u00A0'}não transforma
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {[
+                { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Realçamos o que você já tem — sem criar algo artificial.' },
+                { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'Você mantém o efeito no dia a dia, sem depender de maquiagem.' },
+                { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza.' },
+              ].map((benefit, idx) => (
+                <div key={idx} className="bg-surface-container-low rounded-2xl px-5 py-5 flex items-start gap-4 border border-outline-variant/[0.06]">
+                  <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+                    {benefit.icon}
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-bold text-primary text-[14px] leading-snug mb-1.5">{benefit.title}</h4>
+                    <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65">{benefit.desc}</p>
+                  </div>
                 </div>
-                <div className="pt-1">
-                  <h4 className="font-bold text-primary text-[14px] leading-snug mb-1.5">{benefit.title}</h4>
-                  <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65">{benefit.desc}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* ── Prova social ── */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">depoimentos</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">Resultados que falam por si</h3>
+        {/* ── Depoimento editorial — blockquote grande ── */}
+        <section className="px-6 py-20 text-center max-w-lg mx-auto w-full">
+          <div className="mb-8 flex justify-center">
+            <div className="flex gap-1">
+              {[0,1,2,3,4].map(s => <Star key={s} size={14} className="text-secondary fill-secondary opacity-75" />)}
+            </div>
           </div>
-          <div className="space-y-4">
-            {[
-              'Eu nunca gostei muito da minha sobrancelha… depois do procedimento, ficou leve, natural — parece que já era meu.',
-              'Fiquei com medo de ficar artificial, mas ficou exatamente como eu queria: mais definido, mas ainda sendo eu.',
-            ].map((quote, i) => (
-              <div key={i} className="rounded-2xl px-6 py-6 border border-secondary/15" style={{ background: '#fdfcf9' }}>
-                <div className="flex gap-0.5 mb-3">
-                  {[0,1,2,3,4].map(s => <Star key={s} size={11} className="text-secondary fill-secondary opacity-70" />)}
-                </div>
-                <p className="text-[13px] text-on-surface-variant leading-relaxed italic opacity-85">"{quote}"</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-[10px] text-on-surface-variant opacity-45 mt-5 leading-relaxed">
+          <blockquote className="font-serif text-[22px] italic mb-7 leading-snug text-primary">
+            "Eu tinha medo de ficar artificial, mas o resultado foi natural — parece que sempre foi meu. Minhas amigas não sabem que é procedimento."
+          </blockquote>
+          <cite className="text-[9px] tracking-[0.3em] font-bold uppercase text-on-surface-variant/55 not-italic">
+            — Cliente Premium
+          </cite>
+          <p className="text-center text-[10px] text-on-surface-variant opacity-40 mt-8 leading-relaxed">
             {firstName ? `${firstName}, cada` : 'Cada'} resultado é pensado para valorizar o seu rosto — nunca seguir um padrão.
           </p>
         </section>
 
-        {/* ── Bloco 5: Para quem é ── */}
-        <section className="mb-16">
-          <div className="mb-7">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">perfil</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">Para quem é</h3>
-          </div>
-          <ul className="space-y-5">
-            {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
-              <li key={i} className="flex items-start gap-4">
-                <div className="w-7 h-7 rounded-full bg-secondary/10 border border-secondary/25 flex items-center justify-center shrink-0 mt-0.5">
-                  <Check size={12} className="text-secondary" />
+        {/* ── Para quem é — seção escura ── */}
+        <section className="py-20 px-6" style={{ background: '#1A1F2C' }}>
+          <div className="max-w-lg mx-auto">
+            <h3 className="font-extrabold text-[22px] text-white mb-10 leading-tight">
+              {firstName ? `Isso é para você, ${firstName}:` : 'Isso é para você se:'}
+            </h3>
+            <div className="space-y-0">
+              {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
+                <div key={i} className="flex gap-4 items-start pt-5 border-t border-white/[0.07]">
+                  <div className="w-6 h-6 rounded-full bg-secondary/15 border border-secondary/30 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check size={11} className="text-secondary" />
+                  </div>
+                  <p className="text-[14px] text-white/80 font-light leading-relaxed pb-5">{bullet}</p>
                 </div>
-                <span className="text-[14px] text-on-surface-variant leading-relaxed pt-1">{bullet}</span>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          </div>
         </section>
 
-        {/* ── Bloco 6: Como funciona ── */}
-        <section className="mb-16">
+        {/* ── Como funciona ── */}
+        <section className="px-6 py-16 max-w-lg mx-auto w-full">
           <div className="mb-7">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">processo</span>
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">processo</span>
             <h3 className="text-[20px] font-extrabold text-primary mt-1">
               {firstName ? `${firstName}, veja` : 'Veja'} como funciona na {clinic}
             </h3>
@@ -947,33 +976,18 @@ const OfferPage = ({
           )}
         </section>
 
-        {/* ── Quebra de crença — bloco emocional ── */}
-        <section className="mb-16 -mx-6 px-8 py-14" style={{ background: 'linear-gradient(180deg, #faf9f7 0%, #ffffff 100%)' }}>
-          <div className="text-center max-w-[290px] mx-auto">
-            <div className="w-8 h-[1px] bg-secondary/35 mx-auto mb-7" />
-            <h3 className="text-[22px] font-extrabold text-primary mb-5 leading-tight">
-              O objetivo não é<br />mudar você
-            </h3>
-            <p className="text-[14px] text-on-surface-variant leading-relaxed mb-4">
-              O foco é realçar o que já é seu{firstName ? `, ${firstName}` : ''}.
-            </p>
-            <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-70 mb-3">
-              Respeitamos seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial.
-            </p>
-            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-55">
-              Um resultado leve, harmônico e feito para combinar com você — não com um padrão.
-            </p>
-            <div className="w-8 h-[1px] bg-secondary/35 mx-auto mt-7" />
+        {/* ── FAQ em card ── */}
+        <section className="px-6 pb-16 max-w-lg mx-auto w-full">
+          <div className="mb-6">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">dúvidas</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">Transparência Total</h3>
+            {firstName && (
+              <p className="text-[12px] text-on-surface-variant opacity-50 italic mt-1">
+                {firstName}, não deve sobrar nenhuma dúvida.
+              </p>
+            )}
           </div>
-        </section>
-
-        {/* ── Bloco 7: FAQ ── */}
-        <section className="mb-16">
-          <div className="mb-7">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">dúvidas</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">Perguntas comuns</h3>
-          </div>
-          <div>
+          <div className="bg-surface-container-low rounded-3xl p-5 border border-outline-variant/10">
             {faqItems.map((item, idx) => (
               <div key={idx} className={cn(idx < faqItems.length - 1 && 'border-b border-outline-variant/15')}>
                 <button
@@ -1007,17 +1021,23 @@ const OfferPage = ({
           </div>
         </section>
 
-        {/* ── Bloco 8: Fechamento ── */}
-        <section className="mb-12">
-          <div className="w-8 h-[1px] bg-outline-variant/25 mx-auto mb-7" />
-          <p className="text-center text-[13px] text-on-surface-variant leading-relaxed italic max-w-[250px] mx-auto opacity-60">
+        {/* ── Fechamento editorial ── */}
+        <section className="px-6 pb-10 max-w-lg mx-auto w-full text-center">
+          <div className="w-8 h-px bg-secondary/30 mx-auto mb-7" />
+          <div className="w-9 h-9 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Sparkles size={15} className="text-secondary" />
+          </div>
+          <p className="font-serif text-[19px] italic text-primary mb-3 leading-snug max-w-[260px] mx-auto">
             {closingNote}
+          </p>
+          <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-on-surface-variant/35 mt-5">
+            {clinic} · Estética de Resultados
           </p>
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="mb-10">
-          <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(180,150,100,0.07)' }}>
+        <section className="px-6 pb-12 max-w-lg mx-auto w-full">
+          <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(200,170,130,0.07)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={13} className="text-secondary" />
               <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-secondary">disponibilidade</span>
