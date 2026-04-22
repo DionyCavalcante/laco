@@ -778,12 +778,12 @@ const OfferPage = ({
       <main className="pt-16 px-6 max-w-lg mx-auto flex-1 flex flex-col">
 
         {/* ── Bloco 1: Header personalizado ── */}
-        <section className="text-center mb-8">
-          <span className="text-secondary font-bold text-[10px] mb-2 block uppercase tracking-[0.2em]">Estética</span>
-          <h2 className="text-[22px] font-extrabold text-primary tracking-tight leading-tight mb-2">
+        <section className="text-center mb-10">
+          <span className="text-secondary font-semibold text-[9px] mb-3 block uppercase tracking-[0.25em]">Estética</span>
+          <h2 className="text-[24px] font-extrabold text-primary tracking-tight leading-tight mb-3">
             {headline}
           </h2>
-          <p className="text-on-surface-variant font-medium text-[11px] leading-relaxed max-w-[280px] mx-auto opacity-80">
+          <p className="text-on-surface-variant text-[12px] leading-relaxed max-w-[260px] mx-auto opacity-65">
             {subheadline}
           </p>
         </section>
@@ -835,28 +835,33 @@ const OfferPage = ({
         </section>
 
         {/* ── Bloco 3: Frase de autoridade ── */}
-        <section className="mb-8">
-          <p className="text-center text-[12px] text-on-surface-variant leading-relaxed italic max-w-[300px] mx-auto opacity-80">
+        <section className="mb-10">
+          <p className="text-center text-[13px] text-on-surface-variant leading-relaxed italic max-w-[280px] mx-auto opacity-60">
             {authorityNote}
           </p>
         </section>
 
         {/* ── Bloco 4: Três benefícios ── */}
-        <section className="mb-8">
-          <h3 className="text-base font-extrabold text-primary mb-4 text-center">Um resultado que valoriza, não transforma</h3>
-          <div className="grid gap-3">
+        <section className="mb-12">
+          <div className="text-center mb-7">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">por que escolher</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1 leading-tight">
+              Um resultado que valoriza,{'\u00A0'}não transforma
+            </h3>
+          </div>
+          <div className="space-y-3">
             {[
-              { icon: <Sparkles size={20} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Seu formato é respeitado. O objetivo é realçar o que você já tem — não criar algo artificial.' },
-              { icon: <Bolt size={20} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O efeito se mantém no dia a dia, sem precisar de maquiagem ou ajustes constantes.' },
-              { icon: <ShieldCheck size={20} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza antes, durante e depois.' },
+              { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Seu formato é respeitado. O objetivo é realçar o que você já tem — não criar algo artificial.' },
+              { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'O efeito se mantém no dia a dia, sem precisar de maquiagem ou ajustes constantes.' },
+              { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza antes, durante e depois.' },
             ].map((benefit, idx) => (
-              <div key={idx} className="bg-white p-4 rounded-xl flex items-center gap-4 shadow-sm border border-outline-variant/5">
-                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+              <div key={idx} className="bg-white rounded-2xl px-5 py-4 flex items-start gap-4 shadow-[0_2px_16px_rgba(0,0,0,0.06)]">
+                <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
                   {benefit.icon}
                 </div>
-                <div>
-                  <h4 className="font-bold text-primary text-sm">{benefit.title}</h4>
-                  <p className="text-[10px] text-on-surface-variant leading-tight opacity-70">{benefit.desc}</p>
+                <div className="pt-0.5">
+                  <h4 className="font-semibold text-primary text-[13px] leading-snug mb-1">{benefit.title}</h4>
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed opacity-65">{benefit.desc}</p>
                 </div>
               </div>
             ))}
@@ -864,91 +869,106 @@ const OfferPage = ({
         </section>
 
         {/* ── Prova social ── */}
-        <section className="mb-8">
-          <h3 className="text-base font-extrabold text-primary mb-4 text-center">Resultados que falam por si</h3>
-          <div className="space-y-3">
+        <section className="mb-12">
+          <div className="text-center mb-7">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">depoimentos</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">Resultados que falam por si</h3>
+          </div>
+          <div className="space-y-4">
             {[
-              '"Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu."',
-              '"Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu."',
+              'Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu.',
+              'Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu.',
             ].map((quote, i) => (
-              <div key={i} className="bg-secondary/5 border border-secondary/10 rounded-2xl p-5 shadow-sm">
-                <p className="text-[12px] text-on-surface-variant leading-relaxed italic">{quote}</p>
+              <div key={i} className="bg-white rounded-2xl px-5 py-5 shadow-[0_2px_20px_rgba(0,0,0,0.07)]">
+                <div className="flex gap-0.5 mb-3">
+                  {[0,1,2,3,4].map(s => <Star key={s} size={10} className="text-secondary fill-secondary opacity-60" />)}
+                </div>
+                <p className="text-[13px] text-on-surface-variant leading-relaxed italic opacity-80">"{quote}"</p>
               </div>
             ))}
           </div>
-          <p className="text-center text-[10px] text-on-surface-variant opacity-60 mt-3 leading-relaxed">
+          <p className="text-center text-[10px] text-on-surface-variant opacity-45 mt-4 leading-relaxed">
             Cada resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
           </p>
         </section>
 
-        {/* ── Blocos 5 + 6: Para quem é / Como funciona ── */}
-        <section className="mb-8 space-y-4">
-          {/* Para quem é */}
-          <div className="bg-surface-container-low rounded-2xl p-6">
-            <h3 className="text-base font-extrabold text-primary mb-4">Para quem é</h3>
-            <ul className="space-y-3">
-              {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check size={11} className="text-secondary" />
-                  </div>
-                  <span className="text-[13px] text-on-surface-variant leading-relaxed">{bullet}</span>
-                </li>
-              ))}
-            </ul>
+        {/* ── Bloco 5: Para quem é ── */}
+        <section className="mb-12">
+          <div className="mb-6">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">perfil</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">Para quem é</h3>
           </div>
-          {/* Como funciona */}
-          <div className="bg-surface-container-low rounded-2xl p-6">
-            <h3 className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">
-              Como funciona na {clinic}
-            </h3>
-            {howItWorksSteps ? (
-              <div className="space-y-4">
-                {howItWorksSteps.map((step) => (
-                  <div key={step.num} className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+          <ul className="space-y-4">
+            {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
+              <li key={i} className="flex items-start gap-4">
+                <div className="w-6 h-6 rounded-full border border-secondary/30 flex items-center justify-center shrink-0 mt-0.5">
+                  <Check size={11} className="text-secondary" />
+                </div>
+                <span className="text-[14px] text-on-surface-variant leading-relaxed">{bullet}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ── Bloco 6: Como funciona ── */}
+        <section className="mb-12">
+          <div className="mb-6">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">processo</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">Como funciona na {clinic}</h3>
+          </div>
+          {howItWorksSteps ? (
+            <div>
+              {howItWorksSteps.map((step, idx) => (
+                <div key={step.num} className="flex items-start gap-4">
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="w-7 h-7 rounded-full border border-secondary/30 flex items-center justify-center">
                       <span className="text-[11px] font-bold text-secondary">{step.num}</span>
                     </div>
-                    <div>
-                      <p className="text-[13px] font-semibold text-primary leading-snug">{step.title}</p>
-                      <p className="text-[11px] text-on-surface-variant leading-relaxed mt-0.5 opacity-80">{step.desc}</p>
-                    </div>
+                    {idx < howItWorksSteps.length - 1 && (
+                      <div className="w-px bg-secondary/15 my-1" style={{ minHeight: 24 }} />
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[12px] text-on-surface-variant leading-relaxed">{howItWorks}</p>
-            )}
-          </div>
+                  <div className={cn('pt-0.5', idx < howItWorksSteps.length - 1 ? 'pb-6' : 'pb-0')}>
+                    <p className="text-[13px] font-semibold text-primary leading-snug">{step.title}</p>
+                    <p className="text-[12px] text-on-surface-variant leading-relaxed mt-1 opacity-70">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-80">{howItWorks}</p>
+          )}
         </section>
 
         {/* ── Quebra de crença ── */}
-        <section className="mb-8 text-center py-2">
-          <div className="w-10 h-px bg-secondary/30 mx-auto mb-6" />
-          <h3 className="text-[17px] font-extrabold text-primary mb-4 leading-tight">O objetivo não é mudar você</h3>
-          <p className="text-[13px] text-on-surface-variant leading-relaxed max-w-[300px] mx-auto">
-            Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
-          </p>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-3 max-w-[290px] mx-auto opacity-75">
-            Cada detalhe é pensado para respeitar seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial.
-          </p>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed mt-3 max-w-[290px] mx-auto opacity-75">
-            O resultado é leve, harmônico e feito para combinar com você — não com um padrão.
-          </p>
-          <div className="w-10 h-px bg-secondary/30 mx-auto mt-6" />
+        <section className="mb-12">
+          <div className="border border-secondary/20 rounded-3xl px-7 py-9 text-center">
+            <h3 className="text-[20px] font-extrabold text-primary mb-4 leading-tight">
+              O objetivo não é<br />mudar você
+            </h3>
+            <p className="text-[13px] text-on-surface-variant leading-relaxed mb-3 max-w-[270px] mx-auto">
+              Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
+            </p>
+            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65 max-w-[260px] mx-auto">
+              Cada detalhe respeita seu formato, sua expressão e sua identidade. Nada marcado, exagerado ou artificial. O resultado é leve, harmônico — feito para combinar com você.
+            </p>
+          </div>
         </section>
 
         {/* ── Bloco 7: FAQ ── */}
-        <section className="mb-8">
-          <h3 className="text-base font-extrabold text-primary mb-4">Dúvidas comuns</h3>
-          <div className="bg-surface-container-low rounded-2xl overflow-hidden">
+        <section className="mb-12">
+          <div className="mb-6">
+            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-semibold">dúvidas</span>
+            <h3 className="text-[20px] font-extrabold text-primary mt-1">Perguntas comuns</h3>
+          </div>
+          <div>
             {faqItems.map((item, idx) => (
-              <div key={idx} className={cn('px-5', idx < faqItems.length - 1 && 'border-b border-outline-variant/10')}>
+              <div key={idx} className={cn(idx < faqItems.length - 1 && 'border-b border-outline-variant/10')}>
                 <button
-                  className="w-full flex justify-between items-center py-4 text-left"
+                  className="w-full flex justify-between items-center py-4 text-left gap-3"
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                 >
-                  <span className="text-[13px] font-semibold text-primary pr-4">{item.q}</span>
+                  <span className="text-[13px] font-medium text-primary">{item.q}</span>
                   <ChevronRight
                     size={14}
                     className={cn('text-secondary shrink-0 transition-transform duration-200', openFaq === idx ? 'rotate-90' : '')}
@@ -964,7 +984,7 @@ const OfferPage = ({
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <p className="text-[11px] text-on-surface-variant leading-relaxed pb-4 pt-0.5 opacity-80">
+                      <p className="text-[12px] text-on-surface-variant leading-relaxed pb-4 pt-0.5 opacity-70">
                         {item.a}
                       </p>
                     </motion.div>
@@ -977,25 +997,26 @@ const OfferPage = ({
 
         {/* ── Bloco 8: Fechamento ── */}
         <section className="mb-8">
-          <p className="text-center text-[11px] text-on-surface-variant leading-relaxed italic max-w-[280px] mx-auto opacity-70">
+          <p className="text-center text-[13px] text-on-surface-variant leading-relaxed italic max-w-[260px] mx-auto opacity-55">
             {closingNote}
           </p>
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="mb-10 rounded-2xl p-6 bg-secondary/5 border border-secondary/15">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+        <section className="mb-10">
+          <div className="border-l-[3px] border-secondary/40 bg-secondary/4 rounded-r-2xl pl-5 pr-5 py-5">
+            <div className="flex items-center gap-2 mb-2">
               <Clock size={12} className="text-secondary" />
+              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-secondary">disponibilidade</span>
             </div>
-            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Atendimento com tempo e cuidado</h3>
+            <h3 className="text-[14px] font-bold text-primary mb-1">Atendimento com tempo e cuidado</h3>
+            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-75">
+              Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
+            </p>
+            <p className="text-[12px] font-medium text-secondary mt-2">
+              Os horários disponíveis podem variar rapidamente.
+            </p>
           </div>
-          <p className="text-[12px] text-on-surface-variant leading-relaxed">
-            Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
-          </p>
-          <p className="text-[12px] text-secondary font-medium leading-relaxed mt-2">
-            Por isso, os horários disponíveis podem variar rapidamente.
-          </p>
         </section>
 
       </main>
