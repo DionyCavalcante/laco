@@ -642,6 +642,21 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
+// ─── ProcHighlight — marca-texto animado ───────────────────────────────────
+const ProcHighlight = ({ children }: { children: React.ReactNode }) => (
+  <span className="relative inline-block">
+    <span className="relative z-10">{children}</span>
+    <motion.span
+      initial={{ width: 0 }}
+      whileInView={{ width: '100%' }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.9, delay: 0.15 }}
+      className="absolute bottom-[6%] left-0 h-[38%] -z-0"
+      style={{ background: 'rgba(200,170,130,0.32)', transform: 'skewX(-10deg)' }}
+    />
+  </span>
+);
+
 // ─── OfferPage ─────────────────────────────────────────────────────────────
 const OfferPage = ({
   selectedProc,
@@ -787,11 +802,21 @@ const OfferPage = ({
             <span className="text-secondary font-bold text-[9px] mb-4 block uppercase tracking-[0.3em]">
               {selectedProc?.category || 'Estética'}
             </span>
-            <h2 className="text-[28px] font-extrabold text-primary tracking-tight leading-[1.15] mb-5">
-              {headline}
+            <h2 className="font-serif text-[2rem] text-primary leading-[1.15] mb-5">
+              {selectedProc?.headline ? (
+                headline
+              ) : firstName ? (
+                <>{firstName}, você está pronta para acordar com <ProcHighlight>o olhar pronto</ProcHighlight> todos os dias?</>
+              ) : (
+                <>Acorde com <ProcHighlight>o olhar pronto</ProcHighlight> todos os dias</>
+              )}
             </h2>
-            <p className="text-on-surface-variant text-[13px] leading-relaxed opacity-65 max-w-[270px] mx-auto">
-              {subheadline}
+            <p className="text-on-surface-variant text-[14px] leading-relaxed font-light max-w-[280px] mx-auto">
+              {selectedProc?.subheadline ? (
+                subheadline
+              ) : (
+                <>Sobrancelhas que não apenas <strong className="font-bold text-primary underline decoration-secondary/40">existem</strong>, mas que <strong className="font-bold text-primary">valorizam</strong> cada traço do seu rosto.</>
+              )}
             </p>
           </motion.div>
         </section>
@@ -865,14 +890,14 @@ const OfferPage = ({
             <p className="text-[15px] leading-loose">
               {authorityNote}
             </p>
-            <div className="border-l-4 border-secondary/60 pl-6 py-3 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.07)' }}>
-              <h3 className="font-extrabold text-primary text-[18px] mb-3 leading-tight">
-                {procName} não é apenas um procedimento.
+            <div className="border-l-4 border-secondary pl-6 py-5 pr-5 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.12)' }}>
+              <h3 className="font-serif italic text-primary text-[19px] mb-4 leading-snug">
+                {procName} não é apenas um "procedimento".
               </h3>
-              <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-80">
+              <p className="text-[13px] text-on-surface-variant leading-relaxed">
                 {firstName
-                  ? `É a liberdade de acordar como você mesma, ${firstName} — com o olhar definido e pronto.`
-                  : 'É a liberdade de acordar pronta — com o olhar definido e natural.'}
+                  ? <>É a liberdade de <strong className="font-bold text-primary">ignorar o lápis de maquiagem</strong> e saber que seu olhar está sempre aberto, definido e elegante — sendo você mesma, {firstName}.</>
+                  : <>É a liberdade de <strong className="font-bold text-primary">ignorar o lápis de maquiagem</strong> e saber que seu olhar está sempre aberto, definido e elegante.</>}
               </p>
             </div>
           </div>
