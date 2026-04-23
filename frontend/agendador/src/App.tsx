@@ -1056,7 +1056,7 @@ const OfferPage = ({
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="px-6 py-5 max-w-lg mx-auto w-full">
+        <section className="px-6 py-2 max-w-lg mx-auto w-full">
           <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(200,170,130,0.07)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={13} className="text-secondary" />
