@@ -901,10 +901,10 @@ const OfferPage = ({
         </section>
 
         {/* ── Três benefícios ── */}
-        <section className="py-16 px-6" style={{ background: '#ffffff', borderTop: '1px solid rgba(198,198,206,0.12)', borderBottom: '1px solid rgba(198,198,206,0.12)' }}>
+        <section className="py-16 px-6" style={{ background: '#2C2010' }}>
           <div className="max-w-lg mx-auto">
             <div className="text-center mb-8">
-              <h3 className="text-[22px] font-extrabold text-primary leading-tight">
+              <h3 className="text-[22px] font-extrabold text-white leading-tight">
                 Um resultado que valoriza,{'\u00A0'}não transforma
               </h3>
             </div>
@@ -914,13 +914,13 @@ const OfferPage = ({
                 { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'Você mantém o efeito no dia a dia, sem depender de maquiagem.' },
                 { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza.' },
               ].map((benefit, idx) => (
-                <div key={idx} className="bg-surface-container-low rounded-2xl px-5 py-5 flex items-start gap-4 border border-outline-variant/[0.06]">
-                  <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+                <div key={idx} className="rounded-2xl px-5 py-5 flex items-start gap-4" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-secondary shrink-0 mt-0.5" style={{ background: 'rgba(200,170,130,0.15)' }}>
                     {benefit.icon}
                   </div>
                   <div className="pt-1">
-                    <h4 className="font-bold text-primary text-[14px] leading-snug mb-1.5">{benefit.title}</h4>
-                    <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-65">{benefit.desc}</p>
+                    <h4 className="font-bold text-white text-[14px] leading-snug mb-1.5">{benefit.title}</h4>
+                    <p className="text-[12px] text-white/55 leading-relaxed">{benefit.desc}</p>
                   </div>
                 </div>
               ))}
@@ -1040,18 +1040,21 @@ const OfferPage = ({
           </div>
         </section>
 
-        {/* ── Fechamento editorial ── */}
-        <section className="px-6 pb-10 max-w-lg mx-auto w-full text-center">
-          <div className="w-8 h-px bg-secondary/30 mx-auto mb-7" />
-          <div className="w-9 h-9 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-5">
-            <Sparkles size={15} className="text-secondary" />
+        {/* ── Fechamento editorial — fundo marrom escuro ── */}
+        <section className="px-6 py-16 w-full text-center" style={{ background: '#2C2010' }}>
+          <div className="max-w-lg mx-auto">
+            <div className="w-8 h-px mx-auto mb-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
+            <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(200,170,130,0.15)' }}>
+              <Sparkles size={15} className="text-secondary" />
+            </div>
+            <p className="font-serif text-[21px] italic text-white/90 mb-4 leading-snug max-w-[270px] mx-auto">
+              {closingNote}
+            </p>
+            <p className="text-[9px] uppercase font-bold tracking-[0.2em] mt-6" style={{ color: 'rgba(200,170,130,0.45)' }}>
+              {clinic} · Estética de Resultados
+            </p>
+            <div className="w-8 h-px mx-auto mt-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
           </div>
-          <p className="font-serif text-[19px] italic text-primary mb-3 leading-snug max-w-[260px] mx-auto">
-            {closingNote}
-          </p>
-          <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-on-surface-variant/35 mt-5">
-            {clinic} · Estética de Resultados
-          </p>
         </section>
 
         {/* ── Escassez leve ── */}
