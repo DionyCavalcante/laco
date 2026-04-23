@@ -976,23 +976,21 @@ const OfferPage = ({
           )}
         </section>
 
-        {/* ── Melhor case — imagem estática vertical ── */}
-        {images.length > 0 && (
-          <section className="px-5 pb-14 max-w-lg mx-auto w-full">
-            <div
-              className="relative overflow-hidden rounded-[28px]"
-              style={{ aspectRatio: '3/4', minHeight: 480, boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
-            >
-              <img
-                src={images[0].url}
-                alt="Resultado"
-                className="w-full h-full object-cover"
-                style={images[0].rotation ? { transform: `rotate(${images[0].rotation}deg)`, scale: images[0].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
-            </div>
-          </section>
-        )}
+        {/* ── Foto da clínica — imagem estática vertical ── */}
+        {/* TODO: futuramente adicionar campo "clinic_photo_url" no config do portal para customizar esta imagem */}
+        <section className="px-5 pb-14 max-w-lg mx-auto w-full">
+          <div
+            className="relative overflow-hidden rounded-[28px]"
+            style={{ aspectRatio: '3/4', minHeight: 480, boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
+          >
+            <img
+              src="/mana-clinic.png"
+              alt="Clínica"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+          </div>
+        </section>
 
         {/* ── Fechamento editorial — fundo marrom escuro ── */}
         <section className="px-6 py-16 w-full text-center" style={{ background: '#2C2010' }}>
