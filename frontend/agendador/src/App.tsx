@@ -884,9 +884,6 @@ const OfferPage = ({
         {/* ── Pain & Promise ── */}
         <section className="px-6 pb-20 max-w-lg mx-auto w-full">
           <div className="space-y-8 text-primary/85 leading-relaxed">
-            <p className="text-[15px] leading-loose">
-              {authorityNote}
-            </p>
             <div className="border-l-4 border-secondary pl-6 py-5 pr-5 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.12)' }}>
               <h3 className="font-serif italic text-primary text-[19px] mb-4 leading-snug">
                 {procName} não é apenas um "procedimento".
@@ -941,9 +938,6 @@ const OfferPage = ({
           <cite className="text-[9px] tracking-[0.3em] font-bold uppercase text-on-surface-variant/55 not-italic">
             — Cliente Premium
           </cite>
-          <p className="text-center text-[12px] text-on-surface-variant/70 mt-8 leading-relaxed italic">
-            {firstName ? `${firstName}, cada` : 'Cada'} resultado é pensado para valorizar o seu rosto — nunca seguir um padrão.
-          </p>
         </section>
 
         {/* ── Para quem é — seção escura ── */}
@@ -986,7 +980,7 @@ const OfferPage = ({
                   </div>
                   <div className={cn('pt-1', idx < howItWorksSteps.length - 1 ? 'pb-8' : 'pb-0')}>
                     <p className="text-[14px] font-bold text-primary leading-snug mb-1.5">{step.title}</p>
-                    <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-70">{step.desc}</p>
+                    <p className="text-[13px] text-on-surface-variant/80 leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
               ))}
@@ -1001,7 +995,7 @@ const OfferPage = ({
           <div className="mb-6">
             <h3 className="text-[20px] font-extrabold text-primary">Transparência Total</h3>
             {firstName && (
-              <p className="text-[13px] text-on-surface-variant/70 italic mt-2">
+              <p className="text-[14px] text-on-surface-variant/80 italic mt-2">
                 {firstName}, não deve sobrar nenhuma dúvida.
               </p>
             )}
@@ -1064,7 +1058,7 @@ const OfferPage = ({
               <Clock size={13} className="text-secondary" />
             </div>
             <h3 className="text-[15px] font-bold text-primary mb-1.5">Atendimento com tempo e cuidado</h3>
-            <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-80">
+            <p className="text-[13px] text-on-surface-variant/85 leading-relaxed">
               Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
             </p>
             <p className="text-[13px] font-semibold text-secondary mt-2.5">
