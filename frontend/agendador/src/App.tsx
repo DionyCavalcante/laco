@@ -799,9 +799,6 @@ const OfferPage = ({
         {/* ── HERO: Headline + Imagem Âncora ── */}
         <section className="px-6 pt-6 pb-8 text-center max-w-lg mx-auto w-full">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <span className="text-secondary font-bold text-[9px] mb-4 block uppercase tracking-[0.3em]">
-              {selectedProc?.category || 'Estética'}
-            </span>
             <h2 className="font-serif text-[2rem] text-primary leading-[1.15] mb-5">
               {selectedProc?.headline ? (
                 headline
@@ -907,8 +904,7 @@ const OfferPage = ({
         <section className="py-16 px-6" style={{ background: '#ffffff', borderTop: '1px solid rgba(198,198,206,0.12)', borderBottom: '1px solid rgba(198,198,206,0.12)' }}>
           <div className="max-w-lg mx-auto">
             <div className="text-center mb-8">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">por que escolher</span>
-              <h3 className="text-[22px] font-extrabold text-primary mt-2 leading-tight">
+              <h3 className="text-[22px] font-extrabold text-primary leading-tight">
                 Um resultado que valoriza,{'\u00A0'}não transforma
               </h3>
             </div>
@@ -972,8 +968,7 @@ const OfferPage = ({
         {/* ── Como funciona ── */}
         <section className="px-6 py-16 max-w-lg mx-auto w-full">
           <div className="mb-7">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">processo</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">
+            <h3 className="text-[20px] font-extrabold text-primary">
               {firstName ? `${firstName}, veja` : 'Veja'} como funciona na {clinic}
             </h3>
           </div>
@@ -1004,8 +999,7 @@ const OfferPage = ({
         {/* ── FAQ em card ── */}
         <section className="px-6 pb-16 max-w-lg mx-auto w-full">
           <div className="mb-6">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-secondary font-bold">dúvidas</span>
-            <h3 className="text-[20px] font-extrabold text-primary mt-1">Transparência Total</h3>
+            <h3 className="text-[20px] font-extrabold text-primary">Transparência Total</h3>
             {firstName && (
               <p className="text-[12px] text-on-surface-variant opacity-50 italic mt-1">
                 {firstName}, não deve sobrar nenhuma dúvida.
@@ -1065,7 +1059,6 @@ const OfferPage = ({
           <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(200,170,130,0.07)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={13} className="text-secondary" />
-              <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-secondary">disponibilidade</span>
             </div>
             <h3 className="text-[15px] font-bold text-primary mb-1.5">Atendimento com tempo e cuidado</h3>
             <p className="text-[12px] text-on-surface-variant leading-relaxed opacity-80">
