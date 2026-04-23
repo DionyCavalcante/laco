@@ -720,25 +720,39 @@ const OfferPage = ({
   const procName = selectedProc?.name || 'este procedimento';
   const clinic = clinicName || 'a clínica';
 
-  const headline = selectedProc?.headline ||
+  const resolveTpl = (s: string) =>
+    s.replace(/\{nome\}/gi, firstName || 'você');
+
+  const renderHighlighted = (text: string): React.ReactNode => {
+    const parts = text.split(/\*\*(.+?)\*\*/g);
+    if (parts.length === 1) return text;
+    return <>{parts.map((p, i) => i % 2 === 1 ? <ProcHighlight key={i}>{p}</ProcHighlight> : p)}</>;
+  };
+
+  const headline = resolveTpl(
+    selectedProc?.headline ||
     (firstName
       ? `${firstName}, veja como ${procName} pode realçar o que é seu`
-      : `Veja como ${procName} pode realçar sua beleza natural`);
+      : `Veja como ${procName} pode realçar sua beleza natural`)
+  );
 
-  const subheadline = selectedProc?.subheadline ||
+  const subheadline = resolveTpl(selectedProc?.subheadline ||
     (selectedProc?.description
       ? selectedProc.description.slice(0, 90) + (selectedProc.description.length > 90 ? '...' : '')
-      : 'Sobrancelhas mais alinhadas, definidas e naturais — sem perder sua identidade.');
+      : 'Sobrancelhas mais alinhadas, definidas e naturais — sem perder sua identidade.'));
 
   const authorityNote = selectedProc?.authority_note ||
     `Na ${clinic}, cada atendimento começa entendendo o que realmente combina com você.`;
 
+  const parseBullets = (raw: string) =>
+    raw.split(/\n\n+/).map((s) => s.replace(/\n/g, ' ').trim()).filter(Boolean);
+
   // Para quem é: Fase 2 usa bullets dos campos; Fase 1 usa description
-  const forWhomBullets = [
-    selectedProc?.main_pain,
-    selectedProc?.emotional_desire,
-    selectedProc?.day_to_day_fit,
-  ].filter(Boolean) as string[];
+  const forWhomBullets: string[] = [
+    ...(selectedProc?.main_pain ? parseBullets(selectedProc.main_pain) : []),
+    ...(selectedProc?.emotional_desire ? [selectedProc.emotional_desire] : []),
+    ...(selectedProc?.day_to_day_fit ? [selectedProc.day_to_day_fit] : []),
+  ];
 
   const forWhomFallbackBullets = [
     'Sente que o olhar não está sendo valorizado como poderia.',
@@ -748,9 +762,15 @@ const OfferPage = ({
       : 'Quer se sentir mais segura ao se olhar no espelho, de forma natural.',
   ];
 
-  const howItWorks = selectedProc?.how_it_works || null;
+  const parseHowItWorks = (raw: string) =>
+    raw.split(/\n\n+/).map((block) => {
+      const lines = block.split('\n');
+      return { num: lines[0] || '', title: lines[1] || '', desc: lines.slice(2).join(' ') };
+    }).filter((s) => s.title);
 
-  const howItWorksSteps = selectedProc?.how_it_works ? null : [
+  const howItWorksSteps = selectedProc?.how_it_works
+    ? parseHowItWorks(selectedProc.how_it_works)
+    : [
     { num: '1', title: 'Avaliação personalizada', desc: 'Entendemos o que realmente valoriza o seu rosto.' },
     { num: '2', title: 'Procedimento com técnica', desc: 'Aplicamos com precisão, respeitando sua estrutura natural.' },
     { num: '3', title: 'Você sai orientada', desc: 'Você já vê o resultado e sabe exatamente como manter no dia a dia.' },
@@ -800,7 +820,7 @@ const OfferPage = ({
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h2 className="font-serif text-[2rem] text-primary leading-[1.15] mb-5">
               {selectedProc?.headline ? (
-                headline
+                renderHighlighted(headline)
               ) : firstName ? (
                 <>{firstName}, <ProcHighlight>{procName}</ProcHighlight> pode valorizar muito mais o seu rosto.</>
               ) : (
@@ -951,28 +971,24 @@ const OfferPage = ({
               {firstName ? `${firstName}, veja` : 'Veja'} <ProcHighlight>como funciona</ProcHighlight> na {clinic}
             </h3>
           </div>
-          {howItWorksSteps ? (
-            <div>
-              {howItWorksSteps.map((step, idx) => (
-                <div key={step.num} className="flex items-start gap-4">
-                  <div className="flex flex-col items-center shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-secondary/12 border border-secondary/20 flex items-center justify-center">
-                      <span className="text-[12px] font-bold text-secondary">{step.num}</span>
-                    </div>
-                    {idx < howItWorksSteps.length - 1 && (
-                      <div className="w-px bg-secondary/20 my-2" style={{ minHeight: 28 }} />
-                    )}
+          <div>
+            {howItWorksSteps.map((step, idx) => (
+              <div key={step.num} className="flex items-start gap-4">
+                <div className="flex flex-col items-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-secondary/12 border border-secondary/20 flex items-center justify-center">
+                    <span className="text-[12px] font-bold text-secondary">{step.num}</span>
                   </div>
-                  <div className={cn('pt-1', idx < howItWorksSteps.length - 1 ? 'pb-8' : 'pb-0')}>
-                    <p className="text-[14px] font-bold text-primary leading-snug mb-1.5">{step.title}</p>
-                    <p className="text-[13px] text-on-surface-variant/80 leading-relaxed">{step.desc}</p>
-                  </div>
+                  {idx < howItWorksSteps.length - 1 && (
+                    <div className="w-px bg-secondary/20 my-2" style={{ minHeight: 28 }} />
+                  )}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-80">{howItWorks}</p>
-          )}
+                <div className={cn('pt-1', idx < howItWorksSteps.length - 1 ? 'pb-8' : 'pb-0')}>
+                  <p className="text-[14px] font-bold text-primary leading-snug mb-1.5">{step.title}</p>
+                  <p className="text-[13px] text-on-surface-variant/80 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── Foto da clínica — imagem estática vertical ── */}
