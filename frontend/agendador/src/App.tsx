@@ -994,8 +994,25 @@ const OfferPage = ({
           </section>
         )}
 
+        {/* ── Fechamento editorial — fundo marrom escuro ── */}
+        <section className="px-6 py-16 w-full text-center" style={{ background: '#2C2010' }}>
+          <div className="max-w-lg mx-auto">
+            <div className="w-8 h-px mx-auto mb-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
+            <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(200,170,130,0.15)' }}>
+              <Sparkles size={15} className="text-secondary" />
+            </div>
+            <p className="font-serif text-[21px] italic text-white/90 mb-4 leading-snug max-w-[270px] mx-auto">
+              {closingNote}
+            </p>
+            <p className="text-[9px] uppercase font-bold tracking-[0.2em] mt-6" style={{ color: 'rgba(200,170,130,0.45)' }}>
+              {clinic} · Estética de Resultados
+            </p>
+            <div className="w-8 h-px mx-auto mt-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
+          </div>
+        </section>
+
         {/* ── FAQ em card ── */}
-        <section className="px-6 pb-16 max-w-lg mx-auto w-full">
+        <section className="px-6 pb-16 pt-14 max-w-lg mx-auto w-full">
           <div className="mb-6">
             <h3 className="text-[20px] font-extrabold text-primary">Transparência Total</h3>
             {firstName && (
@@ -1035,23 +1052,6 @@ const OfferPage = ({
                 </AnimatePresence>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* ── Fechamento editorial — fundo marrom escuro ── */}
-        <section className="px-6 py-16 w-full text-center" style={{ background: '#2C2010' }}>
-          <div className="max-w-lg mx-auto">
-            <div className="w-8 h-px mx-auto mb-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
-            <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(200,170,130,0.15)' }}>
-              <Sparkles size={15} className="text-secondary" />
-            </div>
-            <p className="font-serif text-[21px] italic text-white/90 mb-4 leading-snug max-w-[270px] mx-auto">
-              {closingNote}
-            </p>
-            <p className="text-[9px] uppercase font-bold tracking-[0.2em] mt-6" style={{ color: 'rgba(200,170,130,0.45)' }}>
-              {clinic} · Estética de Resultados
-            </p>
-            <div className="w-8 h-px mx-auto mt-8" style={{ background: 'rgba(200,170,130,0.4)' }} />
           </div>
         </section>
 
