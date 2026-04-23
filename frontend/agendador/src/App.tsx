@@ -827,7 +827,7 @@ const OfferPage = ({
             className="relative rounded-[28px] overflow-hidden"
             style={{ boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
           >
-            <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
+            <div className="relative overflow-hidden bg-surface-container-low" style={{ aspectRatio: '3/4', minHeight: 480 }}>
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentImg}
@@ -858,25 +858,14 @@ const OfferPage = ({
                   </button>
                 </>
               )}
-              {/* Overlay editorial */}
-              <div className="absolute bottom-0 inset-x-0 p-6 text-left">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex gap-0.5">
-                    {[0,1,2,3,4].map(s => <Star key={s} size={11} className="text-secondary fill-secondary" />)}
-                  </div>
-                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/75">Resultado Natural</span>
+              {/* Overlay editorial — só dots */}
+              {images.length > 1 && (
+                <div className="absolute bottom-5 inset-x-0 flex justify-center gap-1.5">
+                  {images.map((_, i) => (
+                    <div key={i} className={cn('h-1 rounded-full transition-all duration-300', currentImg === i ? 'w-6 bg-white' : 'w-1.5 bg-white/40')} />
+                  ))}
                 </div>
-                <p className="font-serif text-white/90 italic text-[15px] leading-snug">
-                  {firstName ? `Personalizado para ${firstName}.` : 'Personalizado para você.'}
-                </p>
-                {images.length > 1 && (
-                  <div className="flex gap-1.5 mt-3">
-                    {images.map((_, i) => (
-                      <div key={i} className={cn('h-1 rounded-full transition-all duration-300', currentImg === i ? 'w-6 bg-white' : 'w-1.5 bg-white/35')} />
-                    ))}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </motion.div>
         </section>
@@ -935,9 +924,6 @@ const OfferPage = ({
           <blockquote className="font-serif text-[22px] italic mb-7 leading-snug text-primary">
             "Eu tinha medo de ficar artificial, mas o resultado foi natural — parece que sempre foi meu. Minhas amigas não sabem que é procedimento."
           </blockquote>
-          <cite className="text-[9px] tracking-[0.3em] font-bold uppercase text-on-surface-variant/55 not-italic">
-            — Cliente Premium
-          </cite>
         </section>
 
         {/* ── Para quem é — seção escura ── */}
@@ -989,6 +975,24 @@ const OfferPage = ({
             <p className="text-[13px] text-on-surface-variant leading-relaxed opacity-80">{howItWorks}</p>
           )}
         </section>
+
+        {/* ── Melhor case — imagem estática vertical ── */}
+        {images.length > 0 && (
+          <section className="px-5 pb-14 max-w-lg mx-auto w-full">
+            <div
+              className="relative overflow-hidden rounded-[28px]"
+              style={{ aspectRatio: '3/4', minHeight: 480, boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
+            >
+              <img
+                src={images[0].url}
+                alt="Resultado"
+                className="w-full h-full object-cover"
+                style={images[0].rotation ? { transform: `rotate(${images[0].rotation}deg)`, scale: images[0].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+            </div>
+          </section>
+        )}
 
         {/* ── FAQ em card ── */}
         <section className="px-6 pb-16 max-w-lg mx-auto w-full">
@@ -1052,7 +1056,7 @@ const OfferPage = ({
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="px-6 pt-10 pb-12 max-w-lg mx-auto w-full">
+        <section className="px-6 py-10 max-w-lg mx-auto w-full">
           <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(200,170,130,0.07)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={13} className="text-secondary" />
