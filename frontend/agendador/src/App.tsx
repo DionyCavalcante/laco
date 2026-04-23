@@ -35,6 +35,7 @@ import { cn } from '@/src/lib/utils';
 // ─── Constantes de roteamento ──────────────────────────────────────────────
 const pathParts = window.location.pathname.split('/').filter(Boolean);
 const SLUG = pathParts[0] || '';
+const PROC_ID = pathParts[2] || null; // /:slug/agendar/:procedureId
 const API = window.location.origin;
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -740,19 +741,19 @@ const OfferPage = ({
   ].filter(Boolean) as string[];
 
   const forWhomFallbackBullets = [
-    'Para quem sente que a sobrancelha não valoriza o olhar.',
-    'Para quem busca mais definição sem perder naturalidade.',
+    'Sente que o olhar não está sendo valorizado como poderia.',
+    'Percebe que falta definição e presença no rosto.',
     firstName
-      ? `Para quem quer se sentir pronta no dia a dia, ${firstName}, sem depender de maquiagem.`
-      : 'Para quem quer se sentir pronta no dia a dia, sem depender de maquiagem.',
+      ? `Quer se sentir mais segura ao se olhar no espelho, ${firstName}, de forma natural.`
+      : 'Quer se sentir mais segura ao se olhar no espelho, de forma natural.',
   ];
 
   const howItWorks = selectedProc?.how_it_works || null;
 
   const howItWorksSteps = selectedProc?.how_it_works ? null : [
-    { num: '1', title: 'Avaliação personalizada', desc: 'Avaliamos o que realmente combina com você.' },
-    { num: '2', title: 'Procedimento com técnica', desc: 'Depois, realizamos o procedimento com técnica e cuidado, respeitando seu desenho natural.' },
-    { num: '3', title: 'Você sai orientada', desc: 'Você sai com o olhar mais definido — e sabendo como manter o resultado no dia a dia.' },
+    { num: '1', title: 'Avaliação personalizada', desc: 'Entendemos o que realmente valoriza o seu rosto.' },
+    { num: '2', title: 'Procedimento com técnica', desc: 'Aplicamos com precisão, respeitando sua estrutura natural.' },
+    { num: '3', title: 'Você sai orientada', desc: 'Você já vê o resultado e sabe exatamente como manter no dia a dia.' },
   ];
 
   // FAQ — 4ª pergunta: manutenção ou cuidados pós
@@ -770,17 +771,15 @@ const OfferPage = ({
   const faqItems: { q: string; a: string }[] = [
     {
       q: 'Vai ficar artificial?',
-      a: selectedProc?.faq_pain_discomfort || (firstName
-        ? `Não, ${firstName}. O procedimento respeita seu formato natural, evitando qualquer efeito marcado.`
-        : 'Não. O procedimento respeita seu formato natural, evitando qualquer efeito marcado.'),
+      a: selectedProc?.faq_pain_discomfort || 'Não — o foco é realçar, nunca exagerar.',
     },
     {
       q: 'Dói ou incomoda?',
-      a: selectedProc?.faq_session_duration || 'É um processo tranquilo e confortável para a maioria das clientes.',
+      a: selectedProc?.faq_session_duration || 'É um processo tranquilo para a maioria das clientes.',
     },
     {
       q: 'Quanto tempo dura o resultado?',
-      a: selectedProc?.faq_result_duration || 'O efeito se mantém por semanas, mantendo o olhar alinhado no dia a dia.',
+      a: selectedProc?.faq_result_duration || 'O efeito já é visível e se mantém no dia a dia.',
     },
     faq4,
     { q: 'Onde fica a clínica?', a: clinicLocationAnswer },
@@ -788,8 +787,8 @@ const OfferPage = ({
 
   const closingNote = selectedProc?.closing_note ||
     (firstName
-      ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É realçar o que já existe em você.`
-      : 'Antes de agendar: o objetivo não é mudar quem você é. É realçar o que já existe em você.');
+      ? `Antes de agendar, ${firstName}: o objetivo não é mudar quem você é. É valorizar o que já existe em você.`
+      : 'O objetivo não é mudar quem você é. É valorizar o que já existe em você.');
 
   return (
     <div className="pb-64 min-h-screen flex flex-col bg-white">
@@ -803,16 +802,16 @@ const OfferPage = ({
               {selectedProc?.headline ? (
                 headline
               ) : firstName ? (
-                <>{firstName}, você está pronta para acordar com <ProcHighlight>o olhar pronto</ProcHighlight> todos os dias?</>
+                <>{firstName}, <ProcHighlight>{procName}</ProcHighlight> pode valorizar muito mais o seu rosto.</>
               ) : (
-                <>Acorde com <ProcHighlight>o olhar pronto</ProcHighlight> todos os dias</>
+                <><ProcHighlight>{procName}</ProcHighlight> pode valorizar muito mais o seu rosto.</>
               )}
             </h2>
             <p className="text-on-surface-variant text-[14px] leading-relaxed font-light max-w-[280px] mx-auto">
               {selectedProc?.subheadline ? (
                 subheadline
               ) : (
-                <>Sobrancelhas que não apenas <strong className="font-bold text-primary underline decoration-secondary/40">existem</strong>, mas que <strong className="font-bold text-primary">valorizam</strong> cada traço do seu rosto.</>
+                <>Um resultado que <strong className="font-bold text-primary">realça</strong> o que você já tem — de forma natural, sem exagero.</>
               )}
             </p>
           </motion.div>
@@ -875,12 +874,12 @@ const OfferPage = ({
           <div className="space-y-8 text-primary/85 leading-relaxed">
             <div className="border-l-4 border-secondary pl-6 py-5 pr-5 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.12)' }}>
               <h3 className="font-serif italic text-primary text-[19px] mb-4 leading-snug">
-                {procName} não é apenas um "procedimento".
+                {procName} não é só um procedimento.
               </h3>
               <p className="text-[13px] text-on-surface-variant leading-relaxed">
                 {firstName
-                  ? <>É a liberdade de <strong className="font-bold text-primary">ignorar o lápis de maquiagem</strong> e saber que seu olhar está sempre aberto, definido e elegante — sendo você mesma, {firstName}.</>
-                  : <>É a liberdade de <strong className="font-bold text-primary">ignorar o lápis de maquiagem</strong> e saber que seu olhar está sempre aberto, definido e elegante.</>}
+                  ? <>É a sensação de se <strong className="font-bold text-primary">olhar no espelho</strong> e já ver o rosto mais harmonioso, o olhar mais definido e sua beleza destacada — sem esforço, {firstName}.</>
+                  : <>É a sensação de se <strong className="font-bold text-primary">olhar no espelho</strong> e já ver o rosto mais harmonioso, o olhar mais definido e sua beleza destacada — sem esforço.</>}
               </p>
             </div>
           </div>
@@ -897,8 +896,8 @@ const OfferPage = ({
             <div className="space-y-3">
               {[
                 { icon: <Sparkles size={18} />, title: selectedProc?.benefit_1_title || 'Resultado com sua identidade', desc: selectedProc?.benefit_1_desc || 'Realçamos o que você já tem — sem criar algo artificial.' },
-                { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Sem complicar sua rotina', desc: selectedProc?.benefit_2_desc || 'Você mantém o efeito no dia a dia, sem depender de maquiagem.' },
-                { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você é orientada em cada etapa, com segurança e clareza.' },
+                { icon: <Bolt size={18} />, title: selectedProc?.benefit_2_title || 'Praticidade no dia a dia', desc: selectedProc?.benefit_2_desc || 'Você já se sente pronta, com o resultado presente sem precisar pensar nisso.' },
+                { icon: <ShieldCheck size={18} />, title: selectedProc?.benefit_3_title || 'Acompanhamento profissional', desc: selectedProc?.benefit_3_desc || 'Você se sente segura em cada etapa, sabendo exatamente o que está sendo feito.' },
               ].map((benefit, idx) => (
                 <div key={idx} className="rounded-2xl px-5 py-5 flex items-start gap-4" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-secondary shrink-0 mt-0.5" style={{ background: 'rgba(200,170,130,0.15)' }}>
@@ -922,7 +921,7 @@ const OfferPage = ({
             </div>
           </div>
           <blockquote className="font-serif text-[22px] italic mb-7 leading-snug text-primary">
-            "Eu tinha medo de ficar artificial, mas o resultado foi natural — parece que sempre foi meu. Minhas amigas não sabem que é procedimento."
+            "Eu tinha medo de ficar artificial, mas ficou leve, natural e valorizou muito meu rosto." — Mariana S.
           </blockquote>
         </section>
 
@@ -930,7 +929,7 @@ const OfferPage = ({
         <section className="py-20 px-6" style={{ background: '#1A1F2C' }}>
           <div className="max-w-lg mx-auto">
             <h3 className="font-extrabold text-[22px] text-white mb-10 leading-tight">
-              {firstName ? `Isso é para você, ${firstName}:` : 'Isso é para você se:'}
+              {firstName ? `${firstName}, isso é para quem:` : 'Isso é para quem:'}
             </h3>
             <div className="space-y-0">
               {(forWhomBullets.length > 0 ? forWhomBullets : forWhomFallbackBullets).map((bullet, i) => (
@@ -1960,10 +1959,15 @@ export default function App() {
   const initReady = useRef(false);
   const animReady = useRef(false);
   const hasQueryParams = useRef(false);
+  const targetProcRef = useRef<Procedure | null>(null);
 
   const maybeAdvance = useCallback(() => {
     if (initReady.current && animReady.current) {
-      setCurrentStep(hasQueryParams.current ? 'gallery' : 'login');
+      if (targetProcRef.current) {
+        setCurrentStep(hasQueryParams.current ? 'offer' : 'login');
+      } else {
+        setCurrentStep(hasQueryParams.current ? 'gallery' : 'login');
+      }
     }
   }, []);
 
@@ -1977,6 +1981,15 @@ export default function App() {
         document.title = `${clinic.name} — Agendamento`;
         apiLoadPhotos(procs).then(setProcPhotos);
 
+        // Procedimento direto via URL (/:slug/agendar/:procedureId)
+        if (PROC_ID) {
+          const targetProc = procs.find(p => p.id === PROC_ID);
+          if (targetProc) {
+            targetProcRef.current = targetProc;
+            setSelectedProc(targetProc);
+          }
+        }
+
         const params = new URLSearchParams(window.location.search);
         const pName = params.get('name');
         const pPhone = params.get('phone');
@@ -1986,6 +1999,7 @@ export default function App() {
           setClientPhone(pPhone);
           const id = await apiIdentify(pName, pPhone);
           if (id) setLeadId(id);
+          if (targetProcRef.current && id) apiTrack(id, targetProcRef.current.id);
         }
       } catch {
         setInitError(true);
@@ -2001,7 +2015,12 @@ export default function App() {
     setClientPhone(phone);
     const id = await apiIdentify(name, phone);
     if (id) setLeadId(id);
-    setCurrentStep('gallery');
+    if (targetProcRef.current) {
+      if (id) apiTrack(id, targetProcRef.current.id);
+      setCurrentStep('offer');
+    } else {
+      setCurrentStep('gallery');
+    }
   };
 
   const handleLoadingAnimDone = useCallback(() => {
