@@ -941,7 +941,7 @@ const OfferPage = ({
           <cite className="text-[9px] tracking-[0.3em] font-bold uppercase text-on-surface-variant/55 not-italic">
             — Cliente Premium
           </cite>
-          <p className="text-center text-[10px] text-on-surface-variant opacity-40 mt-8 leading-relaxed">
+          <p className="text-center text-[12px] text-on-surface-variant/70 mt-8 leading-relaxed italic">
             {firstName ? `${firstName}, cada` : 'Cada'} resultado é pensado para valorizar o seu rosto — nunca seguir um padrão.
           </p>
         </section>
@@ -969,7 +969,7 @@ const OfferPage = ({
         <section className="px-6 py-16 max-w-lg mx-auto w-full">
           <div className="mb-7">
             <h3 className="text-[20px] font-extrabold text-primary">
-              {firstName ? `${firstName}, veja` : 'Veja'} como funciona na {clinic}
+              {firstName ? `${firstName}, veja` : 'Veja'} <ProcHighlight>como funciona</ProcHighlight> na {clinic}
             </h3>
           </div>
           {howItWorksSteps ? (
@@ -1001,7 +1001,7 @@ const OfferPage = ({
           <div className="mb-6">
             <h3 className="text-[20px] font-extrabold text-primary">Transparência Total</h3>
             {firstName && (
-              <p className="text-[12px] text-on-surface-variant opacity-50 italic mt-1">
+              <p className="text-[13px] text-on-surface-variant/70 italic mt-2">
                 {firstName}, não deve sobrar nenhuma dúvida.
               </p>
             )}
@@ -1058,7 +1058,7 @@ const OfferPage = ({
         </section>
 
         {/* ── Escassez leve ── */}
-        <section className="px-6 pb-12 max-w-lg mx-auto w-full">
+        <section className="px-6 pt-10 pb-12 max-w-lg mx-auto w-full">
           <div className="border-l-4 border-secondary/55 rounded-r-2xl pl-5 pr-5 py-6" style={{ background: 'rgba(200,170,130,0.07)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={13} className="text-secondary" />
