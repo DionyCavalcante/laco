@@ -5,202 +5,721 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Hoje</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
 
-.topbar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.1);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.brand{display:flex;align-items:center;gap:8px}
-.brand-dot{width:26px;height:26px;border-radius:7px;background:#B8657A;display:flex;align-items:center;justify-content:center}
-.brand-dot svg{width:13px;height:13px;fill:white}
-.brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:600;color:#1A1614;letter-spacing:0.02em}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.btn{padding:6px 12px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap;text-decoration:none}
-.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
-.btn-ghost:hover{background:#FAF7F5}
-
-.date-bar{background:white;border-bottom:0.5px solid rgba(0,0,0,0.08);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
-.date-nav{display:flex;align-items:center;gap:12px}
-.date-nav-btn{width:30px;height:30px;border-radius:8px;background:none;border:0.5px solid rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
-.date-nav-btn:hover{background:#FAF7F5}
-.date-title{font-size:14px;font-weight:500;min-width:180px;text-align:center}
-.date-today-btn{padding:5px 12px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:20px;background:none;cursor:pointer;color:#666}
-.date-today-btn:hover{background:#FAF7F5}
-.date-today-btn.active{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
-
-.page{max-width:900px;margin:0 auto;padding:16px 20px}
-
-.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
-.kpi{background:white;border-radius:10px;border:0.5px solid rgba(0,0,0,0.07);padding:12px 14px}
-.kpi-label{font-size:11px;color:#888;margin-bottom:3px}
-.kpi-val{font-size:22px;font-weight:500}
-.kpi-val.purple{color:#B8657A}
-.kpi-val.green{color:#2E8C66}
-.kpi-val.amber{color:#9A6B10}
-.kpi-val.muted{color:#aaa}
-
-.main-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
-
-/* Timeline */
-.timeline-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.07);overflow:hidden}
-.tl-head{padding:12px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
-.tl-title{font-size:13px;font-weight:500}
-.tl-filter{display:flex;gap:4px}
-.filter-pill{padding:4px 10px;font-size:11px;border:0.5px solid rgba(0,0,0,0.1);border-radius:20px;cursor:pointer;color:#666;background:white}
-.filter-pill.on{background:#FDEEF1;border-color:#D4899A;color:#8B3F52}
-
-.time-slots-wrap{padding:8px 0}
-.hour-row{display:flex;min-height:52px}
-.hour-label{width:52px;padding:6px 8px 0 16px;font-size:11px;color:#bbb;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
-.hour-col{flex:1;padding:2px 8px 2px 12px;border-left:0.5px solid rgba(0,0,0,0.06);position:relative}
-.hour-col.now{border-left-color:#B8657A}
-.now-line{position:absolute;left:0;right:0;top:50%;height:1.5px;background:#B8657A;opacity:0.4}
-
-.apt-block{background:white;border-radius:8px;border:0.5px solid rgba(0,0,0,0.08);border-left:3px solid #D4899A;padding:8px 10px;margin-bottom:4px;cursor:pointer;transition:box-shadow 0.15s}
-.apt-block:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08)}
-.apt-block.confirmed{border-left-color:#5DCAA5}
-.apt-block.done{border-left-color:#ccc;opacity:0.65}
-.apt-block.cancelled{border-left-color:#F09595;opacity:0.55}
-.apt-time{font-size:11px;color:#888;margin-bottom:2px;font-variant-numeric:tabular-nums}
-.apt-name{font-size:13px;font-weight:500}
-.apt-proc{font-size:11px;color:#888;margin-top:1px}
-.apt-badges{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
-.badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;white-space:nowrap}
-.b-confirmed{background:#E0F4EE;color:#27500A}
-.b-pending{background:#FEF3E2;color:#633806}
-.b-done{background:#f0f0f0;color:#666}
-.b-cancelled{background:#FCEBEB;color:#A32D2D}
-.b-system{background:#FDEEF1;color:#8B3F52}
-.apt-empty{padding:16px;text-align:center;font-size:12px;color:#bbb}
-
-/* Sidebar */
-.sidebar{display:flex;flex-direction:column;gap:12px}
-
-.side-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.07);overflow:hidden}
-.side-head{padding:11px 14px;border-bottom:0.5px solid rgba(0,0,0,0.07)}
-.side-title{font-size:12px;font-weight:500;color:#888;letter-spacing:0.3px}
-
-/* Next up */
-.next-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
-.next-item:last-child{border:none}
-.next-time{font-size:12px;font-weight:500;color:#B8657A;width:40px;flex-shrink:0;font-variant-numeric:tabular-nums}
-.next-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
-.next-info{flex:1;min-width:0}
-.next-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.next-proc{font-size:10px;color:#888;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.next-dur{font-size:10px;color:#aaa;flex-shrink:0}
-
-/* Quick actions */
-.qa-item{padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.qa-item:last-child{border:none}
-.qa-item:hover{background:#FBF8F6}
-.qa-label{font-size:12px;color:#555}
-.qa-val{font-size:12px;font-weight:500}
-.qa-val.green{color:#2E8C66}
-.qa-val.amber{color:#9A6B10}
-
-/* Status select inline */
-.status-sel{padding:4px 8px;font-size:11px;border:0.5px solid rgba(0,0,0,0.12);border-radius:6px;background:white;color:#111;cursor:pointer;outline:none;max-width:110px}
-
-/* Detail drawer */
-.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50}
-.drawer-overlay.on{display:block}
-.drawer{position:fixed;right:0;top:0;bottom:0;width:360px;background:white;z-index:51;border-left:0.5px solid rgba(0,0,0,0.1);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.25s ease}
-.drawer.on{transform:translateX(0)}
-.drawer-head{padding:16px 18px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.drawer-title{font-size:14px;font-weight:500}
-.drawer-close{background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;padding:0 4px;line-height:1}
-.drawer-body{padding:18px;flex:1;overflow-y:auto}
-.info-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
-.info-row:last-child{border:none}
-.info-label{color:#666}
-.info-val{font-weight:500;text-align:right}
-.drawer-actions{padding:14px 18px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;gap:8px;flex-shrink:0}
-.da-btn{flex:1;padding:10px;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;text-align:center;border:none}
-.da-confirm{background:#B8657A;color:white}
-.da-done{background:#2E8C66;color:white}
-.da-cancel{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
-
-.loading{padding:40px;text-align:center;color:#aaa;font-size:13px}
-
-.av-0{background:#FDEEF1;color:#8B3F52}
-.av-1{background:#E0F4EE;color:#2E6647}
-.av-2{background:#FEF3E2;color:#9A6B10}
-.av-3{background:#FAECE7;color:#A04830}
-.av-4{background:#F1EFE8;color:#5F5E5A}
-.av-5{background:#EEF4FE;color:#0C447C}
-
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#111;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:all 0.25s;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-@media(max-width:680px){
-  .main-grid{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .kpi-row{grid-template-columns:repeat(2,1fr)}
+/* ─── Reset ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; overflow: hidden }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  color: #1A1C18;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  background: #1B3A2C;
 }
+a { color: inherit; text-decoration: none }
+button { font-family: inherit; cursor: pointer }
+input, select { font-family: inherit }
+
+/* ─── Tokens ─────────────────────────────────── */
+:root {
+  --sb-bg:         #1B3A2C;
+  --sb-text:       rgba(255,255,255,0.50);
+  --sb-text-hover: rgba(255,255,255,0.82);
+  --sb-gold:       #C9A96E;
+  --sb-active-bg:  rgba(201,169,110,0.10);
+  --sb-border:     rgba(255,255,255,0.08);
+  --sb-width:      220px;
+
+  --brand:     #B59248;
+  --brand-h:   #9f8038;
+  --brand-dim: rgba(181,146,72,0.10);
+  --brand-ring:rgba(181,146,72,0.20);
+
+  --bg:       #F7F5F0;
+  --surface:  #FFFFFF;
+  --surface2: #F0EDE5;
+  --border:   rgba(0,0,0,0.07);
+  --border-m: rgba(0,0,0,0.12);
+  --shadow:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.04);
+
+  --green:    #2A7A5A;
+  --green-bg: rgba(42,122,90,0.08);
+  --amber:    #8A6008;
+  --amber-bg: rgba(138,96,8,0.09);
+  --red:      #A02828;
+  --red-bg:   rgba(160,40,40,0.08);
+
+  --t0: #1A1C18;
+  --t1: #5A5D58;
+  --t2: #969890;
+  --t3: #CCCEC7;
+}
+
+/* ─── Layout ─────────────────────────────────── */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────── */
+.sidebar {
+  width: var(--sb-width);
+  flex-shrink: 0;
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 50;
+}
+.sb-watermark {
+  position: absolute;
+  bottom: 52px;
+  right: -20px;
+  width: 124px;
+  height: 124px;
+  color: white;
+  opacity: 0.038;
+  pointer-events: none;
+}
+.sb-watermark svg { width: 100%; height: 100% }
+.sb-logo-area {
+  padding: 26px 18px 22px;
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-mark { display: flex; align-items: center; gap: 10px }
+.sb-star { width: 17px; height: 17px; color: var(--sb-gold); flex-shrink: 0 }
+.sb-wordmark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.90);
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.sb-nav {
+  flex: 1;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sb-nav::-webkit-scrollbar { display: none }
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sb-text);
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+.sb-item svg { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 1.6 }
+.sb-item:hover { color: var(--sb-text-hover); background: rgba(255,255,255,0.05) }
+.sb-item.active {
+  color: var(--sb-gold);
+  background: var(--sb-active-bg);
+  box-shadow: inset 3px 0 0 var(--sb-gold);
+  font-weight: 500;
+}
+.sb-divider { height: 1px; background: var(--sb-border); margin: 6px 18px }
+.sb-bottom {
+  padding: 14px;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-user { display: flex; align-items: center; gap: 9px }
+.sb-user-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(201,169,110,0.16);
+  border: 1px solid rgba(201,169,110,0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sb-gold);
+  flex-shrink: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+.sb-user-info { flex: 1; min-width: 0 }
+.sb-user-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-user-role {
+  font-size: 9px;
+  color: var(--sb-text);
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  margin-top: 1px;
+}
+.sb-logout {
+  width: 28px; height: 28px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.30);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  transition: all 0.15s;
+  flex-shrink: 0; padding: 0;
+}
+.sb-logout svg { width: 14px; height: 14px }
+.sb-logout:hover { color: rgba(255,255,255,0.70); background: rgba(255,255,255,0.07) }
+
+/* ─── Main ───────────────────────────────────── */
+.main {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  min-width: 0;
+}
+
+/* ─── Date bar (sticky topo do main) ────────── */
+.date-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.date-nav { display: flex; align-items: center; gap: 12px }
+.date-nav-btn {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: none;
+  border: 1px solid var(--border-m);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t1);
+  font-size: 14px;
+  transition: background 0.15s;
+}
+.date-nav-btn:hover { background: var(--surface2) }
+.date-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--t0);
+  min-width: 220px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+.date-today-btn {
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border-m);
+  border-radius: 20px;
+  background: none;
+  cursor: pointer;
+  color: var(--t1);
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.date-today-btn:hover { background: var(--surface2) }
+.date-today-btn.active {
+  background: var(--brand-dim);
+  border-color: rgba(181,146,72,0.30);
+  color: var(--brand);
+}
+
+/* ─── Scrollable content ─────────────────────── */
+.content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--t3) transparent;
+}
+
+/* ─── KPI row ────────────────────────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.kpi {
+  padding: 14px 20px;
+  border-right: 1px solid var(--border);
+}
+.kpi:last-child { border-right: none }
+.kpi-label { font-size: 10px; color: var(--t2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 5px }
+.kpi-val {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  color: var(--t0);
+}
+.kpi-val.purple { color: var(--brand)  }
+.kpi-val.green  { color: var(--green)  }
+.kpi-val.amber  { color: var(--amber)  }
+.kpi-val.muted  { color: var(--t3)     }
+
+/* ─── Page ───────────────────────────────────── */
+.page { padding: 20px 24px 48px }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ─── Timeline card ──────────────────────────── */
+.timeline-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tl-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tl-title { font-size: 13px; font-weight: 500; color: var(--t0) }
+.tl-filter { display: flex; gap: 4px }
+.filter-pill {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border-m);
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--t1);
+  background: white;
+  transition: all 0.15s;
+}
+.filter-pill.on {
+  background: var(--brand-dim);
+  border-color: rgba(181,146,72,0.28);
+  color: var(--brand);
+}
+
+/* ─── Timeline slots ─────────────────────────── */
+.time-slots-wrap { padding: 6px 0 }
+.hour-row { display: flex; min-height: 52px }
+.hour-label {
+  width: 52px;
+  padding: 6px 8px 0 16px;
+  font-size: 11px;
+  color: var(--t3);
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.hour-col {
+  flex: 1;
+  padding: 2px 10px 2px 14px;
+  border-left: 1px solid var(--border);
+  position: relative;
+}
+.hour-col.now { border-left-color: var(--brand) }
+.now-line {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1.5px;
+  background: var(--brand);
+  opacity: 0.35;
+}
+
+/* Appointment blocks */
+.apt-block {
+  background: white;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--brand);
+  padding: 7px 10px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.apt-block:hover { box-shadow: var(--shadow) }
+.apt-block.confirmed  { border-left-color: var(--green) }
+.apt-block.done       { border-left-color: var(--t3); opacity: 0.60 }
+.apt-block.cancelled  { border-left-color: var(--red); opacity: 0.50 }
+.apt-time  { font-size: 10px; color: var(--t2); margin-bottom: 2px; font-variant-numeric: tabular-nums }
+.apt-name  { font-size: 13px; font-weight: 500; color: var(--t0) }
+.apt-proc  { font-size: 11px; color: var(--t2); margin-top: 1px }
+.apt-badges { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap }
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.b-confirmed { background: var(--green-bg);  color: var(--green) }
+.b-pending   { background: var(--amber-bg);  color: var(--amber) }
+.b-done      { background: var(--surface2);  color: var(--t1)    }
+.b-cancelled { background: var(--red-bg);    color: var(--red)   }
+.b-system    { background: var(--brand-dim); color: var(--brand) }
+.apt-empty { padding: 20px; text-align: center; font-size: 12px; color: var(--t2) }
+
+/* ─── Side panel (próximos / resumo) ────────── */
+.side-panel { display: flex; flex-direction: column; gap: 12px }
+.side-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.side-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.side-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--t2);
+}
+
+/* Próximos */
+.next-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.next-item:last-child { border: none }
+.next-time { font-size: 12px; font-weight: 600; color: var(--brand); width: 40px; flex-shrink: 0; font-variant-numeric: tabular-nums }
+.next-av {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600;
+  flex-shrink: 0;
+}
+.next-info { flex: 1; min-width: 0 }
+.next-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.next-proc { font-size: 10px; color: var(--t2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.next-dur  { font-size: 10px; color: var(--t2); flex-shrink: 0 }
+
+/* Resumo */
+.qa-item {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.qa-item:last-child { border: none }
+.qa-item:hover { background: rgba(26,28,24,0.018) }
+.qa-label { font-size: 12px; color: var(--t1) }
+.qa-val   { font-size: 13px; font-weight: 600 }
+.qa-val.green  { color: var(--green) }
+.qa-val.amber  { color: var(--amber) }
+.qa-val.purple { color: var(--brand) }
+
+/* Avatar colors */
+.av-0 { background: var(--brand-dim); color: var(--brand) }
+.av-1 { background: var(--green-bg);  color: var(--green) }
+.av-2 { background: var(--amber-bg);  color: var(--amber) }
+.av-3 { background: var(--red-bg);    color: var(--red)   }
+.av-4 { background: rgba(45,40,30,0.07); color: var(--t1) }
+.av-5 { background: rgba(46,106,174,0.08); color: #2E6AAE }
+
+/* ─── Status select inline ───────────────────── */
+.status-sel {
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-m);
+  border-radius: 6px;
+  background: white;
+  color: var(--t0);
+  cursor: pointer;
+  outline: none;
+  max-width: 120px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ─── Drawer ─────────────────────────────────── */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,28,24,0.32);
+  z-index: 100;
+}
+.drawer-overlay.on { display: block }
+.drawer {
+  position: fixed;
+  right: 0; top: 0; bottom: 0;
+  width: 360px;
+  background: white;
+  z-index: 101;
+  border-left: 1px solid var(--border-m);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.24s ease;
+}
+.drawer.on { transform: translateX(0) }
+.drawer-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.drawer-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--t0);
+}
+.drawer-close {
+  background: none; border: none;
+  font-size: 20px; color: var(--t2);
+  cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.drawer-body { padding: 18px; flex: 1; overflow-y: auto }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border: none }
+.info-label { color: var(--t1) }
+.info-val   { font-weight: 500; text-align: right }
+.drawer-actions {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.da-btn {
+  flex: 1; padding: 10px;
+  font-size: 13px; font-weight: 500;
+  border-radius: 8px; cursor: pointer;
+  text-align: center; border: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.da-confirm { background: var(--brand); color: white }
+.da-done    { background: var(--green); color: white }
+.da-cancel  { background: none; border: 1px solid var(--border-m); color: var(--t1) }
+
+/* ─── Toast ──────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--t0);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.25s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+
+/* ─── States ─────────────────────────────────── */
+.loading { padding: 40px; text-align: center; color: var(--t2); font-size: 13px }
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 900px) {
+  :root { --sb-width: 60px }
+  .sb-wordmark, .sb-item span, .sb-user-info { display: none }
+  .sb-item { padding: 10px; justify-content: center; box-shadow: none }
+  .sb-item.active { background: var(--sb-active-bg) }
+  .sb-logo-area { padding: 18px 10px; display: flex; justify-content: center }
+  .sb-mark { justify-content: center }
+  .sb-nav { padding: 8px 6px }
+  .sb-bottom { padding: 10px 6px }
+  .sb-user { justify-content: center }
+  .sb-user-av { margin: 0 }
+}
+@media (max-width: 680px) {
+  .main-grid { grid-template-columns: 1fr }
+  .side-panel { display: none }
+  .kpi-row { grid-template-columns: repeat(2,1fr) }
+  .page { padding: 16px 14px 40px }
+}
+
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-dot"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
-    <span class="brand-name">Laço — Hoje</span>
-  </div>
-  <div class="topbar-right">
-    <a id="back-btn" href="/" class="btn btn-ghost">← Dashboard</a>
-    <button class="btn btn-ghost" onclick="reload()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1 0 1.5-4"/><polyline points="2 2 2 6 6 6"/></svg>
-      Atualizar
-    </button>
-  </div>
-</div>
+<div class="admin-layout">
 
-<div class="date-bar">
-  <div class="date-nav">
-    <button class="date-nav-btn" onclick="changeDay(-1)">‹</button>
-    <div class="date-title" id="date-title">Carregando...</div>
-    <button class="date-nav-btn" onclick="changeDay(1)">›</button>
-  </div>
-  <button class="date-today-btn" id="today-btn" onclick="goToday()">Hoje</button>
-</div>
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-watermark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.09 9.26L22 9.27L15.95 14.14L18.18 21.02L12 17.02L5.82 21.02L8.05 14.14L2 9.27L9.91 9.26Z"/>
+      </svg>
+    </div>
 
-<div class="page">
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-label">Total do dia</div><div class="kpi-val purple" id="k-total">—</div></div>
-    <div class="kpi"><div class="kpi-label">Confirmados</div><div class="kpi-val green" id="k-confirmed">—</div></div>
-    <div class="kpi"><div class="kpi-label">Pendentes</div><div class="kpi-val amber" id="k-pending">—</div></div>
-    <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-val muted" id="k-done">—</div></div>
-  </div>
+    <div class="sb-logo-area">
+      <div class="sb-mark">
+        <svg class="sb-star" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.09 9.26L22 9.27L15.95 14.14L18.18 21.02L12 17.02L5.82 21.02L8.05 14.14L2 9.27L9.91 9.26Z"/>
+        </svg>
+        <span class="sb-wordmark">Laço</span>
+      </div>
+    </div>
 
-  <div class="main-grid">
-    <div class="timeline-card">
-      <div class="tl-head">
-        <span class="tl-title" id="tl-title">Agenda do dia</span>
-        <div class="tl-filter">
-          <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
-          <div class="filter-pill" onclick="setFilter('pending',this)">Pendentes</div>
-          <div class="filter-pill" onclick="setFilter('confirmed',this)">Confirmados</div>
+    <nav class="sb-nav">
+      <a id="back-btn" href="/" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="5" height="5" rx="1"/>
+          <rect x="9" y="2" width="5" height="5" rx="1"/>
+          <rect x="2" y="9" width="5" height="5" rx="1"/>
+          <rect x="9" y="9" width="5" height="5" rx="1"/>
+        </svg>
+        <span>Painel</span>
+      </a>
+
+      <a class="sb-item active" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+          <line x1="5" y1="1.5" x2="5" y2="4.5"/>
+          <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+          <line x1="2" y1="7" x2="14" y2="7"/>
+        </svg>
+        <span>Hoje</span>
+      </a>
+
+      <a href="#" class="sb-item" id="nav-relatorio-hoje">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="3"    y1="13" x2="3"    y2="8"/>
+          <line x1="6.5"  y1="13" x2="6.5"  y2="5"/>
+          <line x1="10"   y1="13" x2="10"   y2="9"/>
+          <line x1="13.5" y1="13" x2="13.5" y2="3"/>
+          <line x1="1"    y1="13" x2="15"   y2="13"/>
+        </svg>
+        <span>Relatórios</span>
+      </a>
+
+      <div class="sb-divider"></div>
+
+      <a href="#" class="sb-item" id="nav-config-hoje">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="2.2"/>
+          <path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/>
+        </svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-user-av">L</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name">Admin</div>
+          <div class="sb-user-role">Clínica</div>
+        </div>
+        <button onclick="if(!localStorage.getItem('token')){location.href='/login'}" class="sb-logout" title="Painel">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN
+  ═══════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- Barra de data (topo fixo) -->
+    <div class="date-bar">
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="changeDay(-1)">‹</button>
+        <div class="date-title" id="date-title">Carregando...</div>
+        <button class="date-nav-btn" onclick="changeDay(1)">›</button>
+      </div>
+      <button class="date-today-btn" id="today-btn" onclick="goToday()">Hoje</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Total do dia</div><div class="kpi-val purple" id="k-total">—</div></div>
+      <div class="kpi"><div class="kpi-label">Confirmados</div><div class="kpi-val green"  id="k-confirmed">—</div></div>
+      <div class="kpi"><div class="kpi-label">Pendentes</div><div class="kpi-val amber"   id="k-pending">—</div></div>
+      <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-val muted"  id="k-done">—</div></div>
+    </div>
+
+    <!-- Conteúdo scrollável -->
+    <div class="content-scroll">
+      <div class="page">
+        <div class="main-grid">
+
+          <!-- Timeline -->
+          <div class="timeline-card">
+            <div class="tl-head">
+              <span class="tl-title" id="tl-title">Agenda do dia</span>
+              <div class="tl-filter">
+                <div class="filter-pill on" onclick="setFilter('todos',this)">Todos</div>
+                <div class="filter-pill" onclick="setFilter('pending',this)">Pendentes</div>
+                <div class="filter-pill" onclick="setFilter('confirmed',this)">Confirmados</div>
+              </div>
+            </div>
+            <div class="time-slots-wrap" id="timeline">
+              <div class="loading">Carregando agenda...</div>
+            </div>
+          </div>
+
+          <!-- Side panel: próximos + resumo -->
+          <div class="side-panel">
+            <div class="side-card">
+              <div class="side-head"><div class="side-title">Próximos</div></div>
+              <div id="next-up"><div class="apt-empty">—</div></div>
+            </div>
+            <div class="side-card">
+              <div class="side-head"><div class="side-title">Resumo</div></div>
+              <div id="summary-rows"><div class="apt-empty">—</div></div>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div class="time-slots-wrap" id="timeline">
-        <div class="loading">Carregando agenda...</div>
-      </div>
-    </div>
-
-    <div class="sidebar">
-      <div class="side-card">
-        <div class="side-head"><div class="side-title">PRÓXIMOS</div></div>
-        <div id="next-up"><div class="apt-empty">—</div></div>
-      </div>
-      <div class="side-card">
-        <div class="side-head"><div class="side-title">RESUMO</div></div>
-        <div id="summary-rows"><div class="apt-empty">—</div></div>
-      </div>
-    </div>
-  </div>
-</div>
+    </div><!-- /content-scroll -->
+  </div><!-- /main -->
+</div><!-- /admin-layout -->
 
 <!-- Detail drawer -->
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
@@ -209,7 +728,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
     <span class="drawer-title" id="d-title">Agendamento</span>
     <button class="drawer-close" onclick="closeDrawer()">×</button>
   </div>
-  <div class="drawer-body" id="d-body"></div>
+  <div class="drawer-body"    id="d-body"></div>
   <div class="drawer-actions" id="d-actions"></div>
 </div>
 
@@ -223,6 +742,16 @@ if (!localStorage.getItem("token")) {
 const API     = window.location.origin
 const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.getItem('laco_slug') || ''
 document.getElementById('back-btn').href = '/' + SLUG + '/'
+
+// Outros links do sidebar com slug correto
+;(function setSidebarLinks() {
+  const base = SLUG ? '/' + SLUG : ''
+  const r = document.getElementById('nav-relatorio-hoje')
+  const c = document.getElementById('nav-config-hoje')
+  if (r) r.href = base + '/relatorio'
+  if (c) c.href = base + '/config'
+})()
+
 function h() { const jwt = localStorage.getItem('token'); return jwt ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt } : {} }
 
 const HOURS = [8,9,10,11,12,13,14,15,16,17,18,19]
@@ -323,10 +852,8 @@ function renderTimeline(apts) {
   }
 
   const now = new Date()
-  const nowMins = now.getHours() * 60 + now.getMinutes()
 
   const html = HOURS.map(h => {
-    const slotMins = h * 60
     const isNowHour = isToday(currentDate) && now.getHours() === h
     const aptsInSlot = apts.filter(a => new Date(a.scheduled_at).getHours() === h)
 
@@ -346,7 +873,6 @@ function renderTimeline(apts) {
 function renderAptBlock(a) {
   const dt       = new Date(a.scheduled_at)
   const time     = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
-  const initials = a.lead_name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()
   const color    = barColors[a.lead_name.charCodeAt(0) % barColors.length]
   const statusBadge = {
     pending:   '<span class="badge b-pending">Pendente</span>',
@@ -427,9 +953,9 @@ function openDrawer(id) {
   document.getElementById('d-body').innerHTML = `
     <div style="margin-bottom:16px">
       <div style="font-size:16px;font-weight:500;margin-bottom:4px">${esc(a.procedure_name)}</div>
-      <div style="font-size:12px;color:#888">${dt.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})} às ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${a.duration} min</div>
+      <div style="font-size:12px;color:#969890">${dt.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})} às ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${a.duration} min</div>
     </div>
-    <div style="background:#f5f4f0;border-radius:10px;padding:12px;margin-bottom:16px">
+    <div style="background:#F7F5F0;border-radius:10px;padding:12px;margin-bottom:16px">
       <div class="info-row"><span class="info-label">Cliente</span><span class="info-val">${esc(a.lead_name)}</span></div>
       <div class="info-row"><span class="info-label">WhatsApp</span>
         <a href="https://wa.me/55${(a.lead_phone||'').replace(/\D/g,'')}" target="_blank"
@@ -445,7 +971,7 @@ function openDrawer(id) {
         </select>
       </div>
     </div>
-    <a href="/cliente.html?id=${a.lead_id}" style="font-size:12px;color:#B8657A;display:flex;align-items:center;gap:4px">
+    <a href="/cliente.html?id=${a.lead_id}" style="font-size:12px;color:var(--brand);display:flex;align-items:center;gap:4px">
       Ver perfil completo do cliente →
     </a>`
 
@@ -454,8 +980,8 @@ function openDrawer(id) {
                 <button class="da-btn da-cancel"  onclick="quickStatus('cancelled')">Cancelar</button>`,
     confirmed: `<button class="da-btn da-done"    onclick="quickStatus('done')">Marcar concluído</button>
                 <button class="da-btn da-cancel"  onclick="quickStatus('cancelled')">Cancelar</button>`,
-    done:      `<span style="font-size:12px;color:#888;padding:10px 0">Agendamento concluído</span>`,
-    cancelled: `<span style="font-size:12px;color:#888;padding:10px 0">Agendamento cancelado</span>`,
+    done:      `<span style="font-size:12px;color:#969890;padding:10px 0">Agendamento concluído</span>`,
+    cancelled: `<span style="font-size:12px;color:#969890;padding:10px 0">Agendamento cancelado</span>`,
   }
   document.getElementById('d-actions').innerHTML = actionsMap[a.status] || ''
 
@@ -503,7 +1029,7 @@ function setFilter(f, el) {
 function toast(msg, ok=true) {
   const t = document.getElementById('toast')
   t.textContent = msg
-  t.style.background = ok ? '#111' : '#A32D2D'
+  t.style.background = ok ? '#1A1C18' : '#A02828'
   t.classList.add('show')
   setTimeout(() => t.classList.remove('show'), 2200)
 }

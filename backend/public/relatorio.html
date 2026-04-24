@@ -5,246 +5,396 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laço — Relatório</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
-/* ── Navbar ── */
-.navbar{height:56px;background:white;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;padding:0 24px;gap:0;position:sticky;top:0;z-index:100}
-.nb-brand{display:flex;align-items:center;gap:9px;margin-right:32px;flex-shrink:0}
-.nb-mark{width:30px;height:30px;border-radius:9px;background:#B8657A;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(184,101,122,0.28);flex-shrink:0}
-.nb-mark svg{width:14px;height:14px;fill:white}
-.nb-logo-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;color:#1A1614;letter-spacing:0.02em;line-height:1}
-.nb-nav{display:flex;align-items:center;gap:2px}
-.nb-link{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#6B5E59;transition:background 0.15s,color 0.15s;white-space:nowrap;text-decoration:none}
-.nb-link svg{width:14px;height:14px;opacity:0.7}
-.nb-link:hover{background:#F5F1EE;color:#1A1614}
-.nb-link.active{background:rgba(184,101,122,0.09);color:#B8657A}
-.nb-link.active svg{opacity:1}
-.nb-spacer{flex:1}
-.nb-right{display:flex;align-items:center;gap:8px}
-.clinic-pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#6B5E59;background:#F5F1EE;border:1px solid rgba(0,0,0,0.11);border-radius:20px;padding:5px 12px;white-space:nowrap}
-.clinic-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:#2D8C66;flex-shrink:0}
-.nb-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#A89890;transition:background 0.15s,color 0.15s;text-decoration:none;cursor:pointer}
-.nb-icon svg{width:16px;height:16px}
-.nb-icon:hover{background:#F5F1EE;color:#1A1614}
-.page{max-width:900px;margin:0 auto;padding:24px}
-.page-title{font-size:18px;font-weight:500;margin-bottom:4px}
-.page-sub{font-size:13px;color:#666;margin-bottom:24px}
 
-/* Stats grid */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
-.kpi{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:16px 18px}
-.kpi-label{font-size:11px;color:#888;margin-bottom:4px}
-.kpi-val{font-size:26px;font-weight:500;line-height:1}
-.kpi-sub{font-size:11px;color:#aaa;margin-top:4px}
-.kpi-val.green{color:#2E8C66}
-.kpi-val.purple{color:#B8657A}
-.kpi-val.amber{color:#9A6B10}
-.kpi-val.red{color:#A32D2D}
+/* ─── Reset ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; overflow: hidden }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  color: #1A1C18;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  background: #1B3A2C;
+}
+a { color: inherit; text-decoration: none }
+button { font-family: inherit; cursor: pointer }
+input { font-family: inherit }
 
-/* Charts row */
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.chart-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px}
-.chart-title{font-size:13px;font-weight:500;margin-bottom:16px}
+/* ─── Tokens ─────────────────────────────────── */
+:root {
+  --sb-bg:         #1B3A2C;
+  --sb-text:       rgba(255,255,255,0.50);
+  --sb-text-hover: rgba(255,255,255,0.82);
+  --sb-gold:       #C9A96E;
+  --sb-active-bg:  rgba(201,169,110,0.10);
+  --sb-border:     rgba(255,255,255,0.08);
+  --sb-width:      220px;
 
-/* Funnel */
-.funnel{display:flex;flex-direction:column;gap:8px}
-.funnel-row{display:flex;align-items:center;gap:10px}
-.funnel-label{font-size:12px;color:#666;width:110px;flex-shrink:0;text-align:right}
-.funnel-bar-wrap{flex:1;height:28px;background:#F0EBE8;border-radius:6px;overflow:hidden;position:relative}
-.funnel-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:500;color:white;white-space:nowrap;min-width:32px;transition:width 0.6s ease}
-.funnel-count{font-size:12px;font-weight:500;width:32px;text-align:right;flex-shrink:0}
+  --brand:     #B59248;
+  --brand-h:   #9f8038;
+  --brand-dim: rgba(181,146,72,0.10);
+  --brand-ring:rgba(181,146,72,0.20);
+  --brand-l:   #D4B87A;
 
-/* Donut */
-.donut-wrap{display:flex;align-items:center;gap:20px}
-.donut-svg{flex-shrink:0}
-.donut-legend{display:flex;flex-direction:column;gap:8px}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#555}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.legend-val{font-weight:500;color:#111;margin-left:auto;padding-left:12px}
+  --bg:       #F7F5F0;
+  --surface:  #FFFFFF;
+  --surface2: #F0EDE5;
+  --border:   rgba(0,0,0,0.07);
+  --border-m: rgba(0,0,0,0.12);
+  --shadow:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.04);
 
-/* Rejection reasons */
-.reason-card{background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px;margin-bottom:14px}
-.reason-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.reason-row:last-child{margin:0}
-.reason-name{font-size:13px;flex:1}
-.reason-bar-wrap{flex:2;height:8px;background:#F0EBE8;border-radius:4px;overflow:hidden}
-.reason-bar{height:100%;border-radius:4px;background:#F0997B}
-.reason-pct{font-size:12px;font-weight:500;color:#A04830;width:36px;text-align:right}
+  --green:    #2A7A5A;
+  --green-bg: rgba(42,122,90,0.08);
+  --amber:    #8A6008;
+  --amber-bg: rgba(138,96,8,0.09);
+  --red:      #A02828;
+  --red-bg:   rgba(160,40,40,0.08);
 
-/* Proc table */
-.proc-table{width:100%;border-collapse:collapse}
-.proc-table th{font-size:11px;color:#aaa;font-weight:500;text-align:left;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,0.08)}
-.proc-table td{font-size:13px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)}
-.proc-table tr:last-child td{border:none}
-.proc-table td:not(:first-child){text-align:right}
-.conv-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+  --t0: #1A1C18;
+  --t1: #5A5D58;
+  --t2: #969890;
+  --t3: #CCCEC7;
+}
 
-.loading{padding:64px;text-align:center;color:#aaa;font-size:13px}
+/* ─── Layout ─────────────────────────────────── */
+.admin-layout { display: flex; height: 100vh; overflow: hidden }
 
-/* ── Period Command Bar ── */
-.period-cmd-bar{
-  background:white;
-  border-bottom:2px solid rgba(0,0,0,0.08);
-  position:sticky;top:56px;z-index:9;
-  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+/* ─── Sidebar (idêntico) ─────────────────────── */
+.sidebar {
+  width: var(--sb-width);
+  flex-shrink: 0;
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 50;
 }
-.period-cmd-bar::before{
-  content:'';display:block;height:2px;
-  background:linear-gradient(90deg,#B8657A 0%,#D4899A 60%,transparent 100%);
-  opacity:0.5;
-}
-.period-cmd-inner{
-  max-width:900px;margin:0 auto;
-  padding:0 24px;height:50px;
-  display:flex;align-items:center;gap:0;
-}
-.pcb-status{
-  display:flex;align-items:center;gap:9px;
-  flex-shrink:0;padding-right:20px;margin-right:16px;
-  border-right:1px solid rgba(0,0,0,0.08);
-}
-.pcb-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#D4CCC8;transition:background 0.25s,box-shadow 0.25s;flex-shrink:0;
-}
-.pcb-dot.live{background:#B8657A;box-shadow:0 0 0 3px rgba(184,101,122,0.18)}
-.pcb-info{display:flex;flex-direction:column;gap:1px;line-height:1}
-.pcb-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#A89890}
-.pcb-range{font-size:12.5px;font-weight:600;color:#B8657A;letter-spacing:-0.1px;white-space:nowrap}
-.pcb-pills{display:flex;gap:2px;flex:1;align-items:center;overflow-x:auto;scrollbar-width:none}
-.pcb-pills::-webkit-scrollbar{display:none}
-.pcb-pill{
-  padding:5px 13px;font-size:11.5px;font-weight:500;
-  border:1px solid transparent;border-radius:20px;
-  cursor:pointer;color:#6B5E59;background:none;
-  white-space:nowrap;transition:all 0.12s;font-family:'Inter',sans-serif;flex-shrink:0;
-}
-.pcb-pill:hover:not(.on){background:#F5F1EE;color:#1A1614}
-.pcb-pill.on{background:rgba(184,101,122,0.09);border-color:rgba(184,101,122,0.22);color:#B8657A;font-weight:600}
-.pcb-sep{width:1px;height:20px;background:rgba(0,0,0,0.08);flex-shrink:0;margin:0 12px}
-.pcb-custom-wrap{position:relative;flex-shrink:0}
-.pcb-custom{
-  display:flex;align-items:center;gap:5px;
-  padding:5px 13px;font-size:11.5px;font-weight:500;
-  border:1px dashed rgba(0,0,0,0.15);border-radius:20px;
-  cursor:pointer;color:#A89890;background:none;
-  font-family:'Inter',sans-serif;transition:all 0.12s;
-}
-.pcb-custom:hover{background:#F5F1EE;color:#6B5E59;border-color:#D4899A;border-style:solid}
-.pcb-custom.on{background:rgba(184,101,122,0.09);border-color:rgba(184,101,122,0.25);color:#B8657A;border-style:solid}
-.pcb-custom svg{width:11px;height:11px}
-.date-picker-panel{
-  display:none;position:absolute;top:calc(100% + 6px);right:0;
-  background:white;border:1px solid rgba(0,0,0,0.1);border-radius:14px;
-  padding:16px;z-index:50;min-width:240px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.12);
-}
-.date-picker-panel.on{display:block}
-.dp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dp-label{font-size:11px;color:#6B5E59;width:24px;flex-shrink:0;font-weight:500}
-.dp-input{
-  flex:1;padding:7px 10px;font-size:12px;border:1px solid rgba(0,0,0,0.1);
-  border-radius:8px;background:#FAF7F5;color:#1A1614;
-  outline:none;font-family:'Inter',sans-serif;
-}
-.dp-input:focus{border-color:#B8657A;box-shadow:0 0 0 2px rgba(184,101,122,0.18)}
-.dp-actions{display:flex;gap:6px;margin-top:10px}
-.dp-apply{flex:1;padding:8px;background:#B8657A;border:none;border-radius:9px;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
-.dp-clear{padding:8px 12px;background:none;border:1px solid rgba(0,0,0,0.1);border-radius:9px;color:#6B5E59;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+.sb-watermark { position: absolute; bottom: 52px; right: -20px; width: 124px; height: 124px; color: white; opacity: 0.038; pointer-events: none }
+.sb-watermark svg { width: 100%; height: 100% }
+.sb-logo-area { padding: 26px 18px 22px; border-bottom: 1px solid var(--sb-border); flex-shrink: 0 }
+.sb-mark { display: flex; align-items: center; gap: 10px }
+.sb-star { width: 17px; height: 17px; color: var(--sb-gold); flex-shrink: 0 }
+.sb-wordmark { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 21px; font-weight: 600; color: rgba(255,255,255,0.90); letter-spacing: 0.06em; line-height: 1 }
+.sb-nav { flex: 1; padding: 10px 0; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none }
+.sb-nav::-webkit-scrollbar { display: none }
+.sb-item { display: flex; align-items: center; gap: 10px; padding: 9px 18px; font-size: 13px; font-weight: 400; color: var(--sb-text); text-decoration: none; transition: color 0.15s, background 0.15s, box-shadow 0.15s; white-space: nowrap }
+.sb-item svg { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 1.6 }
+.sb-item:hover { color: var(--sb-text-hover); background: rgba(255,255,255,0.05) }
+.sb-item.active { color: var(--sb-gold); background: var(--sb-active-bg); box-shadow: inset 3px 0 0 var(--sb-gold); font-weight: 500 }
+.sb-divider { height: 1px; background: var(--sb-border); margin: 6px 18px }
+.sb-bottom { padding: 14px; border-top: 1px solid var(--sb-border); flex-shrink: 0 }
+.sb-user { display: flex; align-items: center; gap: 9px }
+.sb-user-av { width: 30px; height: 30px; border-radius: 50%; background: rgba(201,169,110,0.16); border: 1px solid rgba(201,169,110,0.26); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--sb-gold); flex-shrink: 0; font-family: 'Cormorant Garamond', Georgia, serif }
+.sb-user-info { flex: 1; min-width: 0 }
+.sb-user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.sb-user-role { font-size: 9px; color: var(--sb-text); text-transform: uppercase; letter-spacing: 0.10em; margin-top: 1px }
+.sb-logout { width: 28px; height: 28px; background: none; border: none; color: rgba(255,255,255,0.30); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.15s; flex-shrink: 0; padding: 0 }
+.sb-logout svg { width: 14px; height: 14px }
+.sb-logout:hover { color: rgba(255,255,255,0.70); background: rgba(255,255,255,0.07) }
 
-@media(max-width:600px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .charts-row{grid-template-columns:1fr}
-  .pcb-status{display:none}
+/* ─── Main ───────────────────────────────────── */
+.main {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--t3) transparent;
 }
+
+/* ─── Period bar (sticky) ────────────────────── */
+.period-cmd-bar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 30 }
+.period-cmd-inner { padding: 0 28px; height: 46px; display: flex; align-items: center }
+.pcb-status { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-right: 18px; margin-right: 14px; border-right: 1px solid var(--border-m) }
+.pcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--t3); transition: background 0.25s, box-shadow 0.25s; flex-shrink: 0 }
+.pcb-dot.live { background: var(--brand); box-shadow: 0 0 0 2.5px var(--brand-ring) }
+.pcb-info { display: flex; flex-direction: column; gap: 1px; line-height: 1 }
+.pcb-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: var(--t2) }
+.pcb-range { font-size: 12px; font-weight: 600; color: var(--brand); white-space: nowrap }
+.pcb-pills { display: flex; gap: 1px; flex: 1; align-items: center; overflow-x: auto; scrollbar-width: none }
+.pcb-pills::-webkit-scrollbar { display: none }
+.pcb-pill { padding: 4px 12px; font-size: 11.5px; font-weight: 500; border: 1px solid transparent; border-radius: 20px; cursor: pointer; color: var(--t1); background: none; white-space: nowrap; transition: all 0.12s; font-family: 'DM Sans', sans-serif; flex-shrink: 0 }
+.pcb-pill:hover:not(.on) { background: var(--surface2); color: var(--t0) }
+.pcb-pill.on { background: var(--brand-dim); border-color: rgba(181,146,72,0.24); color: var(--brand); font-weight: 600 }
+.pcb-sep { width: 1px; height: 18px; background: var(--border-m); flex-shrink: 0; margin: 0 12px }
+.pcb-custom-wrap { position: relative; flex-shrink: 0 }
+.pcb-custom { display: flex; align-items: center; gap: 5px; padding: 4px 12px; font-size: 11.5px; font-weight: 500; border: 1px dashed var(--border-m); border-radius: 20px; cursor: pointer; color: var(--t2); background: none; font-family: 'DM Sans', sans-serif; transition: all 0.12s }
+.pcb-custom svg { width: 11px; height: 11px }
+.pcb-custom:hover { background: var(--surface2); color: var(--t1); border-color: var(--brand-l); border-style: solid }
+.pcb-custom.on { background: var(--brand-dim); border-color: rgba(181,146,72,0.26); color: var(--brand); border-style: solid }
+.date-picker-panel { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: white; border: 1px solid var(--border-m); border-radius: 12px; padding: 16px; z-index: 50; min-width: 258px; box-shadow: 0 6px 24px rgba(0,0,0,0.09) }
+.date-picker-panel.on { display: block }
+.dp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px }
+.dp-label { font-size: 11px; color: var(--t1); width: 22px; flex-shrink: 0; font-weight: 500 }
+.dp-input { flex: 1; padding: 7px 10px; font-size: 12px; border: 1px solid var(--border-m); border-radius: 7px; background: var(--bg); color: var(--t0); outline: none; font-family: 'DM Sans', sans-serif }
+.dp-input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-ring) }
+.dp-actions { display: flex; gap: 6px; margin-top: 10px }
+.dp-apply { flex: 1; padding: 8px; background: var(--brand); border: none; border-radius: 8px; color: white; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif }
+.dp-clear { padding: 8px 12px; background: none; border: 1px solid var(--border-m); border-radius: 8px; color: var(--t1); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif }
+
+/* ─── Page ───────────────────────────────────── */
+.page { max-width: 960px; margin: 0 auto; padding: 32px 28px 60px }
+
+.page-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--t0);
+  letter-spacing: -0.2px;
+  line-height: 1.05;
+  margin-bottom: 5px;
+}
+.page-sub { font-size: 12px; color: var(--t2); margin-bottom: 28px }
+
+/* ─── KPI grid (gerado por JS) ───────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+}
+.kpi-label { font-size: 10px; color: var(--t2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 7px }
+.kpi-val {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--t0);
+}
+.kpi-sub { font-size: 11px; color: var(--t2); margin-top: 5px }
+.kpi-val.green  { color: var(--green)  }
+.kpi-val.purple { color: var(--brand)  }
+.kpi-val.amber  { color: var(--amber)  }
+.kpi-val.red    { color: var(--red)    }
+
+/* ─── Charts row ─────────────────────────────── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.chart-card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+}
+.chart-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--t2);
+  margin-bottom: 16px;
+}
+
+/* ─── Funnel ─────────────────────────────────── */
+.funnel { display: flex; flex-direction: column; gap: 8px }
+.funnel-row { display: flex; align-items: center; gap: 10px }
+.funnel-label { font-size: 12px; color: var(--t1); width: 120px; flex-shrink: 0; text-align: right }
+.funnel-bar-wrap { flex: 1; height: 28px; background: var(--surface2); border-radius: 5px; overflow: hidden }
+.funnel-bar { height: 100%; border-radius: 5px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 500; color: white; white-space: nowrap; min-width: 32px; transition: width 0.5s ease }
+.funnel-count { font-size: 12px; font-weight: 600; width: 32px; text-align: right; flex-shrink: 0; color: var(--t0) }
+
+/* ─── Donut ──────────────────────────────────── */
+.donut-wrap { display: flex; align-items: center; gap: 20px }
+.donut-svg { flex-shrink: 0 }
+.donut-legend { display: flex; flex-direction: column; gap: 9px }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--t1) }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0 }
+.legend-val { font-weight: 600; color: var(--t0); margin-left: auto; padding-left: 12px }
+
+/* ─── Rejection reasons ──────────────────────── */
+.reason-card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.reason-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px }
+.reason-row:last-child { margin: 0 }
+.reason-name { font-size: 13px; flex: 1; color: var(--t0) }
+.reason-bar-wrap { flex: 2; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden }
+.reason-bar { height: 100%; border-radius: 4px; background: var(--red) }
+.reason-pct { font-size: 12px; font-weight: 600; color: var(--red); width: 36px; text-align: right }
+
+/* ─── Proc table ─────────────────────────────── */
+.proc-table { width: 100%; border-collapse: collapse }
+.proc-table th { font-size: 10px; color: var(--t2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; text-align: left; padding: 0 0 10px 0; border-bottom: 1px solid var(--border-m) }
+.proc-table td { font-size: 13px; padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--t0) }
+.proc-table tr:last-child td { border: none }
+.proc-table td:not(:first-child) { text-align: right }
+.conv-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em }
+
+/* ─── States ─────────────────────────────────── */
+.loading { padding: 64px; text-align: center; color: var(--t2); font-size: 13px }
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 900px) {
+  :root { --sb-width: 60px }
+  .sb-wordmark, .sb-item span, .sb-user-info { display: none }
+  .sb-item { padding: 10px; justify-content: center; box-shadow: none }
+  .sb-item.active { background: var(--sb-active-bg) }
+  .sb-logo-area { padding: 18px 10px; display: flex; justify-content: center }
+  .sb-mark { justify-content: center }
+  .sb-nav { padding: 8px 6px }
+  .sb-bottom { padding: 10px 6px }
+  .sb-user { justify-content: center }
+  .sb-user-av { margin: 0 }
+  .page { padding: 20px 16px 48px }
+  .period-cmd-inner { padding: 0 16px }
+}
+@media (max-width: 600px) {
+  .kpi-grid { grid-template-columns: repeat(2,1fr) }
+  .charts-row { grid-template-columns: 1fr }
+  .pcb-status { display: none }
+}
+
 </style>
 </head>
 <body>
 
-<header class="navbar">
-  <div class="nb-brand">
-    <div class="nb-mark"><svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3.2"/><path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
-    <span class="nb-logo-name">Laço</span>
-  </div>
-  <nav class="nb-nav">
-    <a id="nav-painel" href="#" class="nb-link">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
-      <span>Painel</span>
-    </a>
-    <a id="nav-hoje" href="#" class="nb-link">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-      <span>Hoje</span>
-    </a>
-    <a id="nav-relatorio" href="#" class="nb-link active">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/><line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg>
-      <span>Relatório</span>
-    </a>
-  </nav>
-  <div class="nb-spacer"></div>
-  <div class="nb-right">
-    <span class="clinic-pill" id="clinic-name">Carregando...</span>
-    <a id="nav-config" href="#" class="nb-icon" title="Configurações">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/></svg>
-    </a>
-    <button onclick="logout()" class="nb-icon" title="Sair">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg>
-    </button>
-  </div>
-</header>
+<div class="admin-layout">
 
-<!-- ═══ PERIOD COMMAND BAR ═══ -->
-<div class="period-cmd-bar">
-  <div class="period-cmd-inner">
-    <div class="pcb-status">
-      <div class="pcb-dot" id="pcb-dot"></div>
-      <div class="pcb-info">
-        <span class="pcb-label">Exibindo dados de</span>
-        <span class="pcb-range" id="period-display">Todos os períodos</span>
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sb-watermark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.09 9.26L22 9.27L15.95 14.14L18.18 21.02L12 17.02L5.82 21.02L8.05 14.14L2 9.27L9.91 9.26Z"/>
+      </svg>
+    </div>
+    <div class="sb-logo-area">
+      <div class="sb-mark">
+        <svg class="sb-star" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.09 9.26L22 9.27L15.95 14.14L18.18 21.02L12 17.02L5.82 21.02L8.05 14.14L2 9.27L9.91 9.26Z"/>
+        </svg>
+        <span class="sb-wordmark">Laço</span>
       </div>
     </div>
-    <div class="pcb-pills">
-      <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
-      <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
-      <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
-      <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
-      <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
-    </div>
-    <div class="pcb-sep"></div>
-    <div class="pcb-custom-wrap" id="date-filter-wrap">
-      <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
+    <nav class="sb-nav">
+      <a id="nav-painel" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/>
+          <rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>
+        </svg>
+        <span>Painel</span>
+      </a>
+      <a id="nav-hoje" href="#" class="sb-item">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="2" y="3" width="12" height="11" rx="1.5"/>
-          <line x1="5" y1="1.5" x2="5" y2="4.5"/>
-          <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+          <line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/>
           <line x1="2" y1="7" x2="14" y2="7"/>
         </svg>
-        Personalizar
-      </button>
-      <div class="date-picker-panel" id="date-picker-panel">
-        <div class="dp-row">
-          <span class="dp-label">De</span>
-          <input type="date" class="dp-input" id="dp-from">
+        <span>Hoje</span>
+      </a>
+      <a id="nav-relatorio" href="#" class="sb-item active">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="3"    y1="13" x2="3"    y2="8"/>
+          <line x1="6.5"  y1="13" x2="6.5"  y2="5"/>
+          <line x1="10"   y1="13" x2="10"   y2="9"/>
+          <line x1="13.5" y1="13" x2="13.5" y2="3"/>
+          <line x1="1"    y1="13" x2="15"   y2="13"/>
+        </svg>
+        <span>Relatórios</span>
+      </a>
+      <div class="sb-divider"></div>
+      <a id="nav-config" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="2.2"/>
+          <path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/>
+        </svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-user-av">L</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="clinic-name">Carregando...</div>
+          <div class="sb-user-role">Admin</div>
         </div>
-        <div class="dp-row">
-          <span class="dp-label">Até</span>
-          <input type="date" class="dp-input" id="dp-to">
+        <button onclick="logout()" class="sb-logout" title="Sair">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- Period bar (sticky) -->
+    <div class="period-cmd-bar">
+      <div class="period-cmd-inner">
+        <div class="pcb-status">
+          <div class="pcb-dot" id="pcb-dot"></div>
+          <div class="pcb-info">
+            <span class="pcb-label">Exibindo dados de</span>
+            <span class="pcb-range" id="period-display">Todos os períodos</span>
+          </div>
         </div>
-        <div class="dp-actions">
-          <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-          <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+        <div class="pcb-pills">
+          <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
+          <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
+          <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
+          <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
+          <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
+        </div>
+        <div class="pcb-sep"></div>
+        <div class="pcb-custom-wrap" id="date-filter-wrap">
+          <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+              <line x1="5" y1="1.5" x2="5" y2="4.5"/>
+              <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+              <line x1="2" y1="7" x2="14" y2="7"/>
+            </svg>
+            Personalizar
+          </button>
+          <div class="date-picker-panel" id="date-picker-panel">
+            <div class="dp-row">
+              <span class="dp-label">De</span>
+              <input type="date" class="dp-input" id="dp-from">
+            </div>
+            <div class="dp-row">
+              <span class="dp-label">Até</span>
+              <input type="date" class="dp-input" id="dp-to">
+            </div>
+            <div class="dp-actions">
+              <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+              <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div class="page">
-  <div class="page-title">Relatório de conversão</div>
-  <div class="page-sub">Visão geral de leads, agendamentos e motivos de recusa</div>
-  <div id="report"><div class="loading">Carregando dados...</div></div>
-</div>
+    <!-- Page -->
+    <div class="page">
+      <div class="page-title">Relatórios</div>
+      <div class="page-sub">Visão geral de leads, agendamentos e conversão por procedimento</div>
+      <div id="report"><div class="loading">Carregando dados...</div></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /admin-layout -->
 
 <script>
 if (!localStorage.getItem("token")) {
@@ -384,7 +534,6 @@ function render(ls, as_, leads, apts) {
   const convRate = total > 0 ? Math.round(scheduled / total * 100) : 0
   const rejRate  = total > 0 ? Math.round(rejected / total * 100) : 0
 
-  // Rejection reasons
   const reasons = {}
   leads.filter(l => l.reject_reason).forEach(l => {
     const r = l.reject_reason
@@ -393,7 +542,6 @@ function render(ls, as_, leads, apts) {
   const reasonLabels = { orcamento: 'Fora do orçamento', outro: 'Quer ver outro procedimento' }
   const totalRejected = Object.values(reasons).reduce((a,b)=>a+b,0)
 
-  // Procedures conversion
   const procMap = {}
   leads.forEach(l => {
     if (!l.procedure_name) return
@@ -404,12 +552,11 @@ function render(ls, as_, leads, apts) {
   })
   const procs = Object.entries(procMap).sort((a,b) => b[1].views - a[1].views)
 
-  // Donut data
   const donutData = [
-    { label:'Agendados',    val: scheduled, color:'#B8657A' },
-    { label:'Não agendaram',val: rejected,  color:'#F0997B' },
+    { label:'Agendados',    val: scheduled, color:'#B59248' },
+    { label:'Não agendaram',val: rejected,  color:'#D4899A' },
     { label:'Link enviado', val: linkSent,  color:'#EF9F27' },
-    { label:'Novos',        val: newLeads,  color:'#ddd' },
+    { label:'Novos',        val: newLeads,  color:'#CCCEC7' },
   ].filter(d => d.val > 0)
 
   document.getElementById('report').innerHTML = `
@@ -424,10 +571,10 @@ function render(ls, as_, leads, apts) {
       <div class="chart-card">
         <div class="chart-title">Funil de conversão</div>
         <div class="funnel">
-          ${renderFunnelRow('Leads captados', total, total, '#B8657A')}
-          ${renderFunnelRow('Link enviado', linkSent + scheduled + rejected, total, '#D4899A')}
+          ${renderFunnelRow('Leads captados', total, total, '#B59248')}
+          ${renderFunnelRow('Link enviado', linkSent + scheduled + rejected, total, '#C9A96E')}
           ${renderFunnelRow('Visualizaram', rejected + scheduled, total, '#EF9F27')}
-          ${renderFunnelRow('Agendaram', scheduled, total, '#2E8C66')}
+          ${renderFunnelRow('Agendaram', scheduled, total, '#2A7A5A')}
         </div>
       </div>
       <div class="chart-card">
@@ -458,7 +605,7 @@ function render(ls, as_, leads, apts) {
     </div>` : ''}
 
     ${procs.length ? `
-    <div class="chart-card" style="background:white;border-radius:12px;border:0.5px solid rgba(0,0,0,0.08);padding:18px 20px">
+    <div class="chart-card">
       <div class="chart-title">Conversão por procedimento</div>
       <table class="proc-table">
         <thead><tr>
@@ -471,8 +618,8 @@ function render(ls, as_, leads, apts) {
         <tbody>
           ${procs.map(([name, d]) => {
             const conv = d.views > 0 ? Math.round(d.scheduled / d.views * 100) : 0
-            const color = conv >= 50 ? '#E0F4EE' : conv >= 25 ? '#FEF3E2' : '#FAECE7'
-            const tcolor = conv >= 50 ? '#27500A' : conv >= 25 ? '#633806' : '#712B13'
+            const color  = conv >= 50 ? 'rgba(42,122,90,0.08)'  : conv >= 25 ? 'rgba(138,96,8,0.09)'  : 'rgba(160,40,40,0.08)'
+            const tcolor = conv >= 50 ? '#2A7A5A' : conv >= 25 ? '#8A6008' : '#A02828'
             return `<tr>
               <td>${esc(name)}</td>
               <td>${d.views}</td>
@@ -500,9 +647,9 @@ function renderFunnelRow(label, val, total, color) {
 }
 
 function renderDonut(data, total) {
-  if (!total) return '<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="#eee" stroke-width="16"/></svg>'
+  if (!total) return '<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="#E8E5DF" stroke-width="16"/></svg>'
   const r = 35, cx = 50, cy = 50, circ = 2 * Math.PI * r
-  let offset = -circ * 0.25 // start from top
+  let offset = -circ * 0.25
   const slices = data.map(d => {
     const frac = d.val / total
     const dash = frac * circ
@@ -515,10 +662,10 @@ function renderDonut(data, total) {
   })
   return `
     <svg class="donut-svg" width="110" height="110" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="35" fill="none" stroke="#f0f0f0" stroke-width="16"/>
+      <circle cx="50" cy="50" r="35" fill="none" stroke="#EEEBE4" stroke-width="16"/>
       ${slices.join('')}
-      <text x="50" y="47" text-anchor="middle" font-size="16" font-weight="500" fill="#111">${total}</text>
-      <text x="50" y="59" text-anchor="middle" font-size="9" fill="#aaa">leads</text>
+      <text x="50" y="47" text-anchor="middle" font-size="16" font-weight="600" fill="#1A1C18">${total}</text>
+      <text x="50" y="59" text-anchor="middle" font-size="9" fill="#969890">leads</text>
     </svg>`
 }
 
