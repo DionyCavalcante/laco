@@ -78,66 +78,16 @@ router.get('/stats', async (req, res) => {
 })
 
 // GET /api/appointments/slots?date=YYYY-MM-DD&procedure_id=UUID
-// Retorna horários disponíveis para um dia
+// Retorna horários disponíveis para um dia (bloqueio por profissional)
 router.get('/slots', async (req, res) => {
   try {
     const { date, procedure_id } = req.query
     const clinicId = await getEffectiveClinicId(req)
     if (!date) return res.status(400).json({ error: 'Data obrigatória' })
 
-    const d = new Date(date)
-    const dayOfWeek = d.getDay()
-
-    // Horário de funcionamento desse dia
-    const { rows: [hours] } = await db.query(`
-      SELECT * FROM business_hours
-      WHERE clinic_id = $1
-        AND day_of_week = $2
-    `, [clinicId, dayOfWeek])
-
-    if (!hours || !hours.open) return res.json({ slots: [], reason: 'closed' })
-
-    // Duração do procedimento
-    let duration = 60
-    if (procedure_id) {
-      const { rows: [proc] } = await db.query('SELECT duration FROM procedures WHERE id = $1 AND clinic_id = $2', [procedure_id, clinicId])
-      if (proc) duration = proc.duration
-    }
-
-    // Agendamentos já existentes neste dia
-    const { rows: booked } = await db.query(`
-      SELECT a.scheduled_at, p.duration
-      FROM appointments a
-      JOIN procedures p ON a.procedure_id = p.id
-      WHERE a.clinic_id = $1
-        AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $2
-        AND a.status != 'cancelled'
-    `, [clinicId, date])
-
-    // Gera slots de 30 em 30 min dentro do horário
-    const slots = []
-    const [sh, sm] = hours.start_time.split(':').map(Number)
-    const [eh, em] = hours.end_time.split(':').map(Number)
-    let cur = sh * 60 + sm
-    const end = eh * 60 + em
-
-    while (cur + duration <= end) {
-      const hh = String(Math.floor(cur / 60)).padStart(2, '0')
-      const mm = String(cur % 60).padStart(2, '0')
-      const slotStart = new Date(`${date}T${hh}:${mm}:00-03:00`)
-      const slotEnd = new Date(slotStart.getTime() + duration * 60000)
-
-      const taken = booked.some(b => {
-        const bs = new Date(b.scheduled_at)
-        const be = new Date(bs.getTime() + b.duration * 60000)
-        return slotStart < be && slotEnd > bs
-      })
-
-      slots.push({ time: `${hh}:${mm}`, taken })
-      cur += 30
-    }
-
-    res.json({ slots })
+    const { computeSlots } = require('../lib/slots')
+    const result = await computeSlots(clinicId, date, procedure_id || null)
+    res.json(result)
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao gerar slots' })

@@ -39,6 +39,9 @@ const db = require('./db')
   `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_aftercare TEXT`,
   `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS closing_note TEXT`,
   `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
+  `CREATE TABLE IF NOT EXISTS professionals (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE, name TEXT NOT NULL, active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW())`,
+  `CREATE TABLE IF NOT EXISTS procedure_professionals (procedure_id UUID REFERENCES procedures(id) ON DELETE CASCADE, professional_id UUID REFERENCES professionals(id) ON DELETE CASCADE, PRIMARY KEY (procedure_id, professional_id))`,
+  `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
 ].forEach(sql => db.query(sql).catch(e => console.warn('startup alter:', e.message)))
 
 // Health check — Railway usa isso
@@ -49,8 +52,9 @@ app.use('/api/auth', require('./routes/auth'))
 app.use('/api', requireAuth)
 
 // Rotas
-app.use('/api/leads',        require('./routes/leads'))
-app.use('/api/appointments', require('./routes/appointments'))
+app.use('/api/leads',         require('./routes/leads'))
+app.use('/api/professionals', require('./routes/professionals'))
+app.use('/api/appointments',  require('./routes/appointments'))
 app.use('/api/procedures',   require('./routes/procedures'))
 app.use('/api/portal',       require('./routes/portal'))
 app.use('/api/hours',        require('./routes/hours'))

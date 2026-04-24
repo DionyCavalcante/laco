@@ -152,6 +152,22 @@ CREATE TABLE IF NOT EXISTS stripe_events (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Profissionais da clínica
+CREATE TABLE IF NOT EXISTS professionals (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  clinic_id  UUID REFERENCES clinics(id) ON DELETE CASCADE,
+  name       TEXT NOT NULL,
+  active     BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Vínculo procedimento ↔ profissional (N:N)
+CREATE TABLE IF NOT EXISTS procedure_professionals (
+  procedure_id    UUID REFERENCES procedures(id) ON DELETE CASCADE,
+  professional_id UUID REFERENCES professionals(id) ON DELETE CASCADE,
+  PRIMARY KEY (procedure_id, professional_id)
+);
+
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_leads_clinic    ON leads(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_leads_phone     ON leads(phone);
@@ -159,6 +175,7 @@ CREATE INDEX IF NOT EXISTS idx_leads_status    ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_appts_clinic    ON appointments(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_appts_scheduled ON appointments(scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_appts_status    ON appointments(status);
+CREATE INDEX IF NOT EXISTS idx_appts_professional ON appointments(professional_id);
 `
 
 async function migrate() {
@@ -218,6 +235,7 @@ async function migrate() {
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS faq_aftercare TEXT`,
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS closing_note TEXT`,
       `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
+      `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
     ]
     for (const sql of alters) await client.query(sql)
 
