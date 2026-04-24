@@ -38,24 +38,24 @@ input { font-family: inherit }
   --brand-ring:rgba(181,146,72,0.20);
   --brand-l:   #D4B87A;
 
-  --bg:       #F7F5F0;
-  --surface:  #FFFFFF;
-  --surface2: #F0EDE5;
-  --border:   rgba(0,0,0,0.07);
-  --border-m: rgba(0,0,0,0.12);
-  --shadow:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.04);
+  --bg:       #070C18;
+  --surface:  #0E1829;
+  --surface2: #152030;
+  --border:   rgba(255,255,255,0.07);
+  --border-m: rgba(255,255,255,0.10);
+  --shadow:   0 2px 8px rgba(0,0,0,0.40), 0 8px 32px rgba(0,0,0,0.35);
 
-  --green:    #2A7A5A;
-  --green-bg: rgba(42,122,90,0.08);
-  --amber:    #8A6008;
-  --amber-bg: rgba(138,96,8,0.09);
-  --red:      #A02828;
-  --red-bg:   rgba(160,40,40,0.08);
+  --green:    #34C985;
+  --green-bg: rgba(52,201,133,0.10);
+  --amber:    #E0A030;
+  --amber-bg: rgba(224,160,48,0.10);
+  --red:      #F06060;
+  --red-bg:   rgba(240,96,96,0.10);
 
-  --t0: #1A1C18;
-  --t1: #5A5D58;
-  --t2: #969890;
-  --t3: #CCCEC7;
+  --t0: rgba(255,255,255,0.92);
+  --t1: rgba(255,255,255,0.58);
+  --t2: rgba(255,255,255,0.34);
+  --t3: rgba(255,255,255,0.14);
 }
 
 /* ─── Layout ─────────────────────────────────── */
@@ -103,7 +103,11 @@ input { font-family: inherit }
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--bg);
+  background:
+    radial-gradient(circle, rgba(181,148,74,0.018) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(181,148,74,0.07) 0%, transparent 55%),
+    #070C18;
+  background-size: 36px 36px, auto, auto;
   min-width: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--t3) transparent;

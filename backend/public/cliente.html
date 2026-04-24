@@ -13,15 +13,15 @@
 html, body { height: 100%; overflow: hidden }
 body {
   font-family: 'DM Sans', -apple-system, sans-serif;
-  color: #1A1C18;
+  color: rgba(255,255,255,0.90);
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
-  background: #0C1A2E;
+  background: #070C18;
 }
 a { color: inherit; text-decoration: none }
 button { font-family: inherit; cursor: pointer }
 input, select { font-family: inherit }
-select option { background: white; color: #1A1C18 }
+select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 
 /* ─── Tokens ─────────────────────────────────── */
 :root {
@@ -39,26 +39,26 @@ select option { background: white; color: #1A1C18 }
   --brand-ring:rgba(181,146,72,0.20);
   --brand-l:   #D4B87A;
 
-  --bg:       #F7F5F0;
-  --surface:  #FFFFFF;
-  --surface2: #F0EDE5;
-  --border:   rgba(0,0,0,0.07);
-  --border-m: rgba(0,0,0,0.12);
-  --shadow:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.04);
+  --bg:       #070C18;
+  --surface:  #0E1829;
+  --surface2: #152030;
+  --border:   rgba(255,255,255,0.07);
+  --border-m: rgba(255,255,255,0.10);
+  --shadow:   0 2px 8px rgba(0,0,0,0.40), 0 8px 32px rgba(0,0,0,0.35);
 
-  --green:    #2A7A5A;
-  --green-bg: rgba(42,122,90,0.08);
-  --amber:    #8A6008;
-  --amber-bg: rgba(138,96,8,0.09);
-  --red:      #A02828;
-  --red-bg:   rgba(160,40,40,0.08);
-  --blue:     #2E6AAE;
-  --blue-bg:  rgba(46,106,174,0.08);
+  --green:    #34C985;
+  --green-bg: rgba(52,201,133,0.10);
+  --amber:    #E0A030;
+  --amber-bg: rgba(224,160,48,0.10);
+  --red:      #F06060;
+  --red-bg:   rgba(240,96,96,0.10);
+  --blue:     #5B9CF6;
+  --blue-bg:  rgba(91,156,246,0.10);
 
-  --t0: #1A1C18;
-  --t1: #5A5D58;
-  --t2: #969890;
-  --t3: #CCCEC7;
+  --t0: rgba(255,255,255,0.92);
+  --t1: rgba(255,255,255,0.58);
+  --t2: rgba(255,255,255,0.34);
+  --t3: rgba(255,255,255,0.14);
 }
 
 /* ─── Layout ─────────────────────────────────── */
@@ -191,9 +191,15 @@ select option { background: white; color: #1A1C18 }
 .main {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg);
+  background:
+    radial-gradient(circle, rgba(181,148,74,0.018) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(181,148,74,0.07) 0%, transparent 55%),
+    #070C18;
+  background-size: 36px 36px, auto, auto;
   display: flex;
   flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(181,148,74,0.22) transparent;
 }
 
 .page { max-width: 780px; margin: 0 auto; padding: 24px; width: 100% }
@@ -202,42 +208,42 @@ select option { background: white; color: #1A1C18 }
 .page-back svg { width:14px; height:14px }
 
 /* Hero card */
-.hero { background:white; border-radius:14px; border:0.5px solid rgba(0,0,0,0.08); padding:22px 24px; display:flex; align-items:flex-start; gap:18px; margin-bottom:14px }
+.hero { background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.02) 100%); border-radius:14px; border:1px solid rgba(255,255,255,0.08); border-top:1px solid rgba(255,255,255,0.12); padding:22px 24px; display:flex; align-items:flex-start; gap:18px; margin-bottom:14px; box-shadow:0 16px 40px rgba(0,0,0,0.30) }
 .hero-av { width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:600; flex-shrink:0 }
 .hero-info { flex:1; min-width:0 }
 .hero-name { font-size:18px; font-weight:600; margin-bottom:3px }
 .hero-phone { font-size:13px; color:#6B5E59; display:flex; align-items:center; gap:5px }
 .hero-meta { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap }
 .badge { font-size:11px; font-weight:500; padding:3px 10px; border-radius:20px; white-space:nowrap }
-.b-scheduled { background:#E0F4EE; color:#27500A }
-.b-rejected { background:#FAECE7; color:#712B13 }
-.b-link_sent { background:#FEF3E2; color:#633806 }
-.b-new,.b-captado { background:#EEF4FE; color:#0C447C }
+.b-scheduled { background:var(--green-bg); color:var(--green) }
+.b-rejected { background:var(--red-bg); color:var(--red) }
+.b-link_sent { background:var(--amber-bg); color:var(--amber) }
+.b-new,.b-captado { background:var(--blue-bg); color:var(--blue) }
 .hero-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0 }
 .btn { padding:7px 14px; font-size:12px; font-weight:500; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:none; white-space:nowrap; text-decoration:none; font-family:'DM Sans',sans-serif }
-.btn-ghost { background:none; border:0.5px solid rgba(0,0,0,0.15); color:#555 }
-.btn-ghost:hover { background:#F5F1EE }
+.btn-ghost { background:none; border:1px solid rgba(255,255,255,0.14); color:var(--t1) }
+.btn-ghost:hover { background:rgba(255,255,255,0.06); color:var(--t0) }
 .btn-green { background:#25D366; color:white; font-size:11px }
 .btn-danger { background:none; border:0.5px solid rgba(176,48,48,0.3); color:#A32D2D; font-size:11px }
 .btn-danger:hover { background:#FAECE7 }
 
 /* Sections */
-.section { background:white; border-radius:14px; border:0.5px solid rgba(0,0,0,0.08); margin-bottom:14px; overflow:hidden }
-.section-head { padding:13px 20px; border-bottom:0.5px solid rgba(0,0,0,0.07); display:flex; align-items:center; justify-content:space-between }
-.section-title { font-size:13px; font-weight:600; color:#1A1614 }
+.section { background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.02) 100%); border-radius:14px; border:1px solid rgba(255,255,255,0.07); border-top:1px solid rgba(255,255,255,0.10); margin-bottom:14px; overflow:hidden; box-shadow:0 12px 32px rgba(0,0,0,0.28) }
+.section-head { padding:13px 20px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between }
+.section-title { font-size:13px; font-weight:600; color:var(--t0) }
 
 /* Info rows */
-.info-row { display:flex; justify-content:space-between; align-items:center; padding:11px 20px; border-bottom:0.5px solid rgba(0,0,0,0.06); font-size:13px }
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:11px 20px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px }
 .info-row:last-child { border:none }
-.info-label { color:#6B5E59 }
-.info-val { font-weight:500; text-align:right; max-width:60% }
+.info-label { color:var(--t2) }
+.info-val { font-weight:500; text-align:right; max-width:60%; color:var(--t1) }
 .info-val.purple { color:var(--brand) }
-.info-val.green { color:#2D8C66 }
-.info-val.red { color:#A32D2D }
-.info-val.amber { color:#9A6B10 }
+.info-val.green { color:var(--green) }
+.info-val.red { color:var(--red) }
+.info-val.amber { color:var(--amber) }
 
 /* Appointment card */
-.apt-card { padding:13px 20px; display:flex; align-items:center; gap:12px; border-bottom:0.5px solid rgba(0,0,0,0.06) }
+.apt-card { padding:13px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05) }
 .apt-card:last-child { border:none }
 .apt-bar { width:3px; height:38px; border-radius:2px; flex-shrink:0 }
 .apt-info { flex:1 }
@@ -246,12 +252,12 @@ select option { background: white; color: #1A1C18 }
 .apt-status { font-size:10px; padding:3px 9px; border-radius:20px }
 .s-confirmed { background:#E0F4EE; color:#27500A }
 .s-pending { background:#FEF3E2; color:#633806 }
-.s-done { background:#F0EBE8; color:#6B5E59 }
-.s-cancelled { background:#FAECE7; color:#712B13 }
+.s-done { background:rgba(255,255,255,0.07); color:var(--t2) }
+.s-cancelled { background:var(--red-bg); color:var(--red) }
 
 /* Status editor */
-.status-select { padding:6px 10px; font-size:12px; border:0.5px solid rgba(0,0,0,0.15); border-radius:8px; color:#1A1614; background:white; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif }
-.status-select:focus { border-color:var(--brand) }
+.status-select { padding:6px 10px; font-size:12px; border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--t1); background:var(--surface2); cursor:pointer; outline:none; font-family:'DM Sans',sans-serif }
+.status-select:focus { border-color:var(--brand); box-shadow:0 0 0 2px rgba(181,148,74,0.20) }
 
 /* Timeline */
 .timeline { padding:14px 20px }
@@ -263,22 +269,22 @@ select option { background: white; color: #1A1C18 }
 .tl-dot.green { background:#2D8C66 }
 .tl-dot.amber { background:#E09F1A }
 .tl-dot.red { background:#E24B4A }
-.tl-dot.gray { background:#D4CCC8 }
-.tl-line { width:1px; background:#F0EBE8; flex:1; margin-top:4px }
+.tl-dot.gray { background:rgba(255,255,255,0.22) }
+.tl-line { width:1px; background:rgba(255,255,255,0.07); flex:1; margin-top:4px }
 .tl-content { flex:1; min-width:0; padding-bottom:4px }
 .tl-title { font-size:13px; font-weight:500; margin-bottom:2px }
 .tl-sub { font-size:11px; color:#A89890 }
 
 /* Avatar colors */
-.av-0 { background:rgba(181,148,74,0.10); color:#7A6030 }
-.av-1 { background:#E0F4EE; color:#2E6647 }
-.av-2 { background:#FEF3E2; color:#9A6B10 }
-.av-3 { background:#FAECE7; color:#A04830 }
-.av-4 { background:#F5F1EE; color:#6B5E59 }
-.av-5 { background:#EEF4FE; color:#0C447C }
+.av-0 { background:rgba(181,148,74,0.14); color:#D4B87A }
+.av-1 { background:rgba(52,201,133,0.12); color:#34C985 }
+.av-2 { background:rgba(224,160,48,0.12); color:#E0A030 }
+.av-3 { background:rgba(240,96,96,0.12); color:#F06060 }
+.av-4 { background:rgba(255,255,255,0.07); color:var(--t2) }
+.av-5 { background:rgba(91,156,246,0.12); color:#5B9CF6 }
 
-.loading { padding:64px; text-align:center; color:#A89890; font-size:13px }
-.empty-state { padding:32px; text-align:center; color:#A89890; font-size:13px }
+.loading { padding:64px; text-align:center; color:var(--t2); font-size:13px }
+.empty-state { padding:32px; text-align:center; color:var(--t2); font-size:13px }
 
 /* Toast */
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#1A1614; color:white; padding:10px 18px; border-radius:20px; font-size:13px; z-index:200; opacity:0; transition:all 0.25s; pointer-events:none }
@@ -482,8 +488,8 @@ function render() {
         </div>
         <div class="hero-meta">
           <span class="badge ${statusColors[lead.status]||'b-new'}">${statusLabels[lead.status]||lead.status}</span>
-          <span class="badge" style="background:#F5F1EE;color:#A89890">via ${lead.source||'whatsapp'}</span>
-          <span class="badge" style="background:#F5F1EE;color:#A89890">desde ${fmtDate(lead.created_at)}</span>
+          <span class="badge" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.35)">via ${lead.source||'whatsapp'}</span>
+          <span class="badge" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.35)">desde ${fmtDate(lead.created_at)}</span>
         </div>
       </div>
       <div class="hero-actions">
