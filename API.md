@@ -364,6 +364,147 @@ Content-Type: application/json
 
 ---
 
+## Profissionais
+
+> Profissionais são as pessoas que executam os procedimentos. Um slot só aparece disponível se pelo menos 1 profissional vinculado ao procedimento estiver livre naquele horário. Se nenhum profissional estiver vinculado, o sistema usa o comportamento legado (bloqueia por clínica).
+
+### Listar profissionais
+```
+GET /api/professionals
+```
+
+**Resposta:**
+```json
+[
+  {
+    "id": "uuid",
+    "clinic_id": "uuid",
+    "name": "Ana Paula",
+    "active": true,
+    "procedure_count": 3,
+    "created_at": "2025-01-15T14:30:00Z"
+  }
+]
+```
+
+---
+
+### Criar profissional
+```
+POST /api/professionals
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{ "name": "Ana Paula" }
+```
+
+---
+
+### Atualizar profissional
+```
+PATCH /api/professionals/:id
+Content-Type: application/json
+```
+
+**Body (campos opcionais):**
+```json
+{ "name": "Ana Paula Costa", "active": false }
+```
+
+---
+
+### Horários do profissional
+```
+GET /api/professionals/:id/hours
+```
+
+> Se o profissional não tiver horários próprios configurados, retorna os horários da clínica como default.
+
+**Resposta:** array de 7 dias (mesmo formato de `GET /api/hours`).
+
+---
+
+### Salvar horários do profissional
+```
+PUT /api/professionals/:id/hours
+Content-Type: application/json
+```
+
+> Substitui todos os horários. Envie sempre os 7 dias. Dias com `open: false` bloqueiam o profissional naquele dia — ele não aparece disponível para nenhum procedimento.
+
+**Body:** mesmo array de `GET /api/hours`.
+
+---
+
+### Procedimentos vinculados ao profissional
+```
+GET /api/professionals/:id/procedures
+```
+
+**Resposta:**
+```json
+[
+  { "id": "uuid", "name": "Cílios", "duration": 90, "active": true }
+]
+```
+
+---
+
+### Definir procedimentos do profissional
+```
+PUT /api/professionals/:id/procedures
+Content-Type: application/json
+```
+
+> Substitui todos os vínculos de uma vez.
+
+**Body:**
+```json
+{ "procedure_ids": ["uuid1", "uuid2"] }
+```
+
+---
+
+### Profissionais de um procedimento
+```
+GET /api/professionals/by-procedure/:procedureId
+```
+
+---
+
+### Definir profissionais de um procedimento
+```
+PUT /api/professionals/by-procedure/:procedureId
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{ "professional_ids": ["uuid1", "uuid2"] }
+```
+
+---
+
+## Regra de disponibilidade de slots
+
+A lógica de slots (`GET /api/appointments/slots` e `GET /api/portal/:slug/slots`) segue esta hierarquia:
+
+| Situação | Comportamento |
+|---|---|
+| Procedimento **sem** profissionais vinculados | Fallback: bloqueia por qualquer agendamento da clínica (legado) |
+| Profissional **sem** horários próprios | Usa `business_hours` da clínica como referência |
+| Profissional com `open: false` no dia | Não conta como disponível naquele dia |
+| Slot fora do horário do profissional | Não conta como disponível |
+| Profissional com conflito de agenda | Não conta como disponível |
+
+Um slot é exibido como `taken: false` somente se **ao menos 1** profissional vinculado passar em todos os critérios acima.
+
+Ao criar um agendamento (`POST /api/portal/:slug/book`), o sistema atribui automaticamente o primeiro profissional disponível e salva o `professional_id` no registro do agendamento.
+
+---
+
 ## Horários de Atendimento
 
 ### Consultar horários
