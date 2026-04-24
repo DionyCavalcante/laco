@@ -398,6 +398,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
           </div>
         </div>
         <div class="field">
+          <label>Profissional(is) responsável(eis) <span style="color:#B8657A">*</span></label>
+          <div id="f-professionals" style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid #e0d8d4;border-radius:8px;min-height:42px">
+            <span id="f-prof-empty" style="color:#aaa;font-size:12px">Carregando...</span>
+          </div>
+          <div class="field-hint">Selecione quem pode realizar este procedimento · <span style="color:#B8657A;cursor:pointer" onclick="switchTab('profissionais',document.querySelector('[onclick*=profissionais]'));closeModal()">Gerenciar profissionais →</span></div>
+        </div>
+        <div class="field">
           <label>Delay para revelar o preço (segundos)</label>
           <div style="display:flex;align-items:center;gap:12px">
             <input type="range" id="f-delay" min="3" max="30" step="1" value="5" style="flex:1"
@@ -412,13 +419,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
             <span style="font-size:10px;background:#F0EBE8;color:#aaa;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:400">em breve</span>
           </label>
           <input type="url" id="f-video" placeholder="https://youtube.com/watch?v=..." disabled>
-        </div>
-        <div class="field">
-          <label>Profissional(is) responsável(eis)</label>
-          <div id="f-professionals" style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid #e0d8d4;border-radius:8px;min-height:42px">
-            <span id="f-prof-empty" style="color:#aaa;font-size:12px">Carregando...</span>
-          </div>
-          <div class="field-hint">Selecione quem pode realizar este procedimento · <span style="color:#B8657A;cursor:pointer" onclick="switchTab('profissionais',document.querySelector('[onclick*=profissionais]'));closeModal()">Gerenciar profissionais →</span></div>
         </div>
       </div>
 
@@ -850,6 +850,14 @@ async function saveProc(){
     closing_note:document.getElementById('f-closing-note').value.trim()||null,
   }
   if(!body.name||!body.price){toast('Nome e preço são obrigatórios',false);return}
+  const checks=document.querySelectorAll('.prof-check')
+  const hasProf=checks.length>0&&[...checks].some(c=>c.checked)
+  if(!hasProf){
+    document.getElementById('f-professionals').style.border='1.5px solid #A32D2D'
+    toast('Selecione ao menos 1 profissional responsável',false)
+    return
+  }
+  document.getElementById('f-professionals').style.border='1px solid #e0d8d4'
   try{
     const url=id?`${API}/api/procedures/${id}`:`${API}/api/procedures`
     const r=await fetch(url,{method:id?'PATCH':'POST',headers:h(),body:JSON.stringify(body)})
@@ -1615,7 +1623,7 @@ async function renderProfCheckboxes(linkedIds = []) {
   }
   container.innerHTML = active.map(p => `
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:2px 0">
-      <input type="checkbox" class="prof-check" value="${p.id}" ${linkedIds.includes(p.id) ? 'checked' : ''} style="width:15px;height:15px;accent-color:#B8657A;cursor:pointer">
+      <input type="checkbox" class="prof-check" value="${p.id}" ${linkedIds.includes(p.id) ? 'checked' : ''} style="width:15px;height:15px;accent-color:#B8657A;cursor:pointer" onchange="document.getElementById('f-professionals').style.border='1px solid #e0d8d4'">
       ${esc(p.name)}
     </label>
   `).join('')
