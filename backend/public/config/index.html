@@ -512,22 +512,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
           <textarea id="f-subheadline" placeholder="Ex: Cílios **levantados** e **definidos** — sem cola, sem extensão, sem esforço." style="min-height:60px"></textarea>
           <div class="field-hint">Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para negrito nos termos-chave.</div>
         </div>
-        <div style="font-size:12px;font-weight:500;color:#555;margin:12px 0;padding-top:12px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          3 tópicos de benefícios
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Tópico 1 — Título</label><input type="text" id="f-b1-title" placeholder="Ex: Resultado Natural"></div>
-          <div class="field"><label>Tópico 1 — Descrição</label><input type="text" id="f-b1-desc" placeholder="Ex: Preservamos sua essência."></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Tópico 2 — Título</label><input type="text" id="f-b2-title" placeholder="Ex: Recuperação Imediata"></div>
-          <div class="field"><label>Tópico 2 — Descrição</label><input type="text" id="f-b2-desc" placeholder="Ex: Retorno rápido à rotina."></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Tópico 3 — Título</label><input type="text" id="f-b3-title" placeholder="Ex: Segurança Máxima"></div>
-          <div class="field"><label>Tópico 3 — Descrição</label><input type="text" id="f-b3-desc" placeholder="Ex: Protocolos rigorosos."></div>
-        </div>
-
         <!-- Seção: Autoridade da clínica -->
         <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
           Autoridade da clínica
@@ -547,11 +531,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
           <textarea id="f-main-pain" placeholder="Ex: Sente que a sobrancelha não valoriza o rosto.&#10;&#10;Percebe que falta definição e presença no olhar.&#10;&#10;Quer se sentir mais segura ao se olhar no espelho." style="min-height:90px"></textarea>
           <div class="field-hint">Separe cada bullet com uma <strong>linha em branco</strong>. Isso gera 3 itens na seção "Para quem é". Se vazio, usa texto automático.</div>
         </div>
-        <div class="field"><label>Desejo <span style="font-size:10px;color:#bbb;font-weight:400">(opcional — ignorado se Dor tiver 3 parágrafos)</span></label><input type="text" id="f-emotional-desire" placeholder="Ex: quer realçar o olhar sem exagero"></div>
-        <div class="field">
-          <label>Rotina / dia a dia <span style="font-size:10px;color:#bbb;font-weight:400">(opcional — ignorado se Dor tiver 3 parágrafos)</span></label>
-          <input type="text" id="f-day-to-day-fit" placeholder="Ex: quer se sentir mais arrumada sem depender de maquiagem">
-        </div>
+        <input type="hidden" id="f-emotional-desire">
+        <input type="hidden" id="f-day-to-day-fit">
 
         <!-- Seção: Como funciona -->
         <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
@@ -813,12 +794,6 @@ async function openModal(proc=null){
   document.getElementById('f-delay-val').textContent=delay+'s'
   document.getElementById('f-headline').value=proc?proc.headline||'':''
   document.getElementById('f-subheadline').value=proc?proc.subheadline||'':''
-  document.getElementById('f-b1-title').value=proc?proc.benefit_1_title||'':''
-  document.getElementById('f-b1-desc').value=proc?proc.benefit_1_desc||'':''
-  document.getElementById('f-b2-title').value=proc?proc.benefit_2_title||'':''
-  document.getElementById('f-b2-desc').value=proc?proc.benefit_2_desc||'':''
-  document.getElementById('f-b3-title').value=proc?proc.benefit_3_title||'':''
-  document.getElementById('f-b3-desc').value=proc?proc.benefit_3_desc||'':''
   document.getElementById('f-authority-note').value=proc?proc.authority_note||'':''
   document.getElementById('f-main-pain').value=proc?proc.main_pain||'':''
   document.getElementById('f-emotional-desire').value=proc?proc.emotional_desire||'':''
@@ -863,17 +838,9 @@ async function saveProc(){
     reveal_delay:parseInt(document.getElementById('f-delay').value)||5,
     headline:document.getElementById('f-headline').value.trim()||null,
     subheadline:document.getElementById('f-subheadline').value.trim()||null,
-    benefit_1_title:document.getElementById('f-b1-title').value.trim()||null,
-    benefit_1_desc:document.getElementById('f-b1-desc').value.trim()||null,
-    benefit_2_title:document.getElementById('f-b2-title').value.trim()||null,
-    benefit_2_desc:document.getElementById('f-b2-desc').value.trim()||null,
-    benefit_3_title:document.getElementById('f-b3-title').value.trim()||null,
-    benefit_3_desc:document.getElementById('f-b3-desc').value.trim()||null,
     photo_mode: document.getElementById('mode-btn-res').classList.contains('mode-active') ? 'results' : 'before_after',
     authority_note:document.getElementById('f-authority-note').value.trim()||null,
     main_pain:document.getElementById('f-main-pain').value.trim()||null,
-    emotional_desire:document.getElementById('f-emotional-desire').value.trim()||null,
-    day_to_day_fit:document.getElementById('f-day-to-day-fit').value.trim()||null,
     how_it_works:document.getElementById('f-how-it-works').value.trim()||null,
     faq_session_duration:document.getElementById('f-faq-duration').value.trim()||null,
     faq_result_duration:document.getElementById('f-faq-result').value.trim()||null,
