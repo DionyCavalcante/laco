@@ -326,7 +326,7 @@ input, select { font-family: inherit }
   border-radius: 20px;
   cursor: pointer;
   color: var(--t1);
-  background: white;
+  background: var(--surface);
   transition: all 0.15s;
 }
 .filter-pill.on {
@@ -364,9 +364,9 @@ input, select { font-family: inherit }
 
 /* Appointment blocks */
 .apt-block {
-  background: white;
+  background: rgba(255,255,255,0.04);
   border-radius: 7px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.08);
   border-left: 3px solid var(--brand);
   padding: 7px 10px;
   margin-bottom: 4px;
@@ -461,8 +461,8 @@ input, select { font-family: inherit }
 .av-1 { background: var(--green-bg);  color: var(--green) }
 .av-2 { background: var(--amber-bg);  color: var(--amber) }
 .av-3 { background: var(--red-bg);    color: var(--red)   }
-.av-4 { background: rgba(45,40,30,0.07); color: var(--t1) }
-.av-5 { background: rgba(46,106,174,0.08); color: #2E6AAE }
+.av-4 { background: rgba(255,255,255,0.07); color: var(--t2) }
+.av-5 { background: rgba(91,156,246,0.12); color: #5B9CF6 }
 
 /* ─── Status select inline ───────────────────── */
 .status-sel {
@@ -470,7 +470,7 @@ input, select { font-family: inherit }
   font-size: 11px;
   border: 1px solid var(--border-m);
   border-radius: 6px;
-  background: white;
+  background: var(--surface2);
   color: var(--t0);
   cursor: pointer;
   outline: none;
@@ -483,7 +483,8 @@ input, select { font-family: inherit }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(26,28,24,0.32);
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
   z-index: 100;
 }
 .drawer-overlay.on { display: block }
@@ -491,9 +492,9 @@ input, select { font-family: inherit }
   position: fixed;
   right: 0; top: 0; bottom: 0;
   width: 360px;
-  background: white;
+  background: #0E1829;
   z-index: 101;
-  border-left: 1px solid var(--border-m);
+  border-left: 1px solid rgba(255,255,255,0.10);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
