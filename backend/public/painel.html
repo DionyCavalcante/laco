@@ -16,7 +16,7 @@ body {
   color: #1A1C18;
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
-  background: #0D1529;
+  background: #0C1A2E;
 }
 a { color: inherit; text-decoration: none }
 button { font-family: inherit; cursor: pointer }
@@ -25,10 +25,10 @@ select option { background: white; color: #1A1C18 }
 
 /* ─── Tokens ─────────────────────────────────── */
 :root {
-  --sb-bg:         #0D1529;
+  --sb-bg:         #0C1A2E;
   --sb-text:       rgba(255,255,255,0.50);
   --sb-text-hover: rgba(255,255,255,0.82);
-  --sb-gold:       #C9A96E;
+  --sb-gold:       #B5944A;
   --sb-active-bg:  rgba(201,169,110,0.10);
   --sb-border:     rgba(255,255,255,0.08);
   --sb-width:      220px;
@@ -102,22 +102,31 @@ select option { background: white; color: #1A1C18 }
 }
 .sb-mark {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 .sb-star {
-  width: 17px;
-  height: 17px;
+  width: 36px;
+  height: 36px;
   color: var(--sb-gold);
   flex-shrink: 0;
 }
 .sb-wordmark {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 600;
-  color: rgba(255,255,255,0.90);
-  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   line-height: 1;
+}
+.sb-tagline {
+  font-size: 9px;
+  color: rgba(255,255,255,0.32);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  margin-top: -2px;
 }
 
 /* Nav */
@@ -871,6 +880,7 @@ select option { background: white; color: #1A1C18 }
 @media (max-width: 900px) {
   :root { --sb-width: 60px }
   .sb-wordmark,
+  .sb-tagline,
   .sb-item span,
   .sb-section-label,
   .sb-user-info,
@@ -936,9 +946,10 @@ select option { background: white; color: #1A1C18 }
       <div class="sb-mark">
         <svg class="sb-star" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="12,2 13.15,9.23 15.89,8.11 14.77,10.85 22,12 14.77,13.15 15.89,15.89 13.15,14.77 12,22 10.85,14.77 8.11,15.89 9.23,13.15 2,12 9.23,10.85 8.11,8.11 10.85,9.23"/>
-          <circle cx="12" cy="12" r="1.4" fill="#0D1529"/>
+          <circle cx="12" cy="12" r="1.4" fill="#0C1A2E"/>
         </svg>
-        <span class="sb-wordmark">Astrai</span>
+        <span class="sb-wordmark">Astraí</span>
+        <span class="sb-tagline">Inteligência que guia.</span>
       </div>
     </div>
 
