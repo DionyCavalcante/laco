@@ -175,7 +175,6 @@ CREATE INDEX IF NOT EXISTS idx_leads_status    ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_appts_clinic    ON appointments(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_appts_scheduled ON appointments(scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_appts_status    ON appointments(status);
-CREATE INDEX IF NOT EXISTS idx_appts_professional ON appointments(professional_id);
 `
 
 async function migrate() {
@@ -236,6 +235,7 @@ async function migrate() {
       `ALTER TABLE procedures ADD COLUMN IF NOT EXISTS closing_note TEXT`,
       `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
       `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
+      `CREATE INDEX IF NOT EXISTS idx_appts_professional ON appointments(professional_id)`,
     ]
     for (const sql of alters) await client.query(sql)
 
