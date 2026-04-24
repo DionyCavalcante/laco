@@ -954,7 +954,7 @@ const OfferPage = ({
             </div>
           </div>
           <blockquote className="font-serif text-[22px] italic mb-7 leading-snug text-primary">
-            "Eu tinha medo de ficar artificial, mas ficou leve, natural e valorizou muito meu rosto." — Mariana S.
+            "Eu tinha medo de ficar artificial, mas ficou leve, natural e valorizou muito meu rosto."
           </blockquote>
         </section>
 
