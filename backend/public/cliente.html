@@ -5,160 +5,383 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrai — Cliente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A1614;min-height:100vh;-webkit-font-smoothing:antialiased}
-/* ── Navbar ── */
-.navbar{height:56px;background:white;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;padding:0 24px;gap:0;position:sticky;top:0;z-index:100}
-.nb-brand{display:flex;align-items:center;gap:9px;margin-right:32px;flex-shrink:0}
-.nb-mark{width:30px;height:30px;border-radius:9px;background:#B8657A;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(184,101,122,0.28);flex-shrink:0}
-.nb-mark svg{width:14px;height:14px;fill:white}
-.nb-logo-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;color:#1A1614;letter-spacing:0.02em;line-height:1}
-.nb-nav{display:flex;align-items:center;gap:2px}
-.nb-link{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#6B5E59;transition:background 0.15s,color 0.15s;white-space:nowrap;text-decoration:none}
-.nb-link svg{width:14px;height:14px;opacity:0.7}
-.nb-link:hover{background:#F5F1EE;color:#1A1614}
-.nb-link.active{background:rgba(184,101,122,0.09);color:#B8657A}
-.nb-link.active svg{opacity:1}
-.nb-spacer{flex:1}
-.nb-right{display:flex;align-items:center;gap:8px}
-.clinic-pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#6B5E59;background:#F5F1EE;border:1px solid rgba(0,0,0,0.11);border-radius:20px;padding:5px 12px;white-space:nowrap}
-.clinic-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:#2D8C66;flex-shrink:0}
-.nb-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#A89890;transition:background 0.15s,color 0.15s;text-decoration:none;cursor:pointer}
-.nb-icon svg{width:16px;height:16px}
-.nb-icon:hover{background:#F5F1EE;color:#1A1614}
 
-.page{max-width:780px;margin:0 auto;padding:24px}
-.page-back{display:flex;align-items:center;gap:6px;font-size:13px;color:#B8657A;cursor:pointer;background:none;border:none;padding:0;margin-bottom:20px;font-family:'Inter',sans-serif}
-.page-back:hover{text-decoration:underline}
-.page-back svg{width:14px;height:14px}
+/* ─── Reset ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; overflow: hidden }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  color: #1A1C18;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  background: #0C1A2E;
+}
+a { color: inherit; text-decoration: none }
+button { font-family: inherit; cursor: pointer }
+input, select { font-family: inherit }
+select option { background: white; color: #1A1C18 }
+
+/* ─── Tokens ─────────────────────────────────── */
+:root {
+  --sb-bg:         #0C1A2E;
+  --sb-text:       rgba(255,255,255,0.50);
+  --sb-text-hover: rgba(255,255,255,0.82);
+  --sb-gold:       #B5944A;
+  --sb-active-bg:  rgba(181,148,74,0.10);
+  --sb-border:     rgba(255,255,255,0.08);
+  --sb-width:      220px;
+
+  --brand:     #B59248;
+  --brand-h:   #9f8038;
+  --brand-dim: rgba(181,146,72,0.10);
+  --brand-ring:rgba(181,146,72,0.20);
+  --brand-l:   #D4B87A;
+
+  --bg:       #F7F5F0;
+  --surface:  #FFFFFF;
+  --surface2: #F0EDE5;
+  --border:   rgba(0,0,0,0.07);
+  --border-m: rgba(0,0,0,0.12);
+  --shadow:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.04);
+
+  --green:    #2A7A5A;
+  --green-bg: rgba(42,122,90,0.08);
+  --amber:    #8A6008;
+  --amber-bg: rgba(138,96,8,0.09);
+  --red:      #A02828;
+  --red-bg:   rgba(160,40,40,0.08);
+  --blue:     #2E6AAE;
+  --blue-bg:  rgba(46,106,174,0.08);
+
+  --t0: #1A1C18;
+  --t1: #5A5D58;
+  --t2: #969890;
+  --t3: #CCCEC7;
+}
+
+/* ─── Layout ─────────────────────────────────── */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────── */
+.sidebar {
+  width: var(--sb-width);
+  flex-shrink: 0;
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 50;
+}
+
+/* Decorative watermark */
+.sb-watermark {
+  position: absolute;
+  bottom: 52px;
+  right: -20px;
+  width: 124px;
+  height: 124px;
+  color: white;
+  opacity: 0.038;
+  pointer-events: none;
+}
+.sb-watermark svg { width: 100%; height: 100% }
+
+/* Logo */
+.sb-logo-area {
+  padding: 26px 18px 22px;
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.sb-star {
+  width: 36px;
+  height: 36px;
+  color: var(--sb-gold);
+  flex-shrink: 0;
+}
+.sb-wordmark {
+  font-family: 'Cinzel', 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.sb-tagline {
+  font-size: 8px;
+  color: rgba(255,255,255,0.30);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 1px;
+  line-height: 1.5;
+}
+
+/* Nav */
+.sb-nav {
+  flex: 1;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sb-nav::-webkit-scrollbar { display: none }
+
+.sb-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.25);
+  padding: 10px 20px 5px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sb-text);
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.sb-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7 }
+.sb-item:hover { background: rgba(255,255,255,0.05); color: var(--sb-text-hover) }
+.sb-item:hover svg { opacity: 1 }
+.sb-item.active { background: var(--sb-active-bg); color: var(--sb-gold) }
+.sb-item.active svg { opacity: 1; color: var(--sb-gold) }
+
+/* Sidebar footer */
+.sb-footer {
+  padding: 12px 10px;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-clinic-name {
+  font-size: 11px;
+  color: rgba(255,255,255,0.40);
+  padding: 0 10px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Main content ───────────────────────────── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.page { max-width: 780px; margin: 0 auto; padding: 24px; width: 100% }
+.page-back { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--brand); cursor:pointer; background:none; border:none; padding:0; margin-bottom:20px; font-family:'DM Sans',sans-serif }
+.page-back:hover { text-decoration:underline }
+.page-back svg { width:14px; height:14px }
 
 /* Hero card */
-.hero{background:white;border-radius:14px;border:0.5px solid rgba(0,0,0,0.08);padding:22px 24px;display:flex;align-items:flex-start;gap:18px;margin-bottom:14px}
-.hero-av{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0}
-.hero-info{flex:1;min-width:0}
-.hero-name{font-size:18px;font-weight:600;margin-bottom:3px}
-.hero-phone{font-size:13px;color:#6B5E59;display:flex;align-items:center;gap:5px}
-.hero-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.b-scheduled{background:#E0F4EE;color:#27500A}
-.b-rejected{background:#FAECE7;color:#712B13}
-.b-link_sent{background:#FEF3E2;color:#633806}
-.b-new,.b-captado{background:#EEF4FE;color:#0C447C}
-.hero-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.btn{padding:7px 14px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;white-space:nowrap;text-decoration:none;font-family:'Inter',sans-serif}
-.btn-ghost{background:none;border:0.5px solid rgba(0,0,0,0.15);color:#555}
-.btn-ghost:hover{background:#F5F1EE}
-.btn-green{background:#25D366;color:white;font-size:11px}
-.btn-danger{background:none;border:0.5px solid rgba(176,48,48,0.3);color:#A32D2D;font-size:11px}
-.btn-danger:hover{background:#FAECE7}
+.hero { background:white; border-radius:14px; border:0.5px solid rgba(0,0,0,0.08); padding:22px 24px; display:flex; align-items:flex-start; gap:18px; margin-bottom:14px }
+.hero-av { width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:600; flex-shrink:0 }
+.hero-info { flex:1; min-width:0 }
+.hero-name { font-size:18px; font-weight:600; margin-bottom:3px }
+.hero-phone { font-size:13px; color:#6B5E59; display:flex; align-items:center; gap:5px }
+.hero-meta { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap }
+.badge { font-size:11px; font-weight:500; padding:3px 10px; border-radius:20px; white-space:nowrap }
+.b-scheduled { background:#E0F4EE; color:#27500A }
+.b-rejected { background:#FAECE7; color:#712B13 }
+.b-link_sent { background:#FEF3E2; color:#633806 }
+.b-new,.b-captado { background:#EEF4FE; color:#0C447C }
+.hero-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0 }
+.btn { padding:7px 14px; font-size:12px; font-weight:500; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:none; white-space:nowrap; text-decoration:none; font-family:'DM Sans',sans-serif }
+.btn-ghost { background:none; border:0.5px solid rgba(0,0,0,0.15); color:#555 }
+.btn-ghost:hover { background:#F5F1EE }
+.btn-green { background:#25D366; color:white; font-size:11px }
+.btn-danger { background:none; border:0.5px solid rgba(176,48,48,0.3); color:#A32D2D; font-size:11px }
+.btn-danger:hover { background:#FAECE7 }
 
 /* Sections */
-.section{background:white;border-radius:14px;border:0.5px solid rgba(0,0,0,0.08);margin-bottom:14px;overflow:hidden}
-.section-head{padding:13px 20px;border-bottom:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
-.section-title{font-size:13px;font-weight:600;color:#1A1614}
+.section { background:white; border-radius:14px; border:0.5px solid rgba(0,0,0,0.08); margin-bottom:14px; overflow:hidden }
+.section-head { padding:13px 20px; border-bottom:0.5px solid rgba(0,0,0,0.07); display:flex; align-items:center; justify-content:space-between }
+.section-title { font-size:13px; font-weight:600; color:#1A1614 }
 
 /* Info rows */
-.info-row{display:flex;justify-content:space-between;align-items:center;padding:11px 20px;border-bottom:0.5px solid rgba(0,0,0,0.06);font-size:13px}
-.info-row:last-child{border:none}
-.info-label{color:#6B5E59}
-.info-val{font-weight:500;text-align:right;max-width:60%}
-.info-val.purple{color:#B8657A}
-.info-val.green{color:#2D8C66}
-.info-val.red{color:#A32D2D}
-.info-val.amber{color:#9A6B10}
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:11px 20px; border-bottom:0.5px solid rgba(0,0,0,0.06); font-size:13px }
+.info-row:last-child { border:none }
+.info-label { color:#6B5E59 }
+.info-val { font-weight:500; text-align:right; max-width:60% }
+.info-val.purple { color:var(--brand) }
+.info-val.green { color:#2D8C66 }
+.info-val.red { color:#A32D2D }
+.info-val.amber { color:#9A6B10 }
 
 /* Appointment card */
-.apt-card{padding:13px 20px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(0,0,0,0.06)}
-.apt-card:last-child{border:none}
-.apt-bar{width:3px;height:38px;border-radius:2px;flex-shrink:0}
-.apt-info{flex:1}
-.apt-proc{font-size:13px;font-weight:500}
-.apt-dt{font-size:11px;color:#A89890;margin-top:2px}
-.apt-status{font-size:10px;padding:3px 9px;border-radius:20px}
-.s-confirmed{background:#E0F4EE;color:#27500A}
-.s-pending{background:#FEF3E2;color:#633806}
-.s-done{background:#F0EBE8;color:#6B5E59}
-.s-cancelled{background:#FAECE7;color:#712B13}
+.apt-card { padding:13px 20px; display:flex; align-items:center; gap:12px; border-bottom:0.5px solid rgba(0,0,0,0.06) }
+.apt-card:last-child { border:none }
+.apt-bar { width:3px; height:38px; border-radius:2px; flex-shrink:0 }
+.apt-info { flex:1 }
+.apt-proc { font-size:13px; font-weight:500 }
+.apt-dt { font-size:11px; color:#A89890; margin-top:2px }
+.apt-status { font-size:10px; padding:3px 9px; border-radius:20px }
+.s-confirmed { background:#E0F4EE; color:#27500A }
+.s-pending { background:#FEF3E2; color:#633806 }
+.s-done { background:#F0EBE8; color:#6B5E59 }
+.s-cancelled { background:#FAECE7; color:#712B13 }
 
 /* Status editor */
-.status-select{padding:6px 10px;font-size:12px;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#1A1614;background:white;cursor:pointer;outline:none;font-family:'Inter',sans-serif}
-.status-select:focus{border-color:#B8657A}
+.status-select { padding:6px 10px; font-size:12px; border:0.5px solid rgba(0,0,0,0.15); border-radius:8px; color:#1A1614; background:white; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif }
+.status-select:focus { border-color:var(--brand) }
 
 /* Timeline */
-.timeline{padding:14px 20px}
-.tl-item{display:flex;gap:12px;margin-bottom:16px}
-.tl-item:last-child{margin:0}
-.tl-dot-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
-.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0}
-.tl-dot.purple{background:#B8657A}
-.tl-dot.green{background:#2D8C66}
-.tl-dot.amber{background:#E09F1A}
-.tl-dot.red{background:#E24B4A}
-.tl-dot.gray{background:#D4CCC8}
-.tl-line{width:1px;background:#F0EBE8;flex:1;margin-top:4px}
-.tl-content{flex:1;min-width:0;padding-bottom:4px}
-.tl-title{font-size:13px;font-weight:500;margin-bottom:2px}
-.tl-sub{font-size:11px;color:#A89890}
+.timeline { padding:14px 20px }
+.tl-item { display:flex; gap:12px; margin-bottom:16px }
+.tl-item:last-child { margin:0 }
+.tl-dot-col { display:flex; flex-direction:column; align-items:center; flex-shrink:0 }
+.tl-dot { width:10px; height:10px; border-radius:50%; margin-top:3px; flex-shrink:0 }
+.tl-dot.purple { background:var(--brand) }
+.tl-dot.green { background:#2D8C66 }
+.tl-dot.amber { background:#E09F1A }
+.tl-dot.red { background:#E24B4A }
+.tl-dot.gray { background:#D4CCC8 }
+.tl-line { width:1px; background:#F0EBE8; flex:1; margin-top:4px }
+.tl-content { flex:1; min-width:0; padding-bottom:4px }
+.tl-title { font-size:13px; font-weight:500; margin-bottom:2px }
+.tl-sub { font-size:11px; color:#A89890 }
 
 /* Avatar colors */
-.av-0{background:rgba(184,101,122,0.1);color:#8B3F52}
-.av-1{background:#E0F4EE;color:#2E6647}
-.av-2{background:#FEF3E2;color:#9A6B10}
-.av-3{background:#FAECE7;color:#A04830}
-.av-4{background:#F5F1EE;color:#6B5E59}
-.av-5{background:#EEF4FE;color:#0C447C}
+.av-0 { background:rgba(181,148,74,0.10); color:#7A6030 }
+.av-1 { background:#E0F4EE; color:#2E6647 }
+.av-2 { background:#FEF3E2; color:#9A6B10 }
+.av-3 { background:#FAECE7; color:#A04830 }
+.av-4 { background:#F5F1EE; color:#6B5E59 }
+.av-5 { background:#EEF4FE; color:#0C447C }
 
-.loading{padding:64px;text-align:center;color:#A89890;font-size:13px}
-.empty-state{padding:32px;text-align:center;color:#A89890;font-size:13px}
+.loading { padding:64px; text-align:center; color:#A89890; font-size:13px }
+.empty-state { padding:32px; text-align:center; color:#A89890; font-size:13px }
 
 /* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A1614;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:all 0.25s;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#1A1614; color:white; padding:10px 18px; border-radius:20px; font-size:13px; z-index:200; opacity:0; transition:all 0.25s; pointer-events:none }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0) }
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { width: 58px }
+  .sb-wordmark, .sb-tagline, .sb-section-label, .sb-item span, .sb-clinic-name { display: none }
+  .sb-item { justify-content: center; padding: 10px }
+  .sb-logo-area { padding: 16px 0; display: flex; justify-content: center }
+  .sb-mark { align-items: center }
+}
+
 </style>
 </head>
 <body>
 
-<!-- ═══ NAVBAR ═══ -->
-<header class="navbar">
-  <div class="nb-brand">
-    <div class="nb-mark"><svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3.2"/><path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6" fill-rule="evenodd"/></svg></div>
-    <span class="nb-logo-name">Astrai</span>
-  </div>
-  <nav class="nb-nav">
-    <a id="nav-painel" href="#" class="nb-link">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
-      <span>Painel</span>
-    </a>
-    <a id="nav-hoje" href="#" class="nb-link">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
-      <span>Hoje</span>
-    </a>
-    <a id="nav-relatorio" href="#" class="nb-link">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/><line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg>
-      <span>Relatório</span>
-    </a>
-  </nav>
-  <div class="nb-spacer"></div>
-  <div class="nb-right">
-    <span class="clinic-pill" id="clinic-name">Carregando...</span>
-    <a id="nav-config" href="#" class="nb-icon" title="Configurações">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/></svg>
-    </a>
-    <button onclick="logout()" class="nb-icon" title="Sair">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg>
-    </button>
-  </div>
-</header>
+<div class="admin-layout">
 
-<div class="page">
-  <button class="page-back" onclick="history.back()">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3L5 8l5 5"/></svg>
-    Voltar para clientes
-  </button>
-  <div id="page-content"><div class="loading">Carregando cliente...</div></div>
-</div>
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Star watermark decorativo -->
+    <div class="sb-watermark" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="currentColor">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <circle cx="50" cy="8"  r="2.4"/>
+        <circle cx="92" cy="50" r="2.4"/>
+        <circle cx="50" cy="92" r="2.4"/>
+        <circle cx="8"  cy="50" r="2.4"/>
+        <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.7" stroke-dasharray="3.5,2.5" opacity="0.55"/>
+        <polygon points="50,0 51.34,46.77 64.14,35.86 53.23,48.66 80,50 53.23,51.34 64.14,64.14 51.34,53.23 50,100 48.66,53.23 35.86,64.14 46.77,51.34 20,50 46.77,48.66 35.86,35.86 48.66,46.77"/>
+        <circle cx="50" cy="50" r="5.5"/>
+      </svg>
+    </div>
+
+    <!-- Logo -->
+    <div class="sb-logo-area">
+      <div class="sb-mark">
+        <svg class="sb-star" viewBox="0 0 100 100" fill="currentColor">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="50" cy="8"  r="2.4"/>
+          <circle cx="92" cy="50" r="2.4"/>
+          <circle cx="50" cy="92" r="2.4"/>
+          <circle cx="8"  cy="50" r="2.4"/>
+          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.7" stroke-dasharray="3.5,2.5" opacity="0.55"/>
+          <polygon points="50,0 51.34,46.77 64.14,35.86 53.23,48.66 80,50 53.23,51.34 64.14,64.14 51.34,53.23 50,100 48.66,53.23 35.86,64.14 46.77,51.34 20,50 46.77,48.66 35.86,35.86 48.66,46.77"/>
+          <circle cx="50" cy="50" r="5.5"/>
+        </svg>
+        <span class="sb-wordmark">Astraí</span>
+        <span class="sb-tagline">Inteligência que guia.<br>Resultados que transformam.</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sb-nav">
+      <div class="sb-section-label">Gestão</div>
+      <a id="nav-painel" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        <span>Painel</span>
+      </a>
+      <a id="nav-hoje" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+        <span>Hoje</span>
+      </a>
+      <a id="nav-relatorio" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="13" x2="3" y2="8"/><line x1="6.5" y1="13" x2="6.5" y2="5"/><line x1="10" y1="13" x2="10" y2="9"/><line x1="13.5" y1="13" x2="13.5" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg>
+        <span>Relatório</span>
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sb-footer">
+      <div class="sb-clinic-name" id="clinic-name">Carregando...</div>
+      <a id="nav-config" href="#" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 2.5V4M8 12V13.5M2.5 8H4M12 8h1.5M4.1 4.1l1.1 1.1M10.8 10.8l1.1 1.1M4.1 11.9l1.1-1.1M10.8 5.2l1.1-1.1"/></svg>
+        <span>Configurações</span>
+      </a>
+      <button onclick="logout()" class="sb-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 5.5l3 2.5-3 2.5M13.5 8H7M7 3H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg>
+        <span>Sair</span>
+      </button>
+    </div>
+
+  </aside><!-- /sidebar -->
+
+  <!-- ═══════════════════════════════════════════
+       MAIN
+  ═══════════════════════════════════════════ -->
+  <main class="main">
+    <div class="page">
+      <button class="page-back" onclick="history.back()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3L5 8l5 5"/></svg>
+        Voltar para clientes
+      </button>
+      <div id="page-content"><div class="loading">Carregando cliente...</div></div>
+    </div>
+  </main>
+
+</div><!-- /admin-layout -->
 
 <div class="toast" id="toast"></div>
 
