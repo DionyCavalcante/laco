@@ -84,6 +84,19 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .modal-section-title{font-size:12px;font-weight:500;color:#444;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .photo-side-head{font-size:11px;font-weight:500;color:#888;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
 
+/* Copy editor (aba Página) */
+.copy-syntax-bar{display:flex;align-items:center;gap:8px;background:#F7F4F9;border:0.5px solid rgba(184,101,122,0.18);border-radius:8px;padding:8px 12px;margin-bottom:14px;flex-wrap:wrap}
+.copy-syntax-item{font-size:11px;color:#777;display:flex;align-items:center;gap:5px}
+.copy-syntax-item code{background:#EEE8F4;color:#8B4F8E;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px}
+.copy-syntax-sep{color:#ccc;font-size:14px}
+.copy-block{background:#FAFAFA;border:0.5px solid rgba(0,0,0,0.09);border-radius:10px;padding:14px 14px 12px;margin-bottom:10px}
+.copy-block-head{display:flex;align-items:baseline;gap:7px;margin-bottom:12px}
+.copy-block-icon{font-size:12px;color:#B8657A;flex-shrink:0;line-height:1}
+.copy-block-title{font-size:12px;font-weight:600;color:#333}
+.copy-block-hint{font-size:10px;color:#aaa;font-weight:400;margin-left:2px}
+.copy-label{font-size:11px !important;color:#888 !important;font-weight:500 !important}
+.copy-faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+
 /* Form */
 .field{margin-bottom:16px}
 .field label{font-size:12px;color:#666;display:block;margin-bottom:5px;font-weight:500}
@@ -496,75 +509,98 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 
       <!-- ETAPA 3: Detalhes da página do procedimento -->
       <div class="step-panel" id="step-panel-3">
-        <div class="field">
-          <label>
-            Headline
-            <span style="font-size:10px;color:#bbb;font-weight:400;margin-left:4px">título da página do procedimento</span>
-          </label>
-          <input type="text" id="f-headline" placeholder="Ex: {nome}, **resultado** que transforma o olhar.">
-          <div class="field-hint">Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">{nome}</code> para o nome da cliente e <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para destaque visual. Se vazio, usa o nome do procedimento.</div>
-        </div>
-        <div class="field">
-          <label>
-            Subheadline
-            <span style="font-size:10px;color:#bbb;font-weight:400;margin-left:4px">descrição</span>
-          </label>
-          <textarea id="f-subheadline" placeholder="Ex: Cílios **levantados** e **definidos** — sem cola, sem extensão, sem esforço." style="min-height:60px"></textarea>
-          <div class="field-hint">Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para negrito nos termos-chave.</div>
-        </div>
-        <!-- Seção: Autoridade da clínica -->
-        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          Autoridade da clínica
-        </div>
-        <div class="field">
-          <label>Frase de autoridade</label>
-          <textarea id="f-authority-note" placeholder="Ex: Brow Lamination não é só um procedimento.&#10;&#10;É a sensação de se olhar no espelho e já ver a sobrancelha **no lugar certo** — sem esforço." style="min-height:80px"></textarea>
-          <div class="field-hint">Formato: primeira linha = título em itálico; linha em branco; resto = corpo. Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para negrito. Se vazio, usa texto automático.</div>
+
+        <!-- legenda de sintaxe -->
+        <div class="copy-syntax-bar">
+          <span class="copy-syntax-item"><code>{nome}</code> nome da cliente</span>
+          <span class="copy-syntax-sep">·</span>
+          <span class="copy-syntax-item"><code>**palavra**</code> negrito / destaque</span>
         </div>
 
-        <!-- Seção: Para quem é -->
-        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          Para quem é
+        <!-- Bloco: Título -->
+        <div class="copy-block">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">✦</span>
+            <span class="copy-block-title">Título da página</span>
+          </div>
+          <div class="field" style="margin-bottom:10px">
+            <label class="copy-label">Headline</label>
+            <input type="text" id="f-headline" placeholder="{nome}, **sua sobrancelha** pode valorizar muito mais o seu rosto.">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="copy-label">Subheadline</label>
+            <textarea id="f-subheadline" placeholder="Um alinhamento que **organiza**, **define** e deixa o olhar mais equilibrado — sem precisar de nada mais." style="min-height:58px"></textarea>
+          </div>
         </div>
-        <div class="field">
-          <label>Dor principal</label>
-          <textarea id="f-main-pain" placeholder="Ex: Sente que a sobrancelha não valoriza o rosto.&#10;&#10;Percebe que falta definição e presença no olhar.&#10;&#10;Quer se sentir mais segura ao se olhar no espelho." style="min-height:90px"></textarea>
-          <div class="field-hint">Separe cada bullet com uma <strong>linha em branco</strong>. Isso gera 3 itens na seção "Para quem é". Se vazio, usa texto automático.</div>
+
+        <!-- Bloco: Autoridade -->
+        <div class="copy-block">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">◈</span>
+            <span class="copy-block-title">Autoridade</span>
+            <span class="copy-block-hint">1ª linha = título em itálico · linha em branco · resto = corpo</span>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <textarea id="f-authority-note" placeholder="Brow Lamination não é só um procedimento.&#10;&#10;É a sensação de se olhar no espelho e já ver a sobrancelha **no lugar certo** — alinhada, cheia e sem esforço." style="min-height:84px"></textarea>
+          </div>
+        </div>
+
+        <!-- Bloco: Para quem é -->
+        <div class="copy-block">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">◎</span>
+            <span class="copy-block-title">Para quem é</span>
+            <span class="copy-block-hint">3 parágrafos separados por linha em branco = 3 bullets</span>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <textarea id="f-main-pain" placeholder="Sente que a sobrancelha parece desorganizada ou sem forma definida.&#10;&#10;Percebe que falta volume e alinhamento para o olhar ficar mais harmônico.&#10;&#10;Quer se sentir mais arrumada ao acordar, de forma natural." style="min-height:96px"></textarea>
+          </div>
         </div>
         <input type="hidden" id="f-emotional-desire">
         <input type="hidden" id="f-day-to-day-fit">
 
-        <!-- Seção: Como funciona -->
-        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          Como funciona
-        </div>
-        <div class="field">
-          <textarea id="f-how-it-works" placeholder="1&#10;Avaliação personalizada&#10;Entendemos o que realmente valoriza o seu rosto.&#10;&#10;2&#10;Procedimento com técnica&#10;Aplicamos com precisão, respeitando sua estrutura natural.&#10;&#10;3&#10;Você sai orientada&#10;Você já vê o resultado e sabe como manter no dia a dia." style="min-height:130px"></textarea>
-          <div class="field-hint">Formato por etapa: número → título → descrição, separados por quebra de linha. Etapas separadas por <strong>linha em branco</strong>. Se vazio, usa texto automático.</div>
+        <!-- Bloco: Como funciona -->
+        <div class="copy-block">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">⑁</span>
+            <span class="copy-block-title">Como funciona</span>
+            <span class="copy-block-hint">número · título · descrição — etapas separadas por linha em branco</span>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <textarea id="f-how-it-works" placeholder="1&#10;Avaliação personalizada&#10;Entendemos o que realmente valoriza o seu rosto.&#10;&#10;2&#10;Procedimento com técnica&#10;Aplicamos com precisão, respeitando sua estrutura natural.&#10;&#10;3&#10;Você sai orientada&#10;Você já vê o resultado e sabe como manter no dia a dia." style="min-height:128px"></textarea>
+          </div>
         </div>
 
-        <!-- Seção: Dúvidas rápidas (FAQ) -->
-        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          Dúvidas rápidas (FAQ)
+        <!-- Bloco: FAQ -->
+        <div class="copy-block">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">？</span>
+            <span class="copy-block-title">Dúvidas rápidas</span>
+          </div>
+          <div class="copy-faq-grid">
+            <div class="field"><label class="copy-label">Quanto tempo leva?</label><input type="text" id="f-faq-duration" placeholder="Em média 30 a 40 minutos"></div>
+            <div class="field"><label class="copy-label">Quanto tempo dura?</label><input type="text" id="f-faq-result" placeholder="15 a 30 dias"></div>
+            <div class="field"><label class="copy-label">Dói ou incomoda?</label><input type="text" id="f-faq-pain" placeholder="Não — o foco é realçar, nunca exagerar."></div>
+            <div class="field"><label class="copy-label">Precisa de manutenção?</label><input type="text" id="f-faq-maintenance" placeholder="Sim, de forma simples e orientada."></div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="copy-label">Cuidados pós <span style="font-weight:400;color:#bbb">(alternativa à manutenção)</span></label>
+            <input type="text" id="f-faq-aftercare" placeholder="Evitar molhar a área nas primeiras 24h">
+          </div>
         </div>
-        <div class="field"><label>Quanto tempo leva?</label><input type="text" id="f-faq-duration" placeholder="Ex: Em média 30 a 40 minutos"><div class="field-hint">Se vazio, usa duração cadastrada (${duração} minutos)</div></div>
-        <div class="field"><label>Quanto tempo dura o resultado?</label><input type="text" id="f-faq-result" placeholder="Ex: 15 a 30 dias"></div>
-        <div class="field"><label>Dói ou incomoda?</label><input type="text" id="f-faq-pain" placeholder="Ex: Pode haver leve desconforto, mas costuma ser bem tolerado"></div>
-        <div class="field">
-          <label>Manutenção</label>
-          <input type="text" id="f-faq-maintenance" placeholder="Ex: A cada 15 a 30 dias">
-          <div class="field-hint">Se vazio e "Cuidados pós" preenchido, usa a pergunta de cuidados</div>
-        </div>
-        <div class="field"><label>Cuidados pós-procedimento <span style="font-size:10px;color:#bbb;font-weight:400">(alternativa à manutenção)</span></label><input type="text" id="f-faq-aftercare" placeholder="Ex: Evitar molhar a área nas primeiras 24h"></div>
 
-        <!-- Seção: Fechamento -->
-        <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
-          Fechamento personalizado
+        <!-- Bloco: Fechamento -->
+        <div class="copy-block" style="margin-bottom:4px">
+          <div class="copy-block-head">
+            <span class="copy-block-icon">↳</span>
+            <span class="copy-block-title">Fechamento</span>
+            <span class="copy-block-hint">aparece antes do botão de agendamento</span>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <textarea id="f-closing-note" placeholder="O objetivo não é mudar quem você é.&#10;É valorizar o que já existe em você." style="min-height:52px"></textarea>
+          </div>
         </div>
-        <div class="field">
-          <textarea id="f-closing-note" placeholder="Ex: o objetivo não é mudança drástica. É realçar o que já existe em você." style="min-height:52px"></textarea>
-          <div class="field-hint">Aparece antes do botão de agendamento. Se vazio, usa texto automático com nome da cliente</div>
-        </div>
+
       </div>
 
     </div>
