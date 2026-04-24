@@ -10,9 +10,9 @@ async function sendWelcomeEmail({ to, clinicName, slug, origin }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.RESEND_FROM || 'Laco <onboarding@laco.app>',
+      from: process.env.RESEND_FROM || 'Astrai <onboarding@laco.app>',
       to,
-      subject: 'Bem-vinda ao Laco! Seu portal esta quase pronto',
+      subject: 'Bem-vinda ao Astrai! Seu portal esta quase pronto',
       html: `
         <h1>${clinicName}</h1>
         <p>Seu portal esta quase pronto.</p>

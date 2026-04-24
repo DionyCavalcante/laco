@@ -111,7 +111,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
-  console.log(`🚀 Laço API rodando na porta ${PORT}`)
+  console.log(`🚀 Astrai API rodando na porta ${PORT}`)
   console.log(`   Ambiente: ${process.env.NODE_ENV || 'development'}`)
   console.log(`   Clínica:  ${process.env.CLINIC_NAME || 'Não configurada'}`)
 })
