@@ -501,15 +501,16 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
             Headline
             <span style="font-size:10px;color:#bbb;font-weight:400;margin-left:4px">título da página do procedimento</span>
           </label>
-          <input type="text" id="f-headline" placeholder="Ex: Botox - Boca">
-          <div class="field-hint">Se vazio, usa o nome do procedimento</div>
+          <input type="text" id="f-headline" placeholder="Ex: {nome}, **resultado** que transforma o olhar.">
+          <div class="field-hint">Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">{nome}</code> para o nome da cliente e <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para destaque visual. Se vazio, usa o nome do procedimento.</div>
         </div>
         <div class="field">
           <label>
             Subheadline
             <span style="font-size:10px;color:#bbb;font-weight:400;margin-left:4px">descrição</span>
           </label>
-          <textarea id="f-subheadline" placeholder="Ex: Personalização completa para realçar sua beleza natural com sofisticação e segurança." style="min-height:60px"></textarea>
+          <textarea id="f-subheadline" placeholder="Ex: Cílios **levantados** e **definidos** — sem cola, sem extensão, sem esforço." style="min-height:60px"></textarea>
+          <div class="field-hint">Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para negrito nos termos-chave.</div>
         </div>
         <div style="font-size:12px;font-weight:500;color:#555;margin:12px 0;padding-top:12px;border-top:0.5px solid rgba(0,0,0,0.07)">
           3 tópicos de benefícios
@@ -533,20 +534,23 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
         </div>
         <div class="field">
           <label>Frase de autoridade</label>
-          <textarea id="f-authority-note" placeholder="Ex: Na clínica, cada atendimento começa por entender o que combina com você." style="min-height:52px"></textarea>
-          <div class="field-hint">Se vazio, usa texto automático</div>
+          <textarea id="f-authority-note" placeholder="Ex: Brow Lamination não é só um procedimento.&#10;&#10;É a sensação de se olhar no espelho e já ver a sobrancelha **no lugar certo** — sem esforço." style="min-height:80px"></textarea>
+          <div class="field-hint">Formato: primeira linha = título em itálico; linha em branco; resto = corpo. Use <code style="background:#f3f0f5;padding:1px 4px;border-radius:3px;font-size:11px">**palavra**</code> para negrito. Se vazio, usa texto automático.</div>
         </div>
 
         <!-- Seção: Para quem é -->
         <div style="font-size:12px;font-weight:500;color:#555;margin:16px 0 10px;padding-top:14px;border-top:0.5px solid rgba(0,0,0,0.07)">
           Para quem é
         </div>
-        <div class="field"><label>Dor principal</label><input type="text" id="f-main-pain" placeholder="Ex: sobrancelhas falhadas ou sem formato"></div>
-        <div class="field"><label>Desejo</label><input type="text" id="f-emotional-desire" placeholder="Ex: quer realçar o olhar sem exagero"></div>
         <div class="field">
-          <label>Rotina / dia a dia</label>
+          <label>Dor principal</label>
+          <textarea id="f-main-pain" placeholder="Ex: Sente que a sobrancelha não valoriza o rosto.&#10;&#10;Percebe que falta definição e presença no olhar.&#10;&#10;Quer se sentir mais segura ao se olhar no espelho." style="min-height:90px"></textarea>
+          <div class="field-hint">Separe cada bullet com uma <strong>linha em branco</strong>. Isso gera 3 itens na seção "Para quem é". Se vazio, usa texto automático.</div>
+        </div>
+        <div class="field"><label>Desejo <span style="font-size:10px;color:#bbb;font-weight:400">(opcional — ignorado se Dor tiver 3 parágrafos)</span></label><input type="text" id="f-emotional-desire" placeholder="Ex: quer realçar o olhar sem exagero"></div>
+        <div class="field">
+          <label>Rotina / dia a dia <span style="font-size:10px;color:#bbb;font-weight:400">(opcional — ignorado se Dor tiver 3 parágrafos)</span></label>
           <input type="text" id="f-day-to-day-fit" placeholder="Ex: quer se sentir mais arrumada sem depender de maquiagem">
-          <div class="field-hint">Se todos vazios, usa texto automático</div>
         </div>
 
         <!-- Seção: Como funciona -->
@@ -554,8 +558,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
           Como funciona
         </div>
         <div class="field">
-          <textarea id="f-how-it-works" placeholder="Ex: a profissional avalia o formato do seu rosto, define o desenho e remove apenas o necessário." style="min-height:60px"></textarea>
-          <div class="field-hint">Se vazio, usa texto automático</div>
+          <textarea id="f-how-it-works" placeholder="1&#10;Avaliação personalizada&#10;Entendemos o que realmente valoriza o seu rosto.&#10;&#10;2&#10;Procedimento com técnica&#10;Aplicamos com precisão, respeitando sua estrutura natural.&#10;&#10;3&#10;Você sai orientada&#10;Você já vê o resultado e sabe como manter no dia a dia." style="min-height:130px"></textarea>
+          <div class="field-hint">Formato por etapa: número → título → descrição, separados por quebra de linha. Etapas separadas por <strong>linha em branco</strong>. Se vazio, usa texto automático.</div>
         </div>
 
         <!-- Seção: Dúvidas rápidas (FAQ) -->
