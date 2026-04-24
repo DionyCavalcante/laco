@@ -723,17 +723,24 @@ const OfferPage = ({
   const resolveTpl = (s: string) =>
     s.replace(/\{nome\}/gi, firstName || 'você');
 
-  const renderHighlighted = (text: string): React.ReactNode => {
-    const parts = text.split(/\*\*(.+?)\*\*/g);
-    if (parts.length === 1) return text;
-    return <>{parts.map((p, i) => i % 2 === 1 ? <ProcHighlight key={i}>{p}</ProcHighlight> : p)}</>;
+  // renderCopy — suporta **negrito** e ==marca-texto==
+  const renderCopy = (text: string): React.ReactNode => {
+    const tokens = text.split(/(\*\*[^*]+\*\*|==[^=]+=+)/g);
+    if (tokens.length === 1) return text;
+    return (
+      <>
+        {tokens.map((t, i) => {
+          if (t.startsWith('**') && t.endsWith('**'))
+            return <strong key={i} className="font-bold text-primary">{t.slice(2, -2)}</strong>;
+          if (t.startsWith('==') && t.endsWith('=='))
+            return <ProcHighlight key={i}>{t.slice(2, -2)}</ProcHighlight>;
+          return t;
+        })}
+      </>
+    );
   };
-
-  const renderBold = (text: string): React.ReactNode => {
-    const parts = text.split(/\*\*(.+?)\*\*/g);
-    if (parts.length === 1) return text;
-    return <>{parts.map((p, i) => i % 2 === 1 ? <strong key={i} className="font-bold text-primary">{p}</strong> : p)}</>;
-  };
+  const renderHighlighted = renderCopy;
+  const renderBold = renderCopy;
 
   const headline = resolveTpl(
     selectedProc?.headline ||
