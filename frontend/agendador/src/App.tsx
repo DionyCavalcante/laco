@@ -729,6 +729,12 @@ const OfferPage = ({
     return <>{parts.map((p, i) => i % 2 === 1 ? <ProcHighlight key={i}>{p}</ProcHighlight> : p)}</>;
   };
 
+  const renderBold = (text: string): React.ReactNode => {
+    const parts = text.split(/\*\*(.+?)\*\*/g);
+    if (parts.length === 1) return text;
+    return <>{parts.map((p, i) => i % 2 === 1 ? <strong key={i} className="font-bold text-primary">{p}</strong> : p)}</>;
+  };
+
   const headline = resolveTpl(
     selectedProc?.headline ||
     (firstName
@@ -829,7 +835,7 @@ const OfferPage = ({
             </h2>
             <p className="text-on-surface-variant text-[14px] leading-relaxed font-light max-w-[280px] mx-auto">
               {selectedProc?.subheadline ? (
-                subheadline
+                renderBold(subheadline)
               ) : (
                 <>Um resultado que <strong className="font-bold text-primary">realça</strong> o que você já tem — de forma natural, sem exagero.</>
               )}
@@ -893,14 +899,21 @@ const OfferPage = ({
         <section className="px-6 pb-20 max-w-lg mx-auto w-full">
           <div className="space-y-8 text-primary/85 leading-relaxed">
             <div className="border-l-4 border-secondary pl-6 py-5 pr-5 rounded-r-2xl" style={{ background: 'rgba(200,170,130,0.12)' }}>
-              <h3 className="font-serif italic text-primary text-[19px] mb-4 leading-snug">
-                {procName} não é só um procedimento.
-              </h3>
-              <p className="text-[13px] text-on-surface-variant leading-relaxed">
-                {firstName
-                  ? <>É a sensação de se <strong className="font-bold text-primary">olhar no espelho</strong> e já ver o rosto mais harmonioso, o olhar mais definido e sua beleza destacada — sem esforço, {firstName}.</>
-                  : <>É a sensação de se <strong className="font-bold text-primary">olhar no espelho</strong> e já ver o rosto mais harmonioso, o olhar mais definido e sua beleza destacada — sem esforço.</>}
-              </p>
+              {(() => {
+                const raw = authorityNote;
+                const [title, ...rest] = raw.split(/\n\n+/);
+                const body = rest.join(' ');
+                return (
+                  <>
+                    <h3 className="font-serif italic text-primary text-[19px] mb-4 leading-snug">
+                      {renderBold(title)}
+                    </h3>
+                    <p className="text-[13px] text-on-surface-variant leading-relaxed">
+                      {renderBold(body || title)}
+                    </p>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </section>

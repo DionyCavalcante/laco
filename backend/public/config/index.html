@@ -66,6 +66,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 .modal-title{font-size:15px;font-weight:500}
 .modal-close{background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;padding:0 4px}
 .modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;justify-content:flex-end;gap:8px}
 .modal-foot{padding:14px 20px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;justify-content:flex-end;gap:8px}
 
 /* Stepper */
@@ -164,6 +165,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
 
 <div class="nav">
   <div class="nav-tab on" onclick="switchTab('procedimentos',this)">Procedimentos</div>
+  <div class="nav-tab" onclick="switchTab('profissionais',this)">Profissionais</div>
   <div class="nav-tab" onclick="switchTab('portal',this)">Portal</div>
   <div class="nav-tab" onclick="switchTab('horarios',this)">Horários</div>
   <div class="nav-tab" onclick="switchTab('clinica',this)">Clínica</div>
@@ -299,6 +301,46 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
   <div class="editor-hint" id="editor-hint">Arraste a linha para definir o ponto de divisão</div>
 </div>
 
+<!-- PROFISSIONAIS -->
+<div class="panel" id="panel-profissionais">
+  <div class="page">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Profissionais</div>
+          <div class="section-sub">Cadastre as pessoas que realizam os procedimentos da clínica</div>
+        </div>
+        <button class="btn btn-purple" onclick="openProfModal()">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+          Novo profissional
+        </button>
+      </div>
+      <div id="prof-list"><div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Carregando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: criar/editar profissional -->
+<div class="overlay" id="prof-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <span class="modal-title" id="prof-modal-title">Novo profissional</span>
+      <button class="modal-close" onclick="closeProfModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="prof-edit-id">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="prof-name" placeholder="Ex: Ana Paula">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProfModal()">Cancelar</button>
+      <button class="btn btn-purple" onclick="saveProf()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: criar/editar procedimento -->
 <div class="overlay" id="proc-modal">
   <div class="modal">
@@ -370,6 +412,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
             <span style="font-size:10px;background:#F0EBE8;color:#aaa;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:400">em breve</span>
           </label>
           <input type="url" id="f-video" placeholder="https://youtube.com/watch?v=..." disabled>
+        </div>
+        <div class="field">
+          <label>Profissional(is) responsável(eis)</label>
+          <div id="f-professionals" style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid #e0d8d4;border-radius:8px;min-height:42px">
+            <span id="f-prof-empty" style="color:#aaa;font-size:12px">Carregando...</span>
+          </div>
+          <div class="field-hint">Selecione quem pode realizar este procedimento · <span style="color:#B8657A;cursor:pointer" onclick="switchTab('profissionais',document.querySelector('[onclick*=profissionais]'));closeModal()">Gerenciar profissionais →</span></div>
         </div>
       </div>
 
@@ -583,6 +632,7 @@ function switchTab(name,el){
   el.classList.add('on')
   document.getElementById('panel-'+name).classList.add('on')
   if(name==='portal')loadSettings()
+  if(name==='profissionais')loadProfessionals()
 }
 
 function toast(msg,ok=true){
@@ -745,7 +795,7 @@ function goToStep(n) {
 }
 
 /* ---- MODAL ---- */
-function openModal(proc=null){
+async function openModal(proc=null){
   document.getElementById('edit-id').value=proc?proc.id:''
   document.getElementById('modal-title').textContent=proc?'Editar procedimento':'Novo procedimento'
   document.getElementById('f-name').value=proc?proc.name:''
@@ -777,6 +827,16 @@ function openModal(proc=null){
   document.getElementById('f-faq-aftercare').value=proc?proc.faq_aftercare||'':''
   document.getElementById('f-closing-note').value=proc?proc.closing_note||'':''
   setPhotoMode(proc?proc.photo_mode||'before_after':'before_after', true)
+  // Carrega profissionais disponíveis e os vinculados a este procedimento
+  if(!allProfessionals.length) await loadAllProfessionals()
+  let linkedIds = []
+  if(proc?.id) {
+    try {
+      const r = await fetch(`${API}/api/professionals/by-procedure/${proc.id}`, { headers: h() })
+      if(r.ok) { const data = await r.json(); linkedIds = data.map(p => p.id) }
+    } catch {}
+  }
+  renderProfCheckboxes(linkedIds)
   goToStep(1)
   document.getElementById('proc-modal').classList.add('on')
 }
@@ -825,6 +885,7 @@ async function saveProc(){
     if(!r.ok)throw new Error()
     const saved=await r.json()
     await flushRotations()
+    await saveProcProfessionals(saved.id)
     loadProcs()
     if(isNew){
       document.getElementById('edit-id').value=saved.id
@@ -856,8 +917,9 @@ async function deleteProc(id){
   }catch{toast('Erro ao remover',false)}
 }
 
-// Fecha modal ao clicar fora
+// Fecha modais ao clicar fora
 document.getElementById('proc-modal').addEventListener('click',function(e){if(e.target===this)closeModal()})
+document.getElementById('prof-modal').addEventListener('click',function(e){if(e.target===this)closeProfModal()})
 
 /* ---- HORÁRIOS ---- */
 const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -1498,6 +1560,106 @@ function canvasSlice(src, x, y, w, h) {
 
 function canvasToBlob(canvas) {
   return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92))
+}
+
+/* ---- PROFISSIONAIS ---- */
+let allProfessionals = []
+
+async function loadAllProfessionals() {
+  try {
+    const r = await fetch(`${API}/api/professionals`, { headers: h() })
+    if (r.ok) allProfessionals = await r.json()
+  } catch {}
+}
+
+async function loadProfessionals() {
+  await loadAllProfessionals()
+  renderProfList()
+}
+
+function renderProfList() {
+  const el = document.getElementById('prof-list')
+  if (!allProfessionals.length) {
+    el.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Nenhum profissional cadastrado ainda.</div>'
+    return
+  }
+  el.innerHTML = allProfessionals.map(p => `
+    <div class="proc-row">
+      <div class="proc-info">
+        <div class="proc-name">${esc(p.name)}</div>
+        <div class="proc-meta">${p.procedure_count} procedimento(s) vinculado(s)</div>
+      </div>
+      <div class="proc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openProfModal('${p.id}','${esc(p.name).replace(/'/g,"\\'")}')">Editar</button>
+      </div>
+      <div class="toggle ${p.active ? '' : 'off'}" onclick="toggleProf('${p.id}',this)"></div>
+    </div>
+  `).join('')
+}
+
+function openProfModal(id = '', name = '') {
+  document.getElementById('prof-edit-id').value = id
+  document.getElementById('prof-modal-title').textContent = id ? 'Editar profissional' : 'Novo profissional'
+  document.getElementById('prof-name').value = name
+  document.getElementById('prof-modal').classList.add('on')
+}
+
+function closeProfModal() {
+  document.getElementById('prof-modal').classList.remove('on')
+}
+
+async function saveProf() {
+  const id = document.getElementById('prof-edit-id').value
+  const name = document.getElementById('prof-name').value.trim()
+  if (!name) { toast('Nome obrigatório', false); return }
+  try {
+    const url = id ? `${API}/api/professionals/${id}` : `${API}/api/professionals`
+    const r = await fetch(url, { method: id ? 'PATCH' : 'POST', headers: h(), body: JSON.stringify({ name }) })
+    if (!r.ok) throw new Error()
+    toast(id ? 'Profissional atualizado!' : 'Profissional criado!')
+    closeProfModal()
+    await loadAllProfessionals()
+    renderProfList()
+  } catch { toast('Erro ao salvar profissional', false) }
+}
+
+async function toggleProf(id, el) {
+  el.classList.toggle('off')
+  const active = !el.classList.contains('off')
+  try {
+    await fetch(`${API}/api/professionals/${id}`, { method: 'PATCH', headers: h(), body: JSON.stringify({ active }) })
+    toast(active ? 'Profissional ativado' : 'Profissional desativado')
+    const p = allProfessionals.find(x => x.id === id)
+    if (p) p.active = active
+  } catch { toast('Erro ao atualizar', false) }
+}
+
+// Renderiza checkboxes no modal do procedimento
+async function renderProfCheckboxes(linkedIds = []) {
+  const container = document.getElementById('f-professionals')
+  const active = allProfessionals.filter(p => p.active)
+  if (!active.length) {
+    container.innerHTML = '<span style="color:#aaa;font-size:12px">Nenhum profissional cadastrado. Crie um na aba <strong>Profissionais</strong>.</span>'
+    return
+  }
+  container.innerHTML = active.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:2px 0">
+      <input type="checkbox" class="prof-check" value="${p.id}" ${linkedIds.includes(p.id) ? 'checked' : ''} style="width:15px;height:15px;accent-color:#B8657A;cursor:pointer">
+      ${esc(p.name)}
+    </label>
+  `).join('')
+}
+
+// Salva os vínculos de profissionais do procedimento atual
+async function saveProcProfessionals(procId) {
+  const checks = document.querySelectorAll('.prof-check')
+  if (!checks.length) return
+  const professional_ids = [...checks].filter(c => c.checked).map(c => c.value)
+  try {
+    await fetch(`${API}/api/professionals/by-procedure/${procId}`, {
+      method: 'PUT', headers: h(), body: JSON.stringify({ professional_ids })
+    })
+  } catch { toast('Aviso: erro ao salvar profissionais vinculados', false) }
 }
 
 async function uploadProcessed(canvas, procId, side) {
