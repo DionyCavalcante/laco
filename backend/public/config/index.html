@@ -354,6 +354,43 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F5;color:#1A16
   </div>
 </div>
 
+<!-- MODAL: horários do profissional -->
+<div class="overlay" id="prof-hours-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head">
+      <span class="modal-title" id="prof-hours-title">Horários</span>
+      <button class="modal-close" onclick="closeProfHoursModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="prof-hours-id">
+      <div id="prof-hours-grid"></div>
+      <div style="margin-top:12px;font-size:11px;color:#aaa">Dias sem configuração própria usam o horário da clínica como referência.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProfHoursModal()">Cancelar</button>
+      <button class="btn btn-purple" onclick="saveProfHours()">Salvar horários</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: procedimentos do profissional -->
+<div class="overlay" id="prof-procs-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <span class="modal-title" id="prof-procs-title">Procedimentos</span>
+      <button class="modal-close" onclick="closeProfProcsModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="prof-procs-id">
+      <div id="prof-procs-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProfProcsModal()">Cancelar</button>
+      <button class="btn btn-purple" onclick="saveProfProcs()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: criar/editar procedimento -->
 <div class="overlay" id="proc-modal">
   <div class="modal">
@@ -937,6 +974,8 @@ async function deleteProc(id){
 // Fecha modais ao clicar fora
 document.getElementById('proc-modal').addEventListener('click',function(e){if(e.target===this)closeModal()})
 document.getElementById('prof-modal').addEventListener('click',function(e){if(e.target===this)closeProfModal()})
+document.getElementById('prof-hours-modal').addEventListener('click',function(e){if(e.target===this)closeProfHoursModal()})
+document.getElementById('prof-procs-modal').addEventListener('click',function(e){if(e.target===this)closeProfProcsModal()})
 
 /* ---- HORÁRIOS ---- */
 const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -1579,6 +1618,105 @@ function canvasToBlob(canvas) {
   return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92))
 }
 
+/* ---- HORÁRIOS POR PROFISSIONAL ---- */
+const DAYS_SHORT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+let profHoursData = []
+
+async function openProfHoursModal(profId, profName) {
+  document.getElementById('prof-hours-id').value = profId
+  document.getElementById('prof-hours-title').textContent = `Horários — ${profName}`
+  document.getElementById('prof-hours-grid').innerHTML = '<div style="padding:16px;text-align:center;color:#aaa;font-size:12px">Carregando...</div>'
+  document.getElementById('prof-hours-modal').classList.add('on')
+  try {
+    const r = await fetch(`${API}/api/professionals/${profId}/hours`, { headers: h() })
+    profHoursData = await r.json()
+    renderProfHours()
+  } catch { document.getElementById('prof-hours-grid').innerHTML = '<div style="color:#A32D2D;font-size:12px;padding:8px">Erro ao carregar horários.</div>' }
+}
+
+function closeProfHoursModal() {
+  document.getElementById('prof-hours-modal').classList.remove('on')
+}
+
+function renderProfHours() {
+  const el = document.getElementById('prof-hours-grid')
+  el.innerHTML = profHoursData.map((d, i) => `
+    <div class="hours-row">
+      <div class="day-name">${DAYS_SHORT[d.day_of_week ?? i]}</div>
+      <div class="toggle ${d.open ? '' : 'off'}" id="pht-${i}" onclick="toggleProfDay(${i},this)"></div>
+      <div class="time-inputs" id="phi-${i}" style="${d.open ? '' : 'opacity:0.3;pointer-events:none'}">
+        <input type="time" id="phs-${i}" value="${(d.start_time||'09:00').substring(0,5)}">
+        <span class="time-sep">até</span>
+        <input type="time" id="phe-${i}" value="${(d.end_time||'18:00').substring(0,5)}">
+      </div>
+      ${d.open ? '' : '<span class="closed-label">Fechado</span>'}
+    </div>`
+  ).join('')
+}
+
+function toggleProfDay(i, el) {
+  el.classList.toggle('off')
+  profHoursData[i].open = !el.classList.contains('off')
+  renderProfHours()
+}
+
+async function saveProfHours() {
+  const profId = document.getElementById('prof-hours-id').value
+  const payload = profHoursData.map((d, i) => ({
+    day_of_week: d.day_of_week ?? i,
+    open: d.open,
+    start_time: document.getElementById(`phs-${i}`)?.value || d.start_time || '09:00',
+    end_time: document.getElementById(`phe-${i}`)?.value || d.end_time || '18:00',
+  }))
+  try {
+    const r = await fetch(`${API}/api/professionals/${profId}/hours`, { method: 'PUT', headers: h(), body: JSON.stringify(payload) })
+    if (!r.ok) throw new Error()
+    toast('Horários salvos!')
+    closeProfHoursModal()
+  } catch { toast('Erro ao salvar horários', false) }
+}
+
+/* ---- PROCEDIMENTOS POR PROFISSIONAL ---- */
+async function openProfProcsModal(profId, profName) {
+  document.getElementById('prof-procs-id').value = profId
+  document.getElementById('prof-procs-title').textContent = `Procedimentos — ${profName}`
+  const el = document.getElementById('prof-procs-list')
+  el.innerHTML = '<div style="color:#aaa;font-size:12px">Carregando...</div>'
+  document.getElementById('prof-procs-modal').classList.add('on')
+  try {
+    const r = await fetch(`${API}/api/professionals/${profId}/procedures`, { headers: h() })
+    const linked = await r.json()
+    const linkedIds = linked.map(p => p.id)
+    const active = procs.filter(p => p.active)
+    if (!active.length) { el.innerHTML = '<div style="color:#aaa;font-size:12px">Nenhum procedimento cadastrado.</div>'; return }
+    el.innerHTML = active.map(p => `
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;padding:4px 0;border-bottom:0.5px solid #f0ece9">
+        <input type="checkbox" class="prof-proc-check" value="${p.id}" ${linkedIds.includes(p.id) ? 'checked' : ''} style="width:15px;height:15px;accent-color:#B8657A;cursor:pointer">
+        <span>
+          <div style="font-weight:500">${esc(p.name)}</div>
+          <div style="font-size:11px;color:#888">${p.duration} min</div>
+        </span>
+      </label>`).join('')
+  } catch { el.innerHTML = '<div style="color:#A32D2D;font-size:12px">Erro ao carregar.</div>' }
+}
+
+function closeProfProcsModal() {
+  document.getElementById('prof-procs-modal').classList.remove('on')
+}
+
+async function saveProfProcs() {
+  const profId = document.getElementById('prof-procs-id').value
+  const procedure_ids = [...document.querySelectorAll('.prof-proc-check')].filter(c => c.checked).map(c => c.value)
+  try {
+    const r = await fetch(`${API}/api/professionals/${profId}/procedures`, { method: 'PUT', headers: h(), body: JSON.stringify({ procedure_ids }) })
+    if (!r.ok) throw new Error()
+    toast('Procedimentos salvos!')
+    closeProfProcsModal()
+    await loadAllProfessionals()
+    renderProfList()
+  } catch { toast('Erro ao salvar procedimentos', false) }
+}
+
 /* ---- PROFISSIONAIS ---- */
 let allProfessionals = []
 
@@ -1600,18 +1738,22 @@ function renderProfList() {
     el.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;font-size:13px">Nenhum profissional cadastrado ainda.</div>'
     return
   }
-  el.innerHTML = allProfessionals.map(p => `
+  el.innerHTML = allProfessionals.map(p => {
+    const safeName = esc(p.name).replace(/'/g, "\\'")
+    return `
     <div class="proc-row">
       <div class="proc-info">
         <div class="proc-name">${esc(p.name)}</div>
         <div class="proc-meta">${p.procedure_count} procedimento(s) vinculado(s)</div>
       </div>
       <div class="proc-actions">
-        <button class="btn btn-ghost btn-sm" onclick="openProfModal('${p.id}','${esc(p.name).replace(/'/g,"\\'")}')">Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="openProfModal('${p.id}','${safeName}')">Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="openProfHoursModal('${p.id}','${safeName}')">Horários</button>
+        <button class="btn btn-ghost btn-sm" onclick="openProfProcsModal('${p.id}','${safeName}')">Procedimentos</button>
       </div>
       <div class="toggle ${p.active ? '' : 'off'}" onclick="toggleProf('${p.id}',this)"></div>
-    </div>
-  `).join('')
+    </div>`
+  }).join('')
 }
 
 function openProfModal(id = '', name = '') {

@@ -41,6 +41,8 @@ const db = require('./db')
   `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
   `CREATE TABLE IF NOT EXISTS professionals (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE, name TEXT NOT NULL, active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW())`,
   `CREATE TABLE IF NOT EXISTS procedure_professionals (procedure_id UUID REFERENCES procedures(id) ON DELETE CASCADE, professional_id UUID REFERENCES professionals(id) ON DELETE CASCADE, PRIMARY KEY (procedure_id, professional_id))`,
+  `CREATE TABLE IF NOT EXISTS professional_hours (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), professional_id UUID REFERENCES professionals(id) ON DELETE CASCADE, day_of_week INTEGER NOT NULL, open BOOLEAN DEFAULT true, start_time TIME NOT NULL DEFAULT '09:00', end_time TIME NOT NULL DEFAULT '18:00', CONSTRAINT ph_prof_day_unique UNIQUE (professional_id, day_of_week))`,
+  `CREATE INDEX IF NOT EXISTS idx_prof_hours_prof ON professional_hours(professional_id)`,
   `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
 ].forEach(sql => db.query(sql).catch(e => console.warn('startup alter:', e.message)))
 

@@ -161,4 +161,63 @@ router.put('/by-procedure/:procedureId', async (req, res) => {
   }
 })
 
+// GET /api/professionals/:id/hours — horários do profissional (fallback para clínica)
+router.get('/:id/hours', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { rows: [prof] } = await db.query(
+      'SELECT id FROM professionals WHERE id=$1 AND clinic_id=$2', [req.params.id, clinicId]
+    )
+    if (!prof) return res.status(404).json({ error: 'Profissional não encontrado' })
+
+    const { rows: ph } = await db.query(
+      'SELECT * FROM professional_hours WHERE professional_id=$1 ORDER BY day_of_week', [req.params.id]
+    )
+
+    if (ph.length === 7) return res.json(ph)
+
+    // Fallback: preenche dias faltantes com horário da clínica
+    const { rows: bh } = await db.query(
+      'SELECT * FROM business_hours WHERE clinic_id=$1 ORDER BY day_of_week', [clinicId]
+    )
+    const phByDay = Object.fromEntries(ph.map(r => [r.day_of_week, r]))
+    const result = Array.from({ length: 7 }, (_, i) => phByDay[i] || { ...bh.find(b => b.day_of_week === i), professional_id: req.params.id, _fromClinic: true })
+    res.json(result)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao buscar horários' })
+  }
+})
+
+// PUT /api/professionals/:id/hours — salva horários do profissional (7 dias)
+router.put('/:id/hours', async (req, res) => {
+  const client = await db.pool.connect()
+  try {
+    const days = req.body
+    if (!Array.isArray(days)) return res.status(400).json({ error: 'Payload deve ser um array de 7 dias' })
+    const clinicId = await getEffectiveClinicId(req)
+    const { rows: [prof] } = await client.query(
+      'SELECT id FROM professionals WHERE id=$1 AND clinic_id=$2', [req.params.id, clinicId]
+    )
+    if (!prof) return res.status(404).json({ error: 'Profissional não encontrado' })
+
+    await client.query('BEGIN')
+    await client.query('DELETE FROM professional_hours WHERE professional_id=$1', [req.params.id])
+    for (const d of days) {
+      await client.query(`
+        INSERT INTO professional_hours (professional_id, day_of_week, open, start_time, end_time)
+        VALUES ($1, $2, $3, $4, $5)
+      `, [req.params.id, d.day_of_week, d.open, d.start_time || '09:00', d.end_time || '18:00'])
+    }
+    await client.query('COMMIT')
+    res.json({ ok: true })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao salvar horários' })
+  } finally {
+    client.release()
+  }
+})
+
 module.exports = router

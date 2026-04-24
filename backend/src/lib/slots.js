@@ -1,24 +1,44 @@
 const db = require('../db')
 
 /**
+ * Busca os horários de um profissional para um dia da semana.
+ * Fallback para business_hours da clínica se não houver registro.
+ */
+async function getProfessionalDayHours(professionalId, clinicId, dayOfWeek) {
+  const { rows: [ph] } = await db.query(
+    'SELECT * FROM professional_hours WHERE professional_id=$1 AND day_of_week=$2',
+    [professionalId, dayOfWeek]
+  )
+  if (ph) return ph
+  // Fallback: usa horário da clínica
+  const { rows: [bh] } = await db.query(
+    'SELECT * FROM business_hours WHERE clinic_id=$1 AND day_of_week=$2',
+    [clinicId, dayOfWeek]
+  )
+  return bh || null
+}
+
+/**
  * Retorna os slots disponíveis para um procedimento em um dia específico.
  *
  * Regra central: um slot está disponível (taken: false) se pelo menos
- * 1 profissional ativo vinculado ao procedimento estiver livre durante
- * todo o intervalo [slotStart, slotEnd).
+ * 1 profissional ativo vinculado ao procedimento:
+ *   - trabalha naquele dia (open=true no horário dele ou da clínica)
+ *   - tem o slot dentro do seu intervalo de horário
+ *   - está livre (sem agendamento conflitante)
  *
- * Se nenhum profissional está vinculado ao procedimento → todos os slots
- * aparecem como taken (procedimento sem executor não pode ser agendado).
+ * Se nenhum profissional está vinculado → fallback por clínica (compatibilidade).
  */
 async function computeSlots(clinicId, date, procedureId) {
   const d = new Date(date)
   const dayOfWeek = d.getDay()
 
-  const { rows: [hours] } = await db.query(
+  // Horário da clínica — usado como referência para "a clínica está aberta hoje?"
+  const { rows: [clinicHours] } = await db.query(
     'SELECT * FROM business_hours WHERE clinic_id=$1 AND day_of_week=$2',
     [clinicId, dayOfWeek]
   )
-  if (!hours || !hours.open) return { slots: [], reason: 'closed' }
+  if (!clinicHours || !clinicHours.open) return { slots: [], reason: 'closed' }
 
   // Duração do procedimento (padrão 60 min se não informado)
   let duration = 60
@@ -41,31 +61,12 @@ async function computeSlots(clinicId, date, procedureId) {
     professionalIds = rows.map(r => r.professional_id)
   }
 
-  // Sem profissionais vinculados → fallback para bloqueio por clínica (compatibilidade)
+  // Sem profissionais → fallback para bloqueio por clínica (compatibilidade)
   const useProfessionalLogic = professionalIds.length > 0
 
-  // Agendamentos do dia (por profissional ou por clínica no fallback)
-  const bookedByProfessional = {}
-  let bookedClinic = []
-
-  if (useProfessionalLogic) {
-    const { rows: booked } = await db.query(`
-      SELECT a.professional_id, a.scheduled_at, p.duration
-      FROM appointments a
-      JOIN procedures p ON a.procedure_id = p.id
-      WHERE a.clinic_id = $1
-        AND a.professional_id = ANY($2::uuid[])
-        AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $3
-        AND a.status != 'cancelled'
-    `, [clinicId, professionalIds, date])
-
-    for (const b of booked) {
-      if (!bookedByProfessional[b.professional_id]) bookedByProfessional[b.professional_id] = []
-      bookedByProfessional[b.professional_id].push(b)
-    }
-  } else {
+  if (!useProfessionalLogic) {
     // Fallback: qualquer agendamento da clínica bloqueia o horário
-    const { rows } = await db.query(`
+    const { rows: bookedClinic } = await db.query(`
       SELECT a.scheduled_at, p.duration
       FROM appointments a
       JOIN procedures p ON a.procedure_id = p.id
@@ -73,44 +74,94 @@ async function computeSlots(clinicId, date, procedureId) {
         AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $2
         AND a.status != 'cancelled'
     `, [clinicId, date])
-    bookedClinic = rows
+
+    const slots = []
+    const [sh, sm] = clinicHours.start_time.split(':').map(Number)
+    const [eh, em] = clinicHours.end_time.split(':').map(Number)
+    let cur = sh * 60 + sm
+    const end = eh * 60 + em
+
+    while (cur + duration <= end) {
+      const hh = String(Math.floor(cur / 60)).padStart(2, '0')
+      const mm = String(cur % 60).padStart(2, '0')
+      const slotStart = new Date(`${date}T${hh}:${mm}:00-03:00`)
+      const slotEnd = new Date(slotStart.getTime() + duration * 60000)
+      const taken = bookedClinic.some(b => {
+        const bs = new Date(b.scheduled_at)
+        const be = new Date(bs.getTime() + b.duration * 60000)
+        return slotStart < be && slotEnd > bs
+      })
+      slots.push({ time: `${hh}:${mm}`, taken })
+      cur += 30
+    }
+    return { slots }
   }
 
-  // Gera candidatos a cada 30 min dentro do horário de funcionamento
-  const slots = []
-  const [sh, sm] = hours.start_time.split(':').map(Number)
-  const [eh, em] = hours.end_time.split(':').map(Number)
+  // --- Lógica por profissional ---
+
+  // Horários individuais de cada profissional para este dia
+  const profHours = {}
+  for (const profId of professionalIds) {
+    profHours[profId] = await getProfessionalDayHours(profId, clinicId, dayOfWeek)
+  }
+
+  // Agendamentos do dia agrupados por profissional
+  const { rows: booked } = await db.query(`
+    SELECT a.professional_id, a.scheduled_at, p.duration
+    FROM appointments a
+    JOIN procedures p ON a.procedure_id = p.id
+    WHERE a.clinic_id = $1
+      AND a.professional_id = ANY($2::uuid[])
+      AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $3
+      AND a.status != 'cancelled'
+  `, [clinicId, professionalIds, date])
+
+  const bookedByProfessional = {}
+  for (const b of booked) {
+    if (!bookedByProfessional[b.professional_id]) bookedByProfessional[b.professional_id] = []
+    bookedByProfessional[b.professional_id].push(b)
+  }
+
+  // Range geral de slots: usa o horário mais amplo entre todos os profissionais disponíveis no dia
+  // para não deixar de exibir slots válidos. A checagem individual filtra por fora.
+  const [sh, sm] = clinicHours.start_time.split(':').map(Number)
+  const [eh, em] = clinicHours.end_time.split(':').map(Number)
   let cur = sh * 60 + sm
   const end = eh * 60 + em
 
+  const slots = []
   while (cur + duration <= end) {
     const hh = String(Math.floor(cur / 60)).padStart(2, '0')
     const mm = String(cur % 60).padStart(2, '0')
     const slotStart = new Date(`${date}T${hh}:${mm}:00-03:00`)
     const slotEnd = new Date(slotStart.getTime() + duration * 60000)
 
-    let taken
-    if (useProfessionalLogic) {
-      // Disponível se ao menos 1 profissional estiver livre no intervalo inteiro
-      const atLeastOneFree = professionalIds.some(profId => {
-        const profBooked = bookedByProfessional[profId] || []
-        return !profBooked.some(b => {
-          const bs = new Date(b.scheduled_at)
-          const be = new Date(bs.getTime() + b.duration * 60000)
-          return slotStart < be && slotEnd > bs
-        })
-      })
-      taken = !atLeastOneFree
-    } else {
-      // Fallback: slot ocupado se houver qualquer agendamento conflitante na clínica
-      taken = bookedClinic.some(b => {
+    // Disponível se ao menos 1 profissional:
+    // 1. trabalha neste dia (open=true)
+    // 2. slot cabe dentro do horário DELE
+    // 3. está livre (sem conflito de agenda)
+    const atLeastOneFree = professionalIds.some(profId => {
+      const ph = profHours[profId]
+      if (!ph || !ph.open) return false
+
+      const [psh, psm] = ph.start_time.split(':').map(Number)
+      const [peh, pem] = ph.end_time.split(':').map(Number)
+      const profStart = psh * 60 + psm
+      const profEnd = peh * 60 + pem
+      const slotMinStart = cur
+      const slotMinEnd = cur + duration
+
+      if (slotMinStart < profStart || slotMinEnd > profEnd) return false
+
+      const profBooked = bookedByProfessional[profId] || []
+      return !profBooked.some(b => {
         const bs = new Date(b.scheduled_at)
         const be = new Date(bs.getTime() + b.duration * 60000)
         return slotStart < be && slotEnd > bs
       })
-    }
+    })
 
-    slots.push({ time: `${hh}:${mm}`, taken })
+    slots.push({ time: `${hh}:${mm}`, taken: !atLeastOneFree })
     cur += 30
   }
 
@@ -119,7 +170,7 @@ async function computeSlots(clinicId, date, procedureId) {
 
 /**
  * Encontra o primeiro profissional ativo vinculado ao procedimento
- * que esteja livre para o horário scheduledAt (considerando a duração).
+ * que trabalha no dia e está livre no horário scheduledAt.
  * Retorna o UUID do profissional ou null se nenhum disponível.
  */
 async function findAvailableProfessional(clinicId, procedureId, scheduledAt, duration) {
@@ -136,6 +187,9 @@ async function findAvailableProfessional(clinicId, procedureId, scheduledAt, dur
   const slotStart = new Date(scheduledAt)
   const slotEnd = new Date(slotStart.getTime() + duration * 60000)
   const date = slotStart.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  const dayOfWeek = slotStart.getDay()
+  const slotMin = slotStart.getHours() * 60 + slotStart.getMinutes()
+  const slotMinEnd = slotMin + duration
 
   const { rows: booked } = await db.query(`
     SELECT a.professional_id, a.scheduled_at, p.duration
@@ -154,6 +208,13 @@ async function findAvailableProfessional(clinicId, procedureId, scheduledAt, dur
   }
 
   for (const profId of professionalIds) {
+    const ph = await getProfessionalDayHours(profId, clinicId, dayOfWeek)
+    if (!ph || !ph.open) continue
+
+    const [psh, psm] = ph.start_time.split(':').map(Number)
+    const [peh, pem] = ph.end_time.split(':').map(Number)
+    if (slotMin < psh * 60 + psm || slotMinEnd > peh * 60 + pem) continue
+
     const profBooked = bookedByProfessional[profId] || []
     const hasConflict = profBooked.some(b => {
       const bs = new Date(b.scheduled_at)
