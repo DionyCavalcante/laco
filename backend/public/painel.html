@@ -253,31 +253,63 @@ select option { background: var(--surface); color: var(--t0) }
   scrollbar-color: rgba(139,105,20,0.20) transparent;
 }
 
-/* ─── Period command bar (sticky dentro do .main) */
-.period-cmd-bar {
-  background: rgba(250,250,247,0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* ─── TopBar (sticky, topo do .main) ────────── */
+.topbar {
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 30;
-}
-.period-cmd-inner {
-  padding: 0 28px;
-  height: 46px;
   display: flex;
   align-items: center;
+  padding: 0 28px;
   gap: 0;
+  height: 62px;
+  flex-shrink: 0;
 }
-.pcb-status {
+.topbar-left { flex-shrink: 0; margin-right: 24px }
+.topbar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--t0);
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+}
+.topbar-sub {
+  font-size: 9.5px;
+  color: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+  font-family: 'Satoshi', sans-serif;
+}
+.topbar-period {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  padding-right: 18px;
+  padding-right: 16px;
   margin-right: 14px;
   border-right: 1px solid var(--border-m);
+}
+.topbar-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 14px;
+  margin-left: 10px;
+  border-left: 1px solid var(--border-m);
+  flex-shrink: 0;
+}
+.ls-url {
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--t1);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .pcb-dot {
   width: 7px;
@@ -413,56 +445,8 @@ select option { background: var(--surface); color: var(--t0) }
 .page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 28px 60px;
+  padding: 24px 28px 60px;
 }
-
-/* Page header */
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-}
-.ph-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--t0);
-  letter-spacing: 0.01em;
-  line-height: 1.05;
-}
-.ph-sub {
-  font-size: 12px;
-  color: var(--t2);
-  margin-top: 5px;
-}
-
-/* Link share */
-.link-share {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--brand-l);
-  border-radius: 10px;
-  padding: 7px 10px 7px 14px;
-  flex-wrap: wrap;
-  box-shadow: var(--shadow);
-}
-.ls-label { font-size: 11px; color: var(--t2); font-weight: 500; white-space: nowrap }
-.ls-url {
-  font-size: 11px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  color: var(--t1);
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.ls-divider { width: 1px; height: 16px; background: var(--border-m) }
 
 /* ─── Buttons ────────────────────────────────── */
 .btn {
@@ -487,82 +471,65 @@ select option { background: var(--surface); color: var(--t0) }
 .btn-wa:hover { background: #20b858 }
 .btn-sm { padding: 5px 10px; font-size: 11px }
 
-/* ─── KPI section ────────────────────────────── */
-.kpi-section {
+/* ─── KPI cards (individuais) ────────────────── */
+.kpi-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  margin-bottom: 12px;
 }
-.kpi-group {
+.kpi-cards.kpi-cards-3 {
+  grid-template-columns: repeat(3,1fr);
+  margin-bottom: 24px;
+}
+.kpi-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px 20px 16px;
+  padding: 20px 22px 18px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
-.kpi-group::before {
+.kpi-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
   width: 28px; height: 2px;
   background: var(--brand-l);
 }
-.kpi-group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.kpi-group-title {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.11em;
-  color: var(--t2);
-}
-.kpi-row   { display: grid; grid-template-columns: repeat(4,1fr); gap: 0 }
-.kpi-row-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 0 }
-.kpi {
-  padding: 0 12px 0 0;
-  position: relative;
-}
-/* Thin divider between KPIs */
-.kpi + .kpi {
-  padding-left: 12px;
-  border-left: 1px solid var(--border);
-}
-.kpi-label {
+.kpi-card.blue::before  { background: var(--blue) }
+.kpi-card.green::before { background: var(--green) }
+.kpi-card.amber::before { background: var(--amber) }
+.kpi-card.red::before   { background: var(--red) }
+.kpi-card-label {
   font-size: 10px;
   color: var(--t2);
   font-weight: 500;
-  margin-bottom: 8px;
-  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 14px;
+  line-height: 1.3;
   display: flex;
   align-items: center;
   gap: 3px;
 }
-.kpi-val {
-  font-size: 26px;
+.kpi-card-val {
+  font-size: 30px;
   font-weight: 600;
-  letter-spacing: -0.8px;
-  line-height: 1;
   color: var(--t0);
+  line-height: 1;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
-.kpi.brand .kpi-val { color: var(--brand) }
-.kpi.green .kpi-val { color: var(--green) }
-.kpi.amber .kpi-val { color: var(--amber) }
-.kpi.red   .kpi-val { color: var(--red)   }
-.kpi.blue  .kpi-val { color: var(--blue)  }
-
-/* Valores financeiros: Cormorant Garamond itálico — o toque especial */
-.kpi-group.financial .kpi-val {
+.kpi-card.blue  .kpi-card-val { color: var(--blue) }
+.kpi-card.green .kpi-card-val { color: var(--green) }
+.kpi-card.amber .kpi-card-val { color: var(--amber) }
+.kpi-card.red   .kpi-card-val { color: var(--red) }
+.kpi-card.brand .kpi-card-val { color: var(--brand) }
+.kpi-card.financial .kpi-card-val {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 24px;
   font-style: italic;
   letter-spacing: -0.1px;
 }
@@ -900,16 +867,14 @@ select option { background: var(--surface); color: var(--t0) }
   .sb-user { justify-content: center }
   .sb-user-av { margin: 0 }
 
-  .period-cmd-inner { padding: 0 16px }
-  .page { padding: 20px 16px 48px }
-  .page-header { flex-direction: column }
-  .link-share { width: 100% }
-  .kpi-section { grid-template-columns: 1fr }
-  .kpi-row { grid-template-columns: repeat(2,1fr) }
+  .topbar { padding: 0 16px; height: auto; min-height: 52px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px }
+  .topbar-link { display: none }
+  .page { padding: 16px 14px 48px }
+  .kpi-cards { grid-template-columns: repeat(2,1fr) }
+  .kpi-cards.kpi-cards-3 { grid-template-columns: repeat(2,1fr) }
 }
 @media (max-width: 700px) {
-  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px }
-  .kpi + .kpi { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 8px }
+  .kpi-cards { grid-template-columns: repeat(2,1fr) }
   .trow.head { display: none }
   .trow {
     display: grid;
@@ -926,7 +891,7 @@ select option { background: var(--surface); color: var(--t0) }
   .col-apt, .col-proc, .col-reason { display: none }
 }
 @media (max-width: 480px) {
-  .kpi-row-3 { grid-template-columns: repeat(2,1fr) }
+  .kpi-cards.kpi-cards-3 { grid-template-columns: 1fr }
 }
 
 </style>
@@ -1047,123 +1012,100 @@ select option { background: var(--surface); color: var(--t0) }
   ═══════════════════════════════════════════ -->
   <div class="main">
 
-    <!-- ── BARRA DE PERÍODO (sticky) ─────────── -->
-    <div class="period-cmd-bar">
-      <div class="period-cmd-inner">
-        <div class="pcb-status">
-          <div class="pcb-dot" id="pcb-dot"></div>
-          <div class="pcb-info">
-            <span class="pcb-label">Exibindo dados de</span>
-            <span class="pcb-range" id="period-display">Todos os períodos</span>
+    <!-- ── TOPBAR (sticky) ───────────────────── -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Painel</div>
+        <div class="topbar-sub">Gestão de leads e agendamentos</div>
+      </div>
+      <div class="topbar-period">
+        <div class="pcb-dot" id="pcb-dot"></div>
+        <div class="pcb-info">
+          <span class="pcb-label">Período</span>
+          <span class="pcb-range" id="period-display">Todos os períodos</span>
+        </div>
+      </div>
+      <div class="pcb-pills">
+        <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
+        <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
+        <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
+        <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
+        <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
+      </div>
+      <div class="pcb-sep"></div>
+      <div class="pcb-custom-wrap" id="date-filter-wrap">
+        <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+            <line x1="5" y1="1.5" x2="5" y2="4.5"/>
+            <line x1="11" y1="1.5" x2="11" y2="4.5"/>
+            <line x1="2" y1="7" x2="14" y2="7"/>
+          </svg>
+          Personalizar
+        </button>
+        <div class="date-picker-panel" id="date-picker-panel">
+          <div class="dp-row">
+            <span class="dp-label">De</span>
+            <input type="date" class="dp-input" id="dp-from">
+          </div>
+          <div class="dp-row">
+            <span class="dp-label">Até</span>
+            <input type="date" class="dp-input" id="dp-to">
+          </div>
+          <div class="dp-actions">
+            <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
+            <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
           </div>
         </div>
-        <div class="pcb-pills">
-          <button class="pcb-pill" onclick="quickPeriod('hoje',this)">Hoje</button>
-          <button class="pcb-pill" onclick="quickPeriod('semana',this)">Esta semana</button>
-          <button class="pcb-pill" onclick="quickPeriod('15dias',this)">Últimos 15d</button>
-          <button class="pcb-pill" id="pcb-30" onclick="quickPeriod('30dias',this)">Últimos 30d</button>
-          <button class="pcb-pill" onclick="quickPeriod('ano',this)">Ano todo</button>
-        </div>
-        <div class="pcb-sep"></div>
-        <div class="pcb-custom-wrap" id="date-filter-wrap">
-          <button class="pcb-custom" id="date-filter-btn" onclick="toggleDatePicker()">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="2" y="3" width="12" height="11" rx="1.5"/>
-              <line x1="5" y1="1.5" x2="5" y2="4.5"/>
-              <line x1="11" y1="1.5" x2="11" y2="4.5"/>
-              <line x1="2" y1="7" x2="14" y2="7"/>
-            </svg>
-            Personalizar
-          </button>
-          <div class="date-picker-panel" id="date-picker-panel">
-            <div class="dp-row">
-              <span class="dp-label">De</span>
-              <input type="date" class="dp-input" id="dp-from">
-            </div>
-            <div class="dp-row">
-              <span class="dp-label">Até</span>
-              <input type="date" class="dp-input" id="dp-to">
-            </div>
-            <div class="dp-actions">
-              <button class="dp-clear" onclick="clearDateFilter()">Limpar</button>
-              <button class="dp-apply" onclick="applyDateFilter()">Aplicar</button>
-            </div>
-          </div>
-        </div>
+      </div>
+      <div class="topbar-link">
+        <span class="ls-url" id="booking-link">carregando...</span>
+        <button class="btn btn-ghost btn-sm" id="copy-btn" onclick="copyLink()">Copiar</button>
+        <button class="btn btn-wa btn-sm" onclick="shareWhatsApp()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          WhatsApp
+        </button>
       </div>
     </div>
 
     <!-- ── PÁGINA ─────────────────────────────── -->
     <div class="page">
 
-      <!-- Cabeçalho -->
-      <div class="page-header">
-        <div>
-          <div class="ph-title">Painel</div>
-          <div class="ph-sub">Gestão de leads e agendamentos da clínica</div>
+      <!-- KPIs — Funil de leads -->
+      <div class="kpi-cards">
+        <div class="kpi-card blue">
+          <div class="kpi-card-label">Total captados</div>
+          <div class="kpi-card-val" id="s-total">—</div>
         </div>
-        <div class="link-share">
-          <span class="ls-label">Link de agendamento</span>
-          <span class="ls-divider"></span>
-          <span class="ls-url" id="booking-link">carregando...</span>
-          <button class="btn btn-ghost btn-sm" id="copy-btn" onclick="copyLink()">Copiar</button>
-          <button class="btn btn-wa btn-sm" onclick="shareWhatsApp()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.554 4.112 1.523 5.837L0 24l6.32-1.497A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.68-.515-5.21-1.41l-.37-.22-3.84.91.96-3.73-.24-.38A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-            WhatsApp
-          </button>
+        <div class="kpi-card brand">
+          <div class="kpi-card-label">Link enviado</div>
+          <div class="kpi-card-val" id="s-sent">—</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-card-label">Agendados</div>
+          <div class="kpi-card-val" id="s-scheduled">—</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-card-label">Não agendaram</div>
+          <div class="kpi-card-val" id="s-rejected">—</div>
         </div>
       </div>
 
-      <!-- KPIs -->
-      <div class="kpi-section">
-
-        <!-- Funil de leads -->
-        <div class="kpi-group">
-          <div class="kpi-group-head">
-            <span class="kpi-group-title">Funil de leads</span>
-          </div>
-          <div class="kpi-row">
-            <div class="kpi blue">
-              <div class="kpi-label">Total captados</div>
-              <div class="kpi-val" id="s-total">—</div>
-            </div>
-            <div class="kpi brand">
-              <div class="kpi-label">Link enviado</div>
-              <div class="kpi-val" id="s-sent">—</div>
-            </div>
-            <div class="kpi green">
-              <div class="kpi-label">Agendados</div>
-              <div class="kpi-val" id="s-scheduled">—</div>
-            </div>
-            <div class="kpi amber">
-              <div class="kpi-label">Não agendaram</div>
-              <div class="kpi-val" id="s-rejected">—</div>
-            </div>
-          </div>
+      <!-- KPIs — Valores -->
+      <div class="kpi-cards kpi-cards-3">
+        <div class="kpi-card financial green">
+          <div class="kpi-card-label">Valor agendado <span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div>
+          <div class="kpi-card-val" id="s-val-agendado">—</div>
         </div>
-
-        <!-- Valores (Cormorant itálico) -->
-        <div class="kpi-group financial">
-          <div class="kpi-group-head">
-            <span class="kpi-group-title">Valores</span>
-          </div>
-          <div class="kpi-row-3">
-            <div class="kpi green">
-              <div class="kpi-label">Valor agendado <span class="tip" data-tip="Soma dos procedimentos com agendamento pendente ou confirmado">?</span></div>
-              <div class="kpi-val" id="s-val-agendado">—</div>
-            </div>
-            <div class="kpi green">
-              <div class="kpi-label">Valor realizado <span class="tip" data-tip="Soma dos procedimentos já concluídos">?</span></div>
-              <div class="kpi-val" id="s-val-realizado">—</div>
-            </div>
-            <div class="kpi red">
-              <div class="kpi-label">Valor perdido <span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div>
-              <div class="kpi-val" id="s-val-perdido">—</div>
-            </div>
-          </div>
+        <div class="kpi-card financial green">
+          <div class="kpi-card-label">Valor realizado <span class="tip" data-tip="Soma dos procedimentos já concluídos">?</span></div>
+          <div class="kpi-card-val" id="s-val-realizado">—</div>
         </div>
-
-      </div><!-- /kpi-section -->
+        <div class="kpi-card financial red">
+          <div class="kpi-card-label">Valor perdido <span class="tip" data-tip="Soma dos agendamentos cancelados">?</span></div>
+          <div class="kpi-card-val" id="s-val-perdido">—</div>
+        </div>
+      </div>
 
       <!-- Card de conteúdo: Clientes / Agenda -->
       <div class="content-card">
