@@ -5,60 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrai — Cliente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
 <style>
 
 /* ─── Reset ──────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 html, body { height: 100%; overflow: hidden }
 body {
-  font-family: 'DM Sans', -apple-system, sans-serif;
-  color: rgba(255,255,255,0.90);
+  font-family: 'Satoshi', -apple-system, sans-serif;
+  color: #1C1917;
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
-  background: #070C18;
+  background: #EAE6E0;
 }
 a { color: inherit; text-decoration: none }
 button { font-family: inherit; cursor: pointer }
 input, select { font-family: inherit }
-select option { background: #0E1829; color: rgba(255,255,255,0.85) }
+select option { background: #FAFAF7; color: #1C1917 }
 
 /* ─── Tokens ─────────────────────────────────── */
 :root {
-  --sb-bg:         #0C1A2E;
-  --sb-text:       rgba(255,255,255,0.50);
-  --sb-text-hover: rgba(255,255,255,0.82);
-  --sb-gold:       #B5944A;
-  --sb-active-bg:  rgba(181,148,74,0.10);
+  --sb-bg:         #0B1F2A;
+  --sb-text:       rgba(245,245,242,0.52);
+  --sb-text-hover: rgba(245,245,242,0.88);
+  --sb-gold:       #C9A96E;
+  --sb-active-bg:  rgba(201,169,110,0.15);
   --sb-border:     rgba(255,255,255,0.08);
   --sb-width:      220px;
 
-  --brand:     #B59248;
-  --brand-h:   #9f8038;
-  --brand-dim: rgba(181,146,72,0.10);
-  --brand-ring:rgba(181,146,72,0.20);
-  --brand-l:   #D4B87A;
+  --brand:     #8B6914;
+  --brand-h:   #7a5c11;
+  --brand-dim: rgba(139,105,20,0.10);
+  --brand-ring:rgba(139,105,20,0.20);
+  --brand-l:   #C9A96E;
 
-  --bg:       #070C18;
-  --surface:  #0E1829;
-  --surface2: #152030;
-  --border:   rgba(255,255,255,0.07);
-  --border-m: rgba(255,255,255,0.10);
-  --shadow:   0 2px 8px rgba(0,0,0,0.40), 0 8px 32px rgba(0,0,0,0.35);
+  --bg:       #EAE6E0;
+  --surface:  #FAFAF7;
+  --surface2: #F0EDE8;
+  --border:   #DDD9D2;
+  --border-m: #ccc8c0;
+  --shadow:   0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.10);
 
-  --green:    #34C985;
-  --green-bg: rgba(52,201,133,0.10);
-  --amber:    #E0A030;
-  --amber-bg: rgba(224,160,48,0.10);
-  --red:      #F06060;
-  --red-bg:   rgba(240,96,96,0.10);
-  --blue:     #5B9CF6;
-  --blue-bg:  rgba(91,156,246,0.10);
+  --green:    #1f8f5e;
+  --green-bg: rgba(31,143,94,0.10);
+  --amber:    #b07810;
+  --amber-bg: rgba(176,120,16,0.10);
+  --red:      #c03535;
+  --red-bg:   rgba(192,53,53,0.10);
+  --blue:     #3e6fc0;
+  --blue-bg:  rgba(62,111,192,0.10);
 
-  --t0: rgba(255,255,255,0.92);
-  --t1: rgba(255,255,255,0.58);
-  --t2: rgba(255,255,255,0.34);
-  --t3: rgba(255,255,255,0.14);
+  --t0: #1C1917;
+  --t1: #7a7268;
+  --t2: #a09890;
+  --t3: #ccc8c0;
 }
 
 /* ─── Layout ─────────────────────────────────── */
@@ -94,13 +95,11 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 }
 .sb-watermark svg { width: 100%; height: 100% }
 
-/* Logo */
-.sb-logo-area {
-  padding: 18px 16px 16px;
-  border-bottom: 1px solid var(--sb-border);
-  flex-shrink: 0;
-}
-.sb-logo-img { width: 100%; max-width: 188px; display: block; }
+/* Brand */
+.sb-brand { padding: 18px 16px 16px; border-bottom: 1px solid var(--sb-border); flex-shrink: 0; display: flex; align-items: center; gap: 11px }
+.sb-compass { width: 32px; height: 32px; flex-shrink: 0 }
+.sb-name { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 16px; color: rgba(245,245,242,0.95); letter-spacing: 0.22em; line-height: 1.15 }
+.sb-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 11px; color: rgba(245,245,242,0.40); letter-spacing: 0.02em; margin-top: 2px }
 
 /* Nav */
 .sb-nav {
@@ -163,24 +162,20 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 .main {
   flex: 1;
   overflow-y: auto;
-  background:
-    radial-gradient(circle, rgba(181,148,74,0.018) 1px, transparent 1px),
-    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(181,148,74,0.07) 0%, transparent 55%),
-    #070C18;
-  background-size: 36px 36px, auto, auto;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   scrollbar-width: thin;
-  scrollbar-color: rgba(181,148,74,0.22) transparent;
+  scrollbar-color: var(--t3) transparent;
 }
 
 .page { max-width: 780px; margin: 0 auto; padding: 24px; width: 100% }
-.page-back { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--brand); cursor:pointer; background:none; border:none; padding:0; margin-bottom:20px; font-family:'DM Sans',sans-serif }
+.page-back { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--brand); cursor:pointer; background:none; border:none; padding:0; margin-bottom:20px; font-family:'Satoshi',sans-serif }
 .page-back:hover { text-decoration:underline }
 .page-back svg { width:14px; height:14px }
 
 /* Hero card */
-.hero { background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.02) 100%); border-radius:14px; border:1px solid rgba(255,255,255,0.08); border-top:1px solid rgba(255,255,255,0.12); padding:22px 24px; display:flex; align-items:flex-start; gap:18px; margin-bottom:14px; box-shadow:0 16px 40px rgba(0,0,0,0.30) }
+.hero { background:var(--surface); border-radius:14px; border:1px solid var(--border); padding:22px 24px; display:flex; align-items:flex-start; gap:18px; margin-bottom:14px; box-shadow:var(--shadow) }
 .hero-av { width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:600; flex-shrink:0 }
 .hero-info { flex:1; min-width:0 }
 .hero-name { font-size:18px; font-weight:600; margin-bottom:3px }
@@ -192,20 +187,20 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 .b-link_sent { background:var(--amber-bg); color:var(--amber) }
 .b-new,.b-captado { background:var(--blue-bg); color:var(--blue) }
 .hero-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0 }
-.btn { padding:7px 14px; font-size:12px; font-weight:500; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:none; white-space:nowrap; text-decoration:none; font-family:'DM Sans',sans-serif }
-.btn-ghost { background:none; border:1px solid rgba(255,255,255,0.14); color:var(--t1) }
-.btn-ghost:hover { background:rgba(255,255,255,0.06); color:var(--t0) }
+.btn { padding:7px 14px; font-size:12px; font-weight:500; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:none; white-space:nowrap; text-decoration:none; font-family:'Satoshi',sans-serif }
+.btn-ghost { background:none; border:1px solid var(--border-m); color:var(--t1) }
+.btn-ghost:hover { background:var(--surface2); color:var(--t0) }
 .btn-green { background:#25D366; color:white; font-size:11px }
 .btn-danger { background:none; border:0.5px solid rgba(176,48,48,0.3); color:#A32D2D; font-size:11px }
 .btn-danger:hover { background:#FAECE7 }
 
 /* Sections */
-.section { background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.02) 100%); border-radius:14px; border:1px solid rgba(255,255,255,0.07); border-top:1px solid rgba(255,255,255,0.10); margin-bottom:14px; overflow:hidden; box-shadow:0 12px 32px rgba(0,0,0,0.28) }
-.section-head { padding:13px 20px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between }
+.section { background:var(--surface); border-radius:14px; border:1px solid var(--border); margin-bottom:14px; overflow:hidden; box-shadow:var(--shadow) }
+.section-head { padding:13px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between }
 .section-title { font-size:13px; font-weight:600; color:var(--t0) }
 
 /* Info rows */
-.info-row { display:flex; justify-content:space-between; align-items:center; padding:11px 20px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px }
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:11px 20px; border-bottom:1px solid var(--border); font-size:13px }
 .info-row:last-child { border:none }
 .info-label { color:var(--t2) }
 .info-val { font-weight:500; text-align:right; max-width:60%; color:var(--t1) }
@@ -215,7 +210,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 .info-val.amber { color:var(--amber) }
 
 /* Appointment card */
-.apt-card { padding:13px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05) }
+.apt-card { padding:13px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border) }
 .apt-card:last-child { border:none }
 .apt-bar { width:3px; height:38px; border-radius:2px; flex-shrink:0 }
 .apt-info { flex:1 }
@@ -224,11 +219,11 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 .apt-status { font-size:10px; padding:3px 9px; border-radius:20px }
 .s-confirmed { background:#E0F4EE; color:#27500A }
 .s-pending { background:#FEF3E2; color:#633806 }
-.s-done { background:rgba(255,255,255,0.07); color:var(--t2) }
+.s-done { background:var(--surface2); color:var(--t2) }
 .s-cancelled { background:var(--red-bg); color:var(--red) }
 
 /* Status editor */
-.status-select { padding:6px 10px; font-size:12px; border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--t1); background:var(--surface2); cursor:pointer; outline:none; font-family:'DM Sans',sans-serif }
+.status-select { padding:6px 10px; font-size:12px; border:1px solid var(--border-m); border-radius:8px; color:var(--t1); background:var(--surface2); cursor:pointer; outline:none; font-family:'Satoshi',sans-serif }
 .status-select:focus { border-color:var(--brand); box-shadow:0 0 0 2px rgba(181,148,74,0.20) }
 
 /* Timeline */
@@ -241,25 +236,25 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 .tl-dot.green { background:#2D8C66 }
 .tl-dot.amber { background:#E09F1A }
 .tl-dot.red { background:#E24B4A }
-.tl-dot.gray { background:rgba(255,255,255,0.22) }
-.tl-line { width:1px; background:rgba(255,255,255,0.07); flex:1; margin-top:4px }
+.tl-dot.gray { background:var(--t3) }
+.tl-line { width:1px; background:var(--border); flex:1; margin-top:4px }
 .tl-content { flex:1; min-width:0; padding-bottom:4px }
 .tl-title { font-size:13px; font-weight:500; margin-bottom:2px }
 .tl-sub { font-size:11px; color:#A89890 }
 
 /* Avatar colors */
-.av-0 { background:rgba(181,148,74,0.14); color:#D4B87A }
-.av-1 { background:rgba(52,201,133,0.12); color:#34C985 }
-.av-2 { background:rgba(224,160,48,0.12); color:#E0A030 }
-.av-3 { background:rgba(240,96,96,0.12); color:#F06060 }
-.av-4 { background:rgba(255,255,255,0.07); color:var(--t2) }
-.av-5 { background:rgba(91,156,246,0.12); color:#5B9CF6 }
+.av-0 { background:rgba(139,105,20,0.12); color:#8B6914 }
+.av-1 { background:rgba(31,143,94,0.12); color:#1f8f5e }
+.av-2 { background:rgba(176,120,16,0.12); color:#b07810 }
+.av-3 { background:rgba(192,53,53,0.12); color:#c03535 }
+.av-4 { background:var(--surface2); color:var(--t2) }
+.av-5 { background:rgba(62,111,192,0.12); color:#3e6fc0 }
 
 .loading { padding:64px; text-align:center; color:var(--t2); font-size:13px }
 .empty-state { padding:32px; text-align:center; color:var(--t2); font-size:13px }
 
 /* Toast */
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#1A1614; color:white; padding:10px 18px; border-radius:20px; font-size:13px; z-index:200; opacity:0; transition:all 0.25s; pointer-events:none }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#1C1917; color:white; padding:10px 18px; border-radius:20px; font-size:13px; z-index:200; opacity:0; transition:all 0.25s; pointer-events:none }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0) }
 
 /* ─── Responsive ─────────────────────────────── */
@@ -267,8 +262,8 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   .sidebar { width: 58px }
   .sb-section-label, .sb-item span, .sb-clinic-name { display: none }
   .sb-item { justify-content: center; padding: 10px }
-  .sb-logo-area { padding: 12px 8px; display: flex; justify-content: center }
-  .sb-logo-img { max-width: 40px }
+  .sb-brand { padding: 12px 8px; display: flex; justify-content: center }
+  .sb-name, .sb-tagline { display: none }
 }
 
 </style>
@@ -296,9 +291,18 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
       </svg>
     </div>
 
-    <!-- Logo -->
-    <div class="sb-logo-area">
-      <img src="/logo-astra-fundo.png" alt="Astraí" class="sb-logo-img">
+    <!-- Brand -->
+    <div class="sb-brand">
+      <svg class="sb-compass" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,2 21.2,17.5 26,14 21.8,19 38,20 21.8,21 26,26 21.2,22.5 20,38 18.8,22.5 14,26 18.2,21 2,20 18.2,19 14,14 18.8,17.5" fill="#C9A96E" opacity="0.9"/>
+        <polygon points="20,2 20.6,17.8 22.5,16.2 20.9,18.8 26,20 20.9,21.2 22.5,23.8 20.6,22.2 20,38 19.4,22.2 17.5,23.8 19.1,21.2 14,20 19.1,18.8 17.5,16.2 19.4,17.8" fill="white" opacity="0.95"/>
+        <circle cx="20" cy="20" r="2.8" fill="#C9A96E"/>
+        <circle cx="20" cy="20" r="1.4" fill="white"/>
+      </svg>
+      <div>
+        <div class="sb-name">ASTRAI</div>
+        <div class="sb-tagline">inteligência que guia</div>
+      </div>
     </div>
 
     <!-- Nav -->

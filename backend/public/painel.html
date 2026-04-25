@@ -4,61 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrai — Painel</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
 <style>
 
 /* ─── Reset ──────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 html, body { height: 100%; overflow: hidden }
 body {
-  font-family: 'DM Sans', -apple-system, sans-serif;
-  color: #1A1C18;
+  font-family: 'Satoshi', -apple-system, sans-serif;
+  color: var(--t0);
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
-  background: #0C1A2E;
+  background: var(--bg);
 }
 a { color: inherit; text-decoration: none }
 button { font-family: inherit; cursor: pointer }
 input, select { font-family: inherit }
-select option { background: #0E1829; color: rgba(255,255,255,0.85) }
+select option { background: var(--surface); color: var(--t0) }
 
-/* ─── Tokens ─────────────────────────────────── */
+/* ─── Tokens — Tema Misto ─────────────────────── */
 :root {
-  --sb-bg:         #0C1A2E;
-  --sb-text:       rgba(255,255,255,0.50);
-  --sb-text-hover: rgba(255,255,255,0.82);
-  --sb-gold:       #B5944A;
-  --sb-active-bg:  rgba(201,169,110,0.10);
-  --sb-border:     rgba(255,255,255,0.08);
-  --sb-width:      220px;
+  --sb-bg:         #0B1F2A;
+  --sb-text:       rgba(245,245,242,0.62);
+  --sb-text-hover: rgba(245,245,242,0.92);
+  --sb-gold:       #C9A96E;
+  --sb-active-bg:  rgba(201,169,110,0.15);
+  --sb-border:     rgba(201,169,110,0.18);
+  --sb-width:      236px;
 
-  --brand:     #B59248;
-  --brand-h:   #9f8038;
-  --brand-dim: rgba(181,146,72,0.10);
-  --brand-ring:rgba(181,146,72,0.20);
-  --brand-l:   #D4B87A;
+  --brand:      #8B6914;
+  --brand-h:    #7a5c10;
+  --brand-dim:  rgba(139,105,20,0.10);
+  --brand-ring: rgba(139,105,20,0.22);
+  --brand-l:    #C9A96E;
 
-  --bg:       #070C18;
-  --surface:  #0E1829;
-  --surface2: #152030;
-  --border:   rgba(255,255,255,0.07);
-  --border-m: rgba(255,255,255,0.10);
-  --shadow:   0 2px 8px rgba(0,0,0,0.40), 0 8px 32px rgba(0,0,0,0.35);
+  --bg:       #EAE6E0;
+  --surface:  #FAFAF7;
+  --surface2: #F0EDE8;
+  --border:   #DDD9D2;
+  --border-m: rgba(28,25,23,0.10);
+  --shadow:   0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
 
-  --green:    #34C985;
-  --green-bg: rgba(52,201,133,0.10);
-  --amber:    #E0A030;
-  --amber-bg: rgba(224,160,48,0.10);
-  --red:      #F06060;
-  --red-bg:   rgba(240,96,96,0.10);
-  --blue:     #5B9CF6;
-  --blue-bg:  rgba(91,156,246,0.10);
+  --green:    #1f8f5e;
+  --green-bg: rgba(31,143,94,0.10);
+  --amber:    #b07810;
+  --amber-bg: rgba(176,120,16,0.10);
+  --red:      #c03535;
+  --red-bg:   rgba(192,53,53,0.10);
+  --blue:     #3e6fc0;
+  --blue-bg:  rgba(62,111,192,0.10);
 
-  --t0: rgba(255,255,255,0.92);
-  --t1: rgba(255,255,255,0.58);
-  --t2: rgba(255,255,255,0.34);
-  --t3: rgba(255,255,255,0.14);
+  --t0: #1C1917;
+  --t1: #7a7268;
+  --t2: #b0a89e;
+  --t3: #DDD9D2;
 }
 
 /* ─── Layout ─────────────────────────────────── */
@@ -94,16 +96,31 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 }
 .sb-watermark svg { width: 100%; height: 100% }
 
-/* Logo */
-.sb-logo-area {
+/* Brand */
+.sb-brand {
   padding: 18px 16px 16px;
   border-bottom: 1px solid var(--sb-border);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
 }
-.sb-logo-img {
-  width: 100%;
-  max-width: 188px;
-  display: block;
+.sb-compass { width: 32px; height: 32px; flex-shrink: 0 }
+.sb-name {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: rgba(245,245,242,0.95);
+  letter-spacing: 0.22em;
+  line-height: 1.15;
+}
+.sb-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: rgba(245,245,242,0.40);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
 }
 
 /* Nav */
@@ -230,22 +247,18 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background:
-    radial-gradient(circle, rgba(181,148,74,0.018) 1px, transparent 1px),
-    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(181,148,74,0.07) 0%, transparent 55%),
-    #070C18;
-  background-size: 36px 36px, auto, auto;
+  background: var(--bg);
   min-width: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(181,148,74,0.22) transparent;
+  scrollbar-color: rgba(139,105,20,0.20) transparent;
 }
 
 /* ─── Period command bar (sticky dentro do .main) */
 .period-cmd-bar {
-  background: rgba(7,12,24,0.80);
+  background: rgba(250,250,247,0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(181,148,74,0.12);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 30;
@@ -314,7 +327,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   background: none;
   white-space: nowrap;
   transition: all 0.12s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   flex-shrink: 0;
 }
 .pcb-pill:hover:not(.on) { background: var(--surface2); color: var(--t0) }
@@ -338,7 +351,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   cursor: pointer;
   color: var(--t2);
   background: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   transition: all 0.12s;
 }
 .pcb-custom svg { width: 11px; height: 11px }
@@ -349,13 +362,13 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  background: #0E1829;
-  border: 1px solid rgba(181,148,74,0.18);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
   z-index: 50;
   min-width: 258px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
 }
 .date-picker-panel.on { display: block }
 .dp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px }
@@ -369,7 +382,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   background: var(--bg);
   color: var(--t0);
   outline: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
 }
 .dp-input:focus { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-ring) }
 .dp-actions { display: flex; gap: 6px; margin-top: 10px }
@@ -383,7 +396,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
 }
 .dp-clear {
   padding: 8px 12px;
@@ -393,7 +406,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   color: var(--t1);
   font-size: 12px;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
 }
 
 /* ─── Page ───────────────────────────────────── */
@@ -416,7 +429,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 32px;
   font-weight: 600;
-  color: rgba(255,255,255,0.95);
+  color: var(--t0);
   letter-spacing: 0.01em;
   line-height: 1.05;
 }
@@ -431,13 +444,13 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(181,148,74,0.20);
-  border-top: 1px solid rgba(181,148,74,0.28);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--brand-l);
   border-radius: 10px;
   padding: 7px 10px 7px 14px;
   flex-wrap: wrap;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.30);
+  box-shadow: var(--shadow);
 }
 .ls-label { font-size: 11px; color: var(--t2); font-weight: 500; white-space: nowrap }
 .ls-url {
@@ -482,14 +495,20 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   margin-bottom: 28px;
 }
 .kpi-group {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-top: 1px solid rgba(255,255,255,0.10);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 18px 20px 16px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 40px rgba(0,0,0,0.30);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-group::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 28px; height: 2px;
+  background: var(--brand-l);
 }
 .kpi-group-head {
   display: flex;
@@ -533,11 +552,11 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   color: var(--t0);
   font-variant-numeric: tabular-nums;
 }
-.kpi.brand .kpi-val { color: var(--brand); text-shadow: 0 0 28px rgba(181,148,74,0.50) }
-.kpi.green .kpi-val { color: var(--green); text-shadow: 0 0 24px rgba(52,201,133,0.40) }
-.kpi.amber .kpi-val { color: var(--amber); text-shadow: 0 0 20px rgba(224,160,48,0.35) }
-.kpi.red   .kpi-val { color: var(--red);   text-shadow: 0 0 20px rgba(240,96,96,0.35)  }
-.kpi.blue  .kpi-val { color: var(--blue);  text-shadow: 0 0 20px rgba(91,156,246,0.35) }
+.kpi.brand .kpi-val { color: var(--brand) }
+.kpi.green .kpi-val { color: var(--green) }
+.kpi.amber .kpi-val { color: var(--amber) }
+.kpi.red   .kpi-val { color: var(--red)   }
+.kpi.blue  .kpi-val { color: var(--blue)  }
 
 /* Valores financeiros: Cormorant Garamond itálico — o toque especial */
 .kpi-group.financial .kpi-val {
@@ -550,12 +569,11 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
 
 /* ─── Content card ───────────────────────────── */
 .content-card {
-  background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-top: 1px solid rgba(255,255,255,0.10);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 48px rgba(0,0,0,0.35);
+  box-shadow: var(--shadow);
 }
 
 /* ─── Tabs ───────────────────────────────────── */
@@ -613,7 +631,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   width: 100%;
   padding: 8px 12px 8px 32px;
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   background: var(--bg);
   border: 1px solid var(--border-m);
   border-radius: 8px;
@@ -662,7 +680,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   cursor: pointer;
   color: var(--t1);
   background: var(--surface);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
   white-space: nowrap;
   transition: all 0.15s;
 }
@@ -725,7 +743,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   cursor: pointer;
   outline: none;
   transition: all 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
 }
 .inline-sel.s-new,
 .inline-sel.s-captado   { border-color: rgba(46,106,174,0.30);  color: var(--blue);  background: var(--blue-bg)  }
@@ -849,7 +867,7 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   z-index: 99;
   pointer-events: none;
   line-height: 1.4;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Satoshi', sans-serif;
 }
 .tip:hover::before {
   content: '';
@@ -875,8 +893,8 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
   .sb-divider { display: none }
   .sb-item { padding: 10px; justify-content: center; box-shadow: none }
   .sb-item.active { background: var(--sb-active-bg) }
-  .sb-logo-area { padding: 12px 8px; display: flex; justify-content: center }
-  .sb-logo-img { max-width: 40px }
+  .sb-brand { padding: 12px 8px; justify-content: center }
+  .sb-name, .sb-tagline { display: none }
   .sb-nav { padding: 8px 6px }
   .sb-bottom { padding: 10px 6px }
   .sb-user { justify-content: center }
@@ -936,9 +954,30 @@ select option { background: #0E1829; color: rgba(255,255,255,0.85) }
       </svg>
     </div>
 
-    <!-- Logo -->
-    <div class="sb-logo-area">
-      <img src="/logo-astra-fundo.png" alt="Astraí" class="sb-logo-img">
+    <!-- Brand -->
+    <div class="sb-brand">
+      <div class="sb-compass" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+          <path d="M50 5 L53.5 44 L50 50 L46.5 44 Z" fill="#C9A96E"/>
+          <path d="M50 5 L53.5 44 L50 50 L46.5 44 Z" fill="#C9A96E" transform="rotate(90 50 50)"/>
+          <path d="M50 5 L53.5 44 L50 50 L46.5 44 Z" fill="#C9A96E" transform="rotate(180 50 50)"/>
+          <path d="M50 5 L53.5 44 L50 50 L46.5 44 Z" fill="#C9A96E" transform="rotate(270 50 50)"/>
+          <path d="M50 21 L52.5 45 L50 50 L47.5 45 Z" fill="#C9A96E" opacity="0.55" transform="rotate(45 50 50)"/>
+          <path d="M50 21 L52.5 45 L50 50 L47.5 45 Z" fill="#C9A96E" opacity="0.55" transform="rotate(135 50 50)"/>
+          <path d="M50 21 L52.5 45 L50 50 L47.5 45 Z" fill="#C9A96E" opacity="0.55" transform="rotate(225 50 50)"/>
+          <path d="M50 21 L52.5 45 L50 50 L47.5 45 Z" fill="#C9A96E" opacity="0.55" transform="rotate(315 50 50)"/>
+          <circle cx="50" cy="50" r="7.5" stroke="#C9A96E" stroke-width="1.5" fill="#0B1F2A"/>
+          <circle cx="50" cy="50" r="3" fill="#C9A96E"/>
+          <path d="M50 1.5 L51.2 5 L50 8.5 L48.8 5 Z" fill="#D4AB32"/>
+          <path d="M50 1.5 L51.2 5 L50 8.5 L48.8 5 Z" fill="#D4AB32" transform="rotate(90 50 50)"/>
+          <path d="M50 1.5 L51.2 5 L50 8.5 L48.8 5 Z" fill="#D4AB32" transform="rotate(180 50 50)"/>
+          <path d="M50 1.5 L51.2 5 L50 8.5 L48.8 5 Z" fill="#D4AB32" transform="rotate(270 50 50)"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sb-name">ASTRAI</div>
+        <div class="sb-tagline">inteligência que guia</div>
+      </div>
     </div>
 
     <!-- Navegação -->
