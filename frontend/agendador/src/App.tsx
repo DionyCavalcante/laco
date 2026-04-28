@@ -702,7 +702,7 @@ const OfferPage = ({
     ...(procPhotos[selectedProc.id]?.after || []),
   ] : [];
   const allProcPhotos: Photo[] = (carouselPhotos.length > 0 ? carouselPhotos : fallbackProcPhotos)
-    .map((p) => ({ url: photoUrl(p.url), rotation: p.rotation }));
+    .map((p) => ({ url: photoUrl(p.url), rotation: p.rotation, label: p.label ?? null }));
   const fallbackImages: Photo[] = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
@@ -899,6 +899,15 @@ const OfferPage = ({
                     <ChevronRight size={14} />
                   </button>
                 </>
+              )}
+              {/* Badge por foto */}
+              {images[currentImg]?.label && (
+                <span
+                  className="absolute top-4 right-4 pointer-events-none"
+                  style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', fontWeight: 500, color: '#444', letterSpacing: '0.3px', boxShadow: '0 1px 6px rgba(0,0,0,0.08)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 32px)', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                >
+                  {images[currentImg].label}
+                </span>
               )}
               {/* Overlay editorial — só dots */}
               {images.length > 1 && (
