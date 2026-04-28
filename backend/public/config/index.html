@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrai — Configurações</title>
+  <link rel="icon" type="image/png" href="/logomarca-astra-Sfundo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -505,6 +506,11 @@ button,input,select,textarea{font-family:inherit}
           <input type="text" id="f-name" placeholder="Ex: Botox — testa">
         </div>
         <div class="field">
+          <label>Rótulo do badge na foto <span style="font-weight:400;color:rgba(255,255,255,0.30)">(opcional — se vazio usa o nome)</span></label>
+          <input type="text" id="f-category" placeholder="Ex: Volume Russo, Fio a Fio, Clássico...">
+          <div class="field-hint">Aparece como etiqueta sutil no canto da imagem na lista de procedimentos</div>
+        </div>
+        <div class="field">
           <label>Texto abaixo do nome no agendamento</label>
           <input type="text" id="f-description" maxlength="80" placeholder='Ex: "Resultado comprovado"'>
           <div class="field-hint">Aparece no card do procedimento, logo abaixo do nome.</div>
@@ -942,6 +948,7 @@ async function openModal(proc=null){
   document.getElementById('edit-id').value=proc?proc.id:''
   document.getElementById('modal-title').textContent=proc?'Editar procedimento':'Novo procedimento'
   document.getElementById('f-name').value=proc?proc.name:''
+  document.getElementById('f-category').value=proc?proc.category||'':''
   document.getElementById('f-description').value=proc?proc.description||'':''
   document.getElementById('f-duration').value=proc?proc.duration:''
   document.getElementById('f-price').value=proc?((proc.price||0)/100).toFixed(2):''
@@ -987,6 +994,7 @@ async function saveProc(){
   const isNew=!id
   const body={
     name:document.getElementById('f-name').value.trim(),
+    category:document.getElementById('f-category').value.trim()||null,
     duration:parseInt(document.getElementById('f-duration').value)||60,
     price:Math.round(parseFloat(document.getElementById('f-price').value||0)*100),
     price_old:Math.round(parseFloat(document.getElementById('f-price-old').value||0)*100)||null,

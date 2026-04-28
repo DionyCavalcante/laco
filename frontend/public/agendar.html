@@ -67,6 +67,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:va
 .cdot.on{background:white}
 .carr-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;z-index:4}
 .carr-btn.l{left:7px}.carr-btn.r{right:7px}
+.proc-img-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:500;color:#444;letter-spacing:0.3px;z-index:5;box-shadow:0 1px 6px rgba(0,0,0,0.08);pointer-events:none;white-space:nowrap;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis}
 
 .proc-foot{padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
 .proc-name{font-size:14px;font-weight:500}
@@ -496,6 +497,7 @@ function renderProcList() {
       <div class="carousel-wrap" id="${cid}">
         <div class="carousel-track">${slides}</div>
         ${arrows}${dots}
+        <div class="proc-img-badge">${esc(p.name)}</div>
       </div>
       <div class="proc-foot">
         <div>

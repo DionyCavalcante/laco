@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Qualquer clÃ­nica se cadastra sozinha em `laco.app/cadastro`, sem precisar que o superadmin crie a conta manualmente. Fluxo completo: cadastro â†’ checkout â†’ wizard â†’ portal no ar.
+Qualquer clÃ­nica se cadastra sozinha em `astrai.com.br/cadastro`, sem precisar que o superadmin crie a conta manualmente. Fluxo completo: cadastro â†’ checkout â†’ wizard â†’ portal no ar.
 
 ## Contexto
 
@@ -16,7 +16,7 @@ EPIC 3 permite ao superadmin criar clÃ­nicas manualmente. Este epic torna isso
 ## Fluxo completo
 
 ```
-1. Cliente acessa laco.app/cadastro
+1. Cliente acessa astrai.com.br/cadastro
 2. Preenche: nome da clÃ­nica, email, senha, confirmar senha
 3. Sistema cria: clinic + user admin + slug automÃ¡tico
 4. Redireciona para /checkout (R$ 1,00 â€” EPIC 5)
@@ -51,8 +51,8 @@ Para: email do admin
 Assunto: "Bem-vinda ao LaÃ§o! Seu portal estÃ¡ quase pronto ðŸŽ‰"
 ConteÃºdo:
   - Nome da clÃ­nica
-  - Link do portal: laco.app/{slug}/agendar
-  - Link do CRM: laco.app/painel
+  - Link do portal: astrai.com.br/{slug}/agendar
+  - Link do CRM: astrai.com.br/painel
   - CTA: "Completar configuraÃ§Ã£o"
 
 ServiÃ§o de email: Resend (simples, preÃ§o acessÃ­vel, boa DX)
@@ -86,3 +86,4 @@ VariÃ¡vel: RESEND_API_KEY
 - `backend/src/routes/email.js`
 - `backend/src/index.js`
 - `backend/src/lib/tenant.js`
+- `docs/stories/EPIC-6-self-service-signup.md`

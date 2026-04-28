@@ -11,7 +11,7 @@ Painel exclusivo do dono da plataforma para criar clÃ­nicas, monitorar o negÃ
 
 ## Contexto
 
-Com multi-tenant ativo (EPIC 1) e auth real (EPIC 2), o superadmin precisa de um painel separado do CRM das clÃ­nicas. Acesso via `laco.app/superadmin`.
+Com multi-tenant ativo (EPIC 1) e auth real (EPIC 2), o superadmin precisa de um painel separado do CRM das clÃ­nicas. Acesso via `astrai.com.br/superadmin`.
 
 ## Funcionalidades
 
@@ -106,3 +106,4 @@ CREATE TABLE audit_logs (
 - `backend/src/index.js`
 - `backend/public/superadmin/index.html`
 - `backend/src/db/migrate.js`
+- `docs/stories/EPIC-3-superadmin.md`

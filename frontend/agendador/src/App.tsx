@@ -564,6 +564,27 @@ const GalleryPage = ({
                 )}
                 <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
               </div>
+              <span
+                className="absolute top-3 right-3 z-10 pointer-events-none"
+                style={{
+                  background: 'rgba(255,255,255,0.82)',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  borderRadius: '6px',
+                  padding: '3px 10px',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  color: '#444',
+                  letterSpacing: '0.3px',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 'calc(100% - 16px)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {proc.category || proc.name}
+              </span>
             </div>
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">

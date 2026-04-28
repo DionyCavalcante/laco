@@ -216,7 +216,7 @@ NODE_ENV=production
 API_SECRET=gere-com-openssl-rand-hex-32
 CLINIC_SLUG=bella-estetica
 CLINIC_NAME=Clínica Bella Estética
-FRONTEND_URL=https://seu-app.railway.app
+FRONTEND_URL=https://astrai.com.br
 ```
 
 > Volumes **não são necessários** — fotos ficam salvas no banco de dados.
@@ -229,7 +229,7 @@ FRONTEND_URL=https://seu-app.railway.app
 
 Configure o webhook na Evolution:
 ```
-POST https://seu-app.railway.app/webhook/evolution
+POST https://astrai.com.br/webhook/evolution
 ```
 
 **Fluxo recomendado com automação (n8n):**

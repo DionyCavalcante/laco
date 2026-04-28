@@ -1,6 +1,6 @@
 # Laço — Documentação da API
 
-Base URL: `https://seu-app.railway.app`
+Base URL: `https://astrai.com.br`
 
 ## Autenticação
 
