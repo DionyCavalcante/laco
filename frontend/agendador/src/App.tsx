@@ -550,7 +550,7 @@ const GalleryPage = ({
                 )}
                 <span className="absolute bottom-3 left-3 ba-label">{isResults ? 'Caso 1' : 'Antes'}</span>
                 {before?.label && (
-                  <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'rgba(26,31,44,0.80)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(200,170,130,0.35)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#C8AA82', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(0,0,0,0.25)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {before.label}
                   </span>
                 )}
@@ -569,7 +569,7 @@ const GalleryPage = ({
                 )}
                 <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
                 {after?.label && (
-                  <span className="absolute top-3 right-3 pointer-events-none" style={{ background: 'rgba(26,31,44,0.80)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(200,170,130,0.35)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#C8AA82', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(0,0,0,0.25)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span className="absolute top-3 right-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {after.label}
                   </span>
                 )}
@@ -905,18 +905,15 @@ const OfferPage = ({
                 <span
                   className="absolute top-4 right-4 pointer-events-none"
                   style={{
-                    background: 'rgba(26,31,44,0.80)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(200,170,130,0.35)',
+                    background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)',
                     borderRadius: '999px',
                     padding: '6px 16px',
                     fontSize: '10px',
                     fontWeight: 700,
-                    color: '#C8AA82',
+                    color: '#1A1F2C',
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                    boxShadow: '0 4px 16px rgba(184,154,106,0.45)',
                     whiteSpace: 'nowrap',
                     maxWidth: 'calc(100% - 32px)',
                     overflow: 'hidden',
