@@ -187,6 +187,10 @@ button,input,select,textarea{font-family:inherit}
 .pos-reticle{position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(201,169,110,.85);border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.3);transform:translate(-50%,-50%);pointer-events:none;transition:left 0.05s,top 0.05s}
 .photo-del svg,.photo-rot svg,.photo-edit svg,.photo-move svg{width:10px;height:10px;stroke:white;fill:none}
 .photo-empty-slot{border-radius:8px;aspect-ratio:1;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,0.28)}
+.photo-item{display:flex;flex-direction:column;gap:4px}
+.photo-label-input{width:100%;padding:3px 7px;font-size:10px;border:1px solid rgba(255,255,255,0.10);border-radius:5px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.65);outline:none;font-family:inherit;transition:border-color 0.15s}
+.photo-label-input:focus{border-color:var(--sb-gold)}
+.photo-label-input::placeholder{color:rgba(255,255,255,0.20)}
 .photo-uploading{position:absolute;inset:0;background:rgba(7,12,24,0.80);display:flex;align-items:center;justify-content:center;z-index:3}
 .spinner-sm{width:18px;height:18px;border:2px solid rgba(201,169,110,0.2);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -1201,29 +1205,35 @@ function renderModalPhotoGrid(side, photos) {
   if (!photos.length) { el.innerHTML = '<div class="photo-empty-slot">Sem fotos</div>'; return }
   photos.forEach(p => { _photoAngles[p.id] = p.rotation || 0 })
   el.innerHTML = photos.map(p => `
-    <div class="photo-thumb" id="thumb-${p.id}" draggable="true"
-      ondragstart="photoDragStart(event,'${p.id}','${side}')"
-      ondragend="photoDragEnd(event)"
-      ondragover="photoDragOverThumb(event,this)"
-      ondragleave="this.classList.remove('drag-over')"
-      ondrop="photoDropOnThumb(event,'${p.id}','${side}')">
-      <img src="${imgUrl(p.url)}" alt="${side}" loading="lazy"
-        style="object-position:${p.position_x??50}% ${p.position_y??50}%;${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
-      <button class="photo-edit" onclick="editorOpen('${p.id}','split')" title="Editar (girar/dividir)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5"><path d="M11.5 2.5l2 2-8.5 8.5H3v-2L11.5 2.5z"/></svg>
-      </button>
-      <button class="photo-rot" onclick="rotatePhoto('${p.id}', true)" title="Girar 90°">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <button class="photo-del" onclick="modalDeletePhoto('${p.id}')" title="Remover">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-      </button>
-      <button class="photo-move" onclick="movePhotoMenu('${p.id}','${side}',this)" title="Mover para outra seção">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M8 3v10M3 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <button class="photo-pos" onclick="enterPositionMode('${p.id}',${p.position_x??50},${p.position_y??50})" title="Enquadrar posição">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><circle cx="8" cy="8" r="2.5"/><line x1="8" y1="1" x2="8" y2="4" stroke-linecap="round"/><line x1="8" y1="12" x2="8" y2="15" stroke-linecap="round"/><line x1="1" y1="8" x2="4" y2="8" stroke-linecap="round"/><line x1="12" y1="8" x2="15" y2="8" stroke-linecap="round"/></svg>
-      </button>
+    <div class="photo-item">
+      <div class="photo-thumb" id="thumb-${p.id}" draggable="true"
+        ondragstart="photoDragStart(event,'${p.id}','${side}')"
+        ondragend="photoDragEnd(event)"
+        ondragover="photoDragOverThumb(event,this)"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="photoDropOnThumb(event,'${p.id}','${side}')">
+        <img src="${imgUrl(p.url)}" alt="${side}" loading="lazy"
+          style="object-position:${p.position_x??50}% ${p.position_y??50}%;${p.rotation ? `transform:rotate(${p.rotation}deg);scale:${p.rotation%180!==0?'1.4':'1'}` : ''}">
+        <button class="photo-edit" onclick="editorOpen('${p.id}','split')" title="Editar (girar/dividir)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5"><path d="M11.5 2.5l2 2-8.5 8.5H3v-2L11.5 2.5z"/></svg>
+        </button>
+        <button class="photo-rot" onclick="rotatePhoto('${p.id}', true)" title="Girar 90°">
+          <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M13 4A6 6 0 1 0 14 9" stroke-linecap="round"/><polyline points="13 1 13 4 10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="photo-del" onclick="modalDeletePhoto('${p.id}')" title="Remover">
+          <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+        </button>
+        <button class="photo-move" onclick="movePhotoMenu('${p.id}','${side}',this)" title="Mover para outra seção">
+          <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2"><path d="M8 3v10M3 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="photo-pos" onclick="enterPositionMode('${p.id}',${p.position_x??50},${p.position_y??50})" title="Enquadrar posição">
+          <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><circle cx="8" cy="8" r="2.5"/><line x1="8" y1="1" x2="8" y2="4" stroke-linecap="round"/><line x1="8" y1="12" x2="8" y2="15" stroke-linecap="round"/><line x1="1" y1="8" x2="4" y2="8" stroke-linecap="round"/><line x1="12" y1="8" x2="15" y2="8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <input class="photo-label-input" type="text" placeholder="Badge (opcional)"
+        value="${(p.label||'').replace(/"/g,'&quot;')}"
+        onblur="savePhotoLabel('${p.id}',this.value)"
+        title="Rótulo exibido sobre a foto no portal">
     </div>`).join('')
 }
 
@@ -1399,6 +1409,18 @@ async function modalDeletePhoto(photoId) {
     toast('Foto removida')
     await loadModalPhotos(procId)
   } catch { toast('Erro ao remover foto', false) }
+}
+
+async function savePhotoLabel(photoId, value) {
+  const label = value.trim() || null
+  const photo = modalPhotos.find(p => p.id === photoId)
+  if (photo && photo.label === label) return // sem mudança
+  try {
+    await fetch(`${API}/api/upload/photo/${photoId}`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ label })
+    })
+    if (photo) photo.label = label
+  } catch { toast('Erro ao salvar badge', false) }
 }
 
 function rotatePhoto(photoId, saveNow = false) {

@@ -248,6 +248,7 @@ async function migrate() {
       `ALTER TABLE clinics ADD COLUMN IF NOT EXISTS address TEXT`,
       `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
       `CREATE INDEX IF NOT EXISTS idx_appts_professional ON appointments(professional_id)`,
+      `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS label TEXT`,
     ]
     for (const sql of alters) await client.query(sql)
 

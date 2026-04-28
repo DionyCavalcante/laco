@@ -44,6 +44,7 @@ const db = require('./db')
   `CREATE TABLE IF NOT EXISTS professional_hours (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), professional_id UUID REFERENCES professionals(id) ON DELETE CASCADE, day_of_week INTEGER NOT NULL, open BOOLEAN DEFAULT true, start_time TIME NOT NULL DEFAULT '09:00', end_time TIME NOT NULL DEFAULT '18:00', CONSTRAINT ph_prof_day_unique UNIQUE (professional_id, day_of_week))`,
   `CREATE INDEX IF NOT EXISTS idx_prof_hours_prof ON professional_hours(professional_id)`,
   `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS professional_id UUID REFERENCES professionals(id)`,
+  `ALTER TABLE procedure_photos ADD COLUMN IF NOT EXISTS label TEXT`,
 ].forEach(sql => db.query(sql).catch(e => console.warn('startup alter:', e.message)))
 
 // Health check — Railway usa isso

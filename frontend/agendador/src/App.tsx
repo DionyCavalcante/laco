@@ -94,7 +94,7 @@ interface Slot {
   taken: boolean;
 }
 
-type Photo = { url: string; rotation: number; position_x?: number; position_y?: number };
+type Photo = { url: string; rotation: number; position_x?: number; position_y?: number; label?: string | null };
 type ApiPhoto = Photo & { side: string };
 type ProcPhotos = Record<string, { before: Photo[]; after: Photo[]; carousel: Photo[] }>;
 
@@ -169,9 +169,9 @@ async function apiLoadPhotos(procedures: Procedure[]): Promise<ProcPhotos> {
         .then((r) => (r.ok ? r.json() : []))
         .then((photos: ApiPhoto[]) => ({
           id: p.id,
-          before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
-          after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
-          carousel: photos.filter((x) => x.side === 'carousel').map((x) => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y })),
+          before:   photos.filter((x) => x.side === 'before').map((x)   => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y, label: x.label ?? null })),
+          after:    photos.filter((x) => x.side === 'after').map((x)    => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y, label: x.label ?? null })),
+          carousel: photos.filter((x) => x.side === 'carousel').map((x) => ({ url: x.url, rotation: x.rotation || 0, position_x: x.position_x, position_y: x.position_y, label: x.label ?? null })),
         }))
     )
   );
@@ -549,6 +549,11 @@ const GalleryPage = ({
                   <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">{isResults ? 'Caso 1' : 'Antes'}</div>
                 )}
                 <span className="absolute bottom-3 left-3 ba-label">{isResults ? 'Caso 1' : 'Antes'}</span>
+                {before?.label && (
+                  <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderRadius: '6px', padding: '3px 10px', fontSize: '10px', fontWeight: 500, color: '#444', letterSpacing: '0.3px', boxShadow: '0 1px 6px rgba(0,0,0,0.08)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {before.label}
+                  </span>
+                )}
               </div>
               <div className="relative w-1/2 h-full overflow-hidden">
                 {after ? (
@@ -563,28 +568,12 @@ const GalleryPage = ({
                   <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">{isResults ? 'Caso 2' : 'Depois'}</div>
                 )}
                 <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
+                {after?.label && (
+                  <span className="absolute top-3 right-3 pointer-events-none" style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderRadius: '6px', padding: '3px 10px', fontSize: '10px', fontWeight: 500, color: '#444', letterSpacing: '0.3px', boxShadow: '0 1px 6px rgba(0,0,0,0.08)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {after.label}
+                  </span>
+                )}
               </div>
-              <span
-                className="absolute top-3 right-3 z-10 pointer-events-none"
-                style={{
-                  background: 'rgba(255,255,255,0.82)',
-                  backdropFilter: 'blur(6px)',
-                  WebkitBackdropFilter: 'blur(6px)',
-                  borderRadius: '6px',
-                  padding: '3px 10px',
-                  fontSize: '10px',
-                  fontWeight: 500,
-                  color: '#444',
-                  letterSpacing: '0.3px',
-                  boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
-                  whiteSpace: 'nowrap',
-                  maxWidth: 'calc(100% - 16px)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {proc.category || proc.name}
-              </span>
             </div>
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">

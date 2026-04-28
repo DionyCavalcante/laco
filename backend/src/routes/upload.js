@@ -89,7 +89,7 @@ router.post('/procedure/:id/photos', upload.fields([
 router.get('/procedure/:id/photos', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT id, procedure_id, side, url, rotation, sort_order, position_x, position_y, created_at FROM procedure_photos
+      SELECT id, procedure_id, side, url, rotation, sort_order, position_x, position_y, label, created_at FROM procedure_photos
       WHERE procedure_id = $1
       ORDER BY side, sort_order, created_at
     `, [req.params.id])
@@ -151,7 +151,7 @@ router.post('/photo/:photoId/rotate', async (req, res) => {
 router.patch('/photo/:photoId', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
-    const { side, position_x, position_y } = req.body
+    const { side, position_x, position_y, label } = req.body
     const { rows } = await db.query(
       `SELECT pp.id FROM procedure_photos pp
        JOIN procedures p ON p.id = pp.procedure_id
@@ -171,6 +171,9 @@ router.patch('/photo/:photoId', async (req, res) => {
         'UPDATE procedure_photos SET position_x = COALESCE($1, position_x), position_y = COALESCE($2, position_y) WHERE id = $3',
         [position_x ?? null, position_y ?? null, req.params.photoId]
       )
+    }
+    if (label !== undefined) {
+      await db.query('UPDATE procedure_photos SET label = $1 WHERE id = $2', [label || null, req.params.photoId])
     }
     res.json({ ok: true })
   } catch (err) {
