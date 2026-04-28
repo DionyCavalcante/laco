@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astraí — Entrar</title>
+  <link rel="icon" type="image/png" href="/logomarca-astra-Sfundo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle, rgba(181,148,74,0.018) 1px, transparent 1px),
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(181,148,74,0.08) 0%, transparent 60%),
+        #070C18;
+      background-size: 36px 36px, auto, auto;
+      color: rgba(255,255,255,0.88);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* Logo */
+    .logo-block {
+      text-align: center;
+    }
+    .logo-block img {
+      width: 240px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Card */
+    .card {
+      width: 100%;
+      background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(255,255,255,0.13);
+      border-radius: 16px;
+      padding: 36px 32px 32px;
+      box-shadow: 0 2px 0 rgba(255,255,255,0.04) inset, 0 24px 60px rgba(0,0,0,0.45);
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.95);
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.34);
+      margin-bottom: 28px;
+    }
+
+    /* Fields */
+    .field { margin-bottom: 18px }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.90);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.20) }
+    .field input:focus {
+      border-color: #B5944A;
+      box-shadow: 0 0 0 3px rgba(181,148,74,0.18);
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* Error */
+    .error {
+      font-size: 12px;
+      color: #F06060;
+      min-height: 18px;
+      margin-bottom: 6px;
+    }
+
+    /* Button */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #C4A256 0%, #B5944A 50%, #9f8038 100%);
+      border: none;
+      border-radius: 9px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 4px 18px rgba(181,148,74,0.28);
+      margin-top: 8px;
+    }
+    .btn-submit:hover { opacity: 0.88 }
+    .btn-submit:active { transform: scale(0.99) }
+
+    /* Footer link */
+    .card-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.30);
+    }
+    .card-footer a {
+      color: #B5944A;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .card-footer a:hover { color: #D4B87A }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 24px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+    .divider span {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* Tagline below card */
+    .tagline {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(181,148,74,0.50);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+
+    <div class="logo-block">
+      <img src="/logo-astra-fundo.png" alt="Astraí">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bem-vindo de volta</div>
+      <div class="card-sub">Acesse sua plataforma Astraí</div>
+
+      <div class="divider"><span>login</span></div>
+
+      <form id="form">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <p class="error" id="error"></p>
+        <button class="btn-submit" type="submit">Entrar</button>
+      </form>
+
+      <div class="card-footer">
+        Ainda não tem conta? <a href="/cadastro">Criar conta</a>
+      </div>
+    </div>
+
+    <span class="tagline">Inteligência que guia. Resultados que transformam.</span>
+
+  </div>
+  <script>
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      error.textContent = ''
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.value, password: password.value })
+      })
+      const data = await res.json()
+      if (!res.ok) { error.textContent = data.error || 'Falha no login'; return }
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('refreshToken', data.refreshToken)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.removeItem('superadminToken') // limpa token de impersonação anterior
+      if (data.clinic) {
+        localStorage.setItem('laco_slug', data.clinic.slug)
+        localStorage.setItem('laco_onboarding_step', data.clinic.onboarding_step)
+      }
+      if (data.user.role === 'superadmin') location.href = '/superadmin'
+      else if (data.clinic && data.clinic.onboarding_step >= 4) location.href = '/' + data.clinic.slug + '/'
+      else location.href = '/onboarding'
+    })
+  </script>
+</body>
+</html>

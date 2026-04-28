@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
 router.get('/clinic', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
-    const { rows } = await db.query('SELECT name, slug, phone, address, status, onboarding_step, onboarding_completed_at FROM clinics WHERE id = $1', [clinicId])
+    const { rows } = await db.query('SELECT name, slug, phone, status, onboarding_step, onboarding_completed_at FROM clinics WHERE id = $1', [clinicId])
     if (!rows.length) return res.status(404).json({ error: 'Clínica não encontrada' })
     res.json(rows[0])
   } catch (err) {
@@ -60,7 +60,7 @@ router.get('/clinic', async (req, res) => {
 // PATCH /api/settings/clinic
 router.patch('/clinic', async (req, res) => {
   try {
-    const { name, slug, address } = req.body
+    const { name, slug } = req.body
     if (!name || !name.trim()) return res.status(400).json({ error: 'Nome é obrigatório' })
 
     const clinicId = await getEffectiveClinicId(req)
@@ -79,10 +79,12 @@ router.patch('/clinic', async (req, res) => {
     }
 
     const { rowCount } = await db.query(
-      'UPDATE clinics SET name = $1, slug = $2, phone = COALESCE($3, phone), address = $4 WHERE id = $5',
-      [name.trim(), newSlug, req.body.phone || null, address?.trim() || null, clinicId]
+      'UPDATE clinics SET name = $1, slug = $2, phone = COALESCE($3, phone) WHERE id = $4',
+      [name.trim(), newSlug, req.body.phone || null, clinicId]
     )
     if (!rowCount) return res.status(404).json({ error: 'Clínica não encontrada' })
+
+    // Atualiza o slug em memória para que as próximas queries usem o novo valor
 
     res.json({ ok: true, slug: newSlug })
   } catch (err) {

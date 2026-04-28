@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astrai - Checkout</title>
+  <link rel="icon" type="image/png" href="/logomarca-astra-Sfundo.png">
+  <style>body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f6f5f2;color:#202124}main{max-width:520px;margin:auto;padding:32px 18px}.panel{background:#fff;border:1px solid #ddd8ce;border-radius:8px;padding:24px}button{padding:12px 14px;border:0;border-radius:6px;background:#1e6f5c;color:white;font-weight:800}.msg{color:#5c625f}</style>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <main><section class="panel"><h1>Ativar trial</h1><p>R$ 1,00 hoje. Depois, R$ 110,00 por mes ao fim do trial.</p><div id="payment"></div><p class="msg" id="msg"></p><button id="btn">Pagar R$ 1,00</button></section></main>
+  <script>
+    const token = localStorage.getItem('token')
+    let stripe, elements
+    async function init(){
+      msg.textContent = 'Preparando pagamento...'
+      const cfg = await fetch('/api/billing/config', { headers:{Authorization:'Bearer '+token} }).then(r=>r.json())
+      const res = await fetch('/api/billing/checkout-intent', { method:'POST', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'} })
+      const data = await res.json()
+      if (!res.ok) { msg.textContent = data.error || 'Checkout indisponivel'; return }
+      if (!cfg.publishableKey) { msg.textContent = 'STRIPE_PUBLISHABLE_KEY ausente. Client secret criado: ' + data.clientSecret; return }
+      stripe = Stripe(cfg.publishableKey)
+      elements = stripe.elements({ clientSecret: data.clientSecret })
+      elements.create('payment').mount('#payment')
+      msg.textContent = ''
+    }
+    btn.onclick = async () => {
+      if (!stripe || !elements) return init()
+      btn.disabled = true
+      const { error } = await stripe.confirmPayment({ elements, confirmParams:{ return_url: location.origin + '/onboarding' } })
+      if (error) msg.textContent = error.message
+      btn.disabled = false
+    }
+    init()
+  </script>
+</body>
+</html>
