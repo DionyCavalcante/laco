@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-astrai-blue: #0B1F2A;
+  --color-astrai-gold: #C9A96E;
+  --color-astrai-gold-bright: #D4A832;
+  --color-astrai-neutral: #1C1917;
+  --color-astrai-offwhite: #F5F5F2;
+  --color-astrai-bone: #FAFAF7;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-astrai-blue text-astrai-offwhite/80;
+  }
+}
+
+@keyframes scan-move {
+  from { background-position: 0 0; }
+  to { background-position: 0 100px; }
+}
+
+.scan-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  animation: scan-move 8s linear infinite;
+}
+
+.glass {
+  @apply backdrop-blur-md bg-zinc-900/40 border border-white/5;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
