@@ -30,6 +30,45 @@ Este arquivo define as instrucoes do projeto para o Codex CLI.
 - Docs: `docs/`
 <!-- AIOX-MANAGED-END: codebase -->
 
+## Estrutura do Projeto Laço
+
+Este é um monorepo com 3 módulos principais:
+
+```
+laco/
+├── backend/          ← API Node.js + Express (PostgreSQL via Railway)
+├── frontend/
+│   ├── agendador/    ← Portal do cliente (/:slug/agendar) — React + Vite
+│   └── admin/        ← Admin CRM da clínica (/admin) — React + Vite
+└── nixpacks.toml     ← builda os 3 no deploy Railway
+```
+
+### Admin CRM (`frontend/admin/`)
+
+Painel React com tema Astrai (light/dark/gold). Telas: Dashboard, Clientes, Agenda, Atendimento, Configurações.
+
+**LEIA ANTES DE MEXER NO LAYOUT:** [`frontend/admin/LAYOUT_ARCHITECTURE.md`](frontend/admin/LAYOUT_ARCHITECTURE.md)
+
+O doc cobre:
+- Estrutura de arquivos e componentes
+- Sistema de temas (light/mixed/dark/terminal)
+- Menu de navegação e como reordenar
+- Componentes principais: Sidebar, LeadProfileDrawer, BookingModal, Leads, Agenda
+- Fluxos de dados (novo cliente, reagendar, digital profile)
+- Padrões de código: `cn()`, formatação de telefone, fetch com `api`
+- Como fazer mudanças comuns (nova página, nova coluna, novo campo)
+- Deploy correto (sempre `git push`, nunca `railway up`)
+
+### Deploy
+
+```bash
+# SEMPRE assim — aparece o commit no Railway
+git add .
+git commit -m "feat: descrição"
+git push origin main
+# Railway detecta e builda automaticamente
+```
+
 <!-- AIOX-MANAGED-START: commands -->
 ## Common Commands
 

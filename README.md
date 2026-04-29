@@ -26,22 +26,30 @@ laco/
 │   │       ├── settings.js         ← configurações do portal
 │   │       ├── portal.js           ← API pública (cliente): identify, track, book, slots
 │   │       └── webhook.js          ← eventos da Evolution
+│   ├── public/                     ← gerado pelo build dos frontends (não editar manualmente)
+│   │   ├── admin/                  ← build do frontend/admin
+│   │   └── ...                     ← outros assets estáticos
 │   ├── .env.example
 │   └── package.json
 ├── frontend/
-│   └── public/
-│       ├── index.html              ← dashboard principal (filtro de período com calendário)
-│       ├── login.html              ← tela de login
-│       ├── cliente.html            ← detalhe do cliente
-│       ├── relatorio.html          ← relatório de conversão
-│       ├── agendar.html            ← portal de agendamento (cliente)
-│       └── config/
-│           └── index.html          ← configurações da clínica (fotos antes/depois)
+│   ├── agendador/                  ← Portal do cliente (/:slug/agendar) — React + Vite
+│   └── admin/                      ← Admin CRM da clínica (/admin) — React + Vite
+│       └── LAYOUT_ARCHITECTURE.md  ← GUIA COMPLETO de layout e componentes do admin
 ├── railway.toml
-└── nixpacks.toml
+└── nixpacks.toml                   ← builda agendador + admin + backend no deploy
 ```
 
-> **Importante:** `backend/public/` é cópia de `frontend/public/`. Sempre sincronize com `cp frontend/public/X backend/public/X` ao editar o frontend.
+> **Deploy:** Sempre via `git push origin main`. O Railway builda os frontends automaticamente via `nixpacks.toml`. Nunca use `railway up` manualmente — perde o resumo do commit no histórico de deploys.
+
+### Frontends
+
+| Frontend | URL | Pasta | Descrição |
+|----------|-----|-------|-----------|
+| Admin CRM | `/admin` | `frontend/admin/` | Painel da clínica — agenda, clientes, atendimento |
+| Portal cliente | `/:slug/agendar` | `frontend/agendador/` | Autoatendimento para o cliente final |
+| Superadmin | `/superadmin` | (futuro) | Painel de gestão geral |
+
+> Para mexer no layout do **Admin CRM**, leia primeiro: [`frontend/admin/LAYOUT_ARCHITECTURE.md`](frontend/admin/LAYOUT_ARCHITECTURE.md)
 
 ---
 
