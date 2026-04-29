@@ -94,6 +94,36 @@ router.get('/slots', async (req, res) => {
   }
 })
 
+// POST /api/appointments — admin cria novo agendamento
+router.post('/', async (req, res) => {
+  const { lead_id, procedure_id, date, time } = req.body
+  if (!lead_id || !procedure_id || !date || !time)
+    return res.status(400).json({ error: 'lead_id, procedure_id, date e time são obrigatórios' })
+
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const scheduled_at = new Date(`${date}T${time}:00-03:00`)
+
+    const { rows: [proc] } = await db.query('SELECT duration FROM procedures WHERE id=$1', [procedure_id])
+    const duration = proc?.duration ?? 60
+
+    const { findAvailableProfessional } = require('../lib/slots')
+    const professionalId = await findAvailableProfessional(clinicId, procedure_id, scheduled_at, duration)
+
+    const { rows: [apt] } = await db.query(`
+      INSERT INTO appointments (clinic_id, lead_id, procedure_id, scheduled_at, status, source, professional_id)
+      VALUES ($1, $2, $3, $4, 'confirmed', 'system', $5) RETURNING *
+    `, [clinicId, lead_id, procedure_id, scheduled_at, professionalId])
+
+    await db.query(`UPDATE leads SET status='scheduled', updated_at=NOW() WHERE id=$1`, [lead_id])
+
+    res.status(201).json(apt)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao criar agendamento' })
+  }
+})
+
 // PATCH /api/appointments/:id/reschedule
 router.patch('/:id/reschedule', async (req, res) => {
   const { date, time } = req.body
