@@ -43,13 +43,16 @@ laco/
 
 ### Frontends
 
-| Frontend | URL | Pasta | Descrição |
-|----------|-----|-------|-----------|
-| Admin CRM | `/admin` | `frontend/admin/` | Painel da clínica — agenda, clientes, atendimento |
-| Portal cliente | `/:slug/agendar` | `frontend/agendador/` | Autoatendimento para o cliente final |
-| Superadmin | `/superadmin` | (futuro) | Painel de gestão geral |
+| Frontend | URL | Pasta | Status |
+|----------|-----|-------|--------|
+| Admin CRM | `/admin` | `frontend/admin/` | **Em validação — o correto, substitui o legado** |
+| Portal cliente | `/:slug/agendar` | `frontend/agendador/` | Produção |
+| Superadmin | `/superadmin` | (futuro) | — |
+| ~~Legado~~ | `/` | `frontend/public/` | **Descontinuando** — HTML puro, não editar |
 
-> Para mexer no layout do **Admin CRM**, leia primeiro: [`frontend/admin/LAYOUT_ARCHITECTURE.md`](frontend/admin/LAYOUT_ARCHITECTURE.md)
+> **Frontend correto do admin:** `frontend/admin/` (React + Vite). O `frontend/public/` é legado e será removido após validação do novo admin.
+>
+> Para mexer no layout do Admin CRM, leia: [`frontend/admin/LAYOUT_ARCHITECTURE.md`](frontend/admin/LAYOUT_ARCHITECTURE.md)
 
 ---
 

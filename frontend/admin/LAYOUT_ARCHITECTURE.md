@@ -2,7 +2,17 @@
 
 **Último atualizado:** 2026-04-29
 **Versão:** 2.0
-**Status:** Produção
+**Status:** Em validação → substituirá o frontend legado
+
+---
+
+## Este é o frontend correto
+
+`frontend/admin/` é o **único frontend de admin sendo desenvolvido e lapidado para produção**.
+
+Existe um frontend legado em `frontend/public/` (HTML puro — index.html, login.html, relatorio.html, etc.) que ainda está servido pelo backend durante a transição. **Não edite esse legado.** Todo desenvolvimento novo acontece aqui.
+
+Quando este admin for validado e lançado, o `frontend/public/` será descontinuado.
 
 ---
 
@@ -10,10 +20,14 @@
 
 ```
 D:\Trab\laco\
-├── backend/                  ← API Node.js
+├── backend/
+│   └── public/
+│       ├── admin/            ← gerado pelo build deste frontend (não editar)
+│       └── ...               ← legado (frontend/public antigo, temporário)
 ├── frontend/
+│   ├── public/               ← LEGADO — HTML puro, não mexa aqui
 │   ├── agendador/            ← Portal do cliente (/:slug/agendar)
-│   ├── admin/                ← ESTE FRONTEND (/admin)
+│   ├── admin/                ← ESTE FRONTEND — o único correto (/admin)
 │   └── superadmin/           ← (futuro)
 └── nixpacks.toml             ← build dos 3 frontends juntos
 ```
