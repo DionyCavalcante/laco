@@ -26,6 +26,18 @@ function weekDays(anchor: Date): Date[] {
   return Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d; });
 }
 function addDays(d: Date, n: number) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function getWeeksInPeriod(fromISO: string, toISO: string): Date[][] {
+  const from = new Date(fromISO);
+  const to = new Date(toISO);
+  const weeks: Date[][] = [];
+  let current = new Date(from);
+  current = weekStart(current);
+  while (current <= to) {
+    weeks.push(weekDays(current));
+    current = addDays(current, 7);
+  }
+  return weeks;
+}
 
 const STATUS_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
   'Confirmado': { dot:'bg-emerald-500', bg:'bg-emerald-500/10', text:'text-emerald-400' },
@@ -35,6 +47,7 @@ const STATUS_COLOR: Record<string, { dot: string; bg: string; text: string }> = 
 
 export default function Agenda({ theme }: { theme: AstraiTheme }) {
   const [view, setView]           = useState<'weekly'|'list'>('weekly');
+  const [period, setPeriod]       = useState<'7'|'14'|'30'|'custom'>('7');
   const [anchor, setAnchor]       = useState(new Date());
   const [selDate, setSelDate]     = useState(todayISO());
   const [customFrom, setFrom]     = useState(todayISO());
@@ -48,21 +61,45 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
   const isLight = theme.id === 'light';
   const isAstraiBrand = theme.id === 'mixed';
 
+  function handlePeriodChange(newPeriod: '7'|'14'|'30'|'custom') {
+    if (newPeriod === 'custom') {
+      setPeriod('custom');
+      return;
+    }
+    const days = parseInt(newPeriod);
+    const today = new Date();
+    setPeriod(newPeriod);
+    setFrom(toISO(today));
+    setTo(toISO(addDays(today, days - 1)));
+    setAnchor(today);
+    setSelDate(toISO(today));
+  }
+
+  function handleNavigatePeriod(direction: -1 | 1) {
+    const periodDays = period === 'custom'
+      ? Math.floor((new Date(customTo).getTime() - new Date(customFrom).getTime()) / (1000 * 60 * 60 * 24)) + 1
+      : parseInt(period);
+
+    const newFrom = addDays(new Date(customFrom), direction * periodDays);
+    setFrom(toISO(newFrom));
+    setTo(toISO(addDays(newFrom, periodDays - 1)));
+  }
+
   const days = weekDays(anchor);
   const today = todayISO();
+  const weeks = getWeeksInPeriod(customFrom, customTo);
+  const allDaysInPeriod = weeks.flat();
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const from = toISO(days[0]);
-      const to   = toISO(days[6]);
-      const data = await getAppointments({ from, to });
+      const data = await getAppointments({ from: customFrom, to: customTo });
       setApts(data.filter(a => a.status !== 'Cancelado'));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  }, [anchor]);
+  }, [customFrom, customTo]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, [load, customFrom, customTo]);
 
   async function openDetail(apt: Appointment) {
     try {
@@ -112,7 +149,7 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
   const confirmed = appointments.filter(a => a.status === 'Confirmado').length;
 
   const dayLabel = (d: Date) => d.toLocaleDateString('pt-BR', { day:'numeric', month:'short' });
-  const weekLabel = `${dayLabel(days[0])} – ${dayLabel(days[6])}`;
+  const periodLabel = `${dayLabel(new Date(customFrom))} – ${dayLabel(new Date(customTo))}`;
 
   const renderInsightCard = (title: string, value: string | number, icon: React.ReactNode, variant: 'gold'|'blue'|'emerald') => {
     const v = { gold:{ text:'text-astrai-gold', bg:'bg-astrai-gold/10', border:'border-astrai-gold/20' }, blue:{ text:'text-sky-400', bg:'bg-sky-400/10', border:'border-sky-400/20' }, emerald:{ text:'text-emerald-400', bg:'bg-emerald-400/10', border:'border-emerald-400/20' } }[variant];
@@ -133,76 +170,85 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
     <div className={cn('flex flex-col rounded-[2.5rem] border shadow-2xl overflow-hidden',
       isLight ? 'bg-white border-zinc-200' : 'bg-[#0E2836]/40 border-white/5'
     )}>
-      {/* Header dias */}
-      <div className={cn('grid border-b', isLight ? 'bg-zinc-50 border-zinc-100' : 'bg-black/20 border-white/5')}
-        style={{ gridTemplateColumns:'80px repeat(7, 1fr)' }}>
-        <div className={cn('p-4 flex items-center justify-center border-r', isLight ? 'border-zinc-100' : 'border-white/5')}>
-          <Clock className="w-4 h-4 text-zinc-600" />
-        </div>
-        {days.map((d, i) => {
-          const iso = toISO(d);
-          const isToday = iso === today;
-          const isSel   = iso === selDate;
-          const cnt     = appointments.filter(a => a.date === iso).length;
-          return (
-            <button key={iso} onClick={() => { setSelDate(iso); setView('list'); }}
-              className={cn('p-4 text-center border-r last:border-0 transition-colors',
-                isLight ? 'border-zinc-100' : 'border-white/5',
-                isSel && (isLight ? 'bg-astrai-gold/10' : 'bg-astrai-gold/5')
-              )}>
-              <span className="block text-xs font-mono text-zinc-500 uppercase tracking-[0.25em] font-bold mb-1">{DAYS_SHORT[(d.getDay())]}</span>
-              <span className={cn('text-2xl font-display font-bold', isToday||isSel ? 'text-astrai-gold' : theme.textPrimary)}>{d.getDate()}</span>
-              {cnt > 0 && <div className="mt-1 w-1.5 h-1.5 rounded-full bg-astrai-gold mx-auto" />}
-            </button>
-          );
-        })}
-      </div>
-      {/* Grid horas */}
-      <div className="relative" style={{ minHeight: 500 }}>
-        {HOURS.map(h => (
-          <div key={h} className={cn('flex border-b', isLight ? 'border-zinc-50' : 'border-white/[0.05]')} style={{ height:80 }}>
-            <div className={cn('w-[80px] flex items-start justify-center pt-2 text-xs font-mono border-r font-bold shrink-0',
-              isLight ? 'bg-zinc-50/50 border-zinc-100 text-zinc-400' : 'bg-black/10 border-white/5 text-zinc-400'
-            )}>{h}:00</div>
-            <div className="flex-1" />
-          </div>
-        ))}
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-astrai-gold" />
-          </div>
-        ) : (
-          <AnimatePresence>
-            {appointments.map(apt => {
-              const dayIndex = days.findIndex(d => toISO(d) === apt.date);
-              if (dayIndex < 0) return null;
-              const [hh, mm] = apt.time.split(':').map(Number);
-              if (hh < 8 || hh > 18) return null;
-              const top  = ((hh - 8) + (mm/60)) * 80;
-              const left = `calc(80px + (100% - 80px) / 7 * ${dayIndex})`;
-              const width = `calc((100% - 80px) / 7 - 4px)`;
-              const sc = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
-              return (
-                <motion.div key={apt.id} initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
-                  className="absolute px-0.5 z-10 cursor-pointer"
-                  style={{ top, left, width, height:72 }}
-                  onClick={() => openDetail(apt)}>
-                  <div className={cn('w-full h-full rounded-xl border-l-[4px] p-2.5 flex flex-col shadow-lg hover:shadow-xl transition-shadow',
-                    isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10',
-                    apt.status === 'Confirmado' ? 'border-l-emerald-500' : 'border-l-amber-400'
-                  )}>
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <div className={cn('w-2 h-2 rounded-full shrink-0', sc.dot)} />
-                      <p className={cn('text-xs font-bold truncate hover:text-astrai-gold transition-colors', theme.textPrimary)}>{apt.patientName}</p>
-                    </div>
-                    <p className="text-[11px] text-astrai-gold font-bold truncate">{apt.procedure}</p>
-                    <p className="text-xs text-zinc-400 font-mono font-bold mt-auto">{apt.time}</p>
+      {/* Scroll container para múltiplas semanas */}
+      <div className="overflow-x-auto">
+        <div style={{ minWidth: weeks.length === 1 ? '100%' : `${weeks.length * 1000}px` }}>
+          {weeks.map((weekDays, weekIdx) => (
+            <div key={weekIdx}>
+              {/* Header dias */}
+              <div className={cn('grid border-b', isLight ? 'bg-zinc-50 border-zinc-100' : 'bg-black/20 border-white/5')}
+                style={{ gridTemplateColumns:'80px repeat(7, 1fr)' }}>
+                <div className={cn('p-4 flex items-center justify-center border-r', isLight ? 'border-zinc-100' : 'border-white/5')}>
+                  <Clock className="w-4 h-4 text-zinc-600" />
+                </div>
+                {weekDays.map((d, i) => {
+                  const iso = toISO(d);
+                  const isToday = iso === today;
+                  const isSel   = iso === selDate;
+                  const cnt     = appointments.filter(a => a.date === iso).length;
+                  return (
+                    <button key={iso} onClick={() => { setSelDate(iso); setView('list'); }}
+                      className={cn('p-4 text-center border-r last:border-0 transition-colors',
+                        isLight ? 'border-zinc-100' : 'border-white/5',
+                        isSel && (isLight ? 'bg-astrai-gold/10' : 'bg-astrai-gold/5')
+                      )}>
+                      <span className="block text-xs font-mono text-zinc-500 uppercase tracking-[0.25em] font-bold mb-1">{DAYS_SHORT[(d.getDay())]}</span>
+                      <span className={cn('text-2xl font-display font-bold', isToday||isSel ? 'text-astrai-gold' : theme.textPrimary)}>{d.getDate()}</span>
+                      {cnt > 0 && <div className="mt-1 w-1.5 h-1.5 rounded-full bg-astrai-gold mx-auto" />}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Grid horas */}
+              <div className="relative" style={{ minHeight: 500 }}>
+                {HOURS.map(h => (
+                  <div key={h} className={cn('flex border-b', isLight ? 'border-zinc-50' : 'border-white/[0.05]')} style={{ height:80 }}>
+                    <div className={cn('w-[80px] flex items-start justify-center pt-2 text-xs font-mono border-r font-bold shrink-0',
+                      isLight ? 'bg-zinc-50/50 border-zinc-100 text-zinc-400' : 'bg-black/10 border-white/5 text-zinc-400'
+                    )}>{h}:00</div>
+                    <div className="flex-1" />
                   </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        )}
+                ))}
+                {loading && weekIdx === 0 ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-astrai-gold" />
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {appointments.map(apt => {
+                      const dayIndex = weekDays.findIndex(d => toISO(d) === apt.date);
+                      if (dayIndex < 0) return null;
+                      const [hh, mm] = apt.time.split(':').map(Number);
+                      if (hh < 8 || hh > 18) return null;
+                      const top  = ((hh - 8) + (mm/60)) * 80;
+                      const left = `calc(80px + (100% - 80px) / 7 * ${dayIndex})`;
+                      const width = `calc((100% - 80px) / 7 - 4px)`;
+                      const sc = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
+                      return (
+                        <motion.div key={apt.id} initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
+                          className="absolute px-0.5 z-10 cursor-pointer"
+                          style={{ top, left, width, height:72 }}
+                          onClick={() => openDetail(apt)}>
+                          <div className={cn('w-full h-full rounded-xl border-l-[4px] p-2.5 flex flex-col shadow-lg hover:shadow-xl transition-shadow',
+                            isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10',
+                            apt.status === 'Confirmado' ? 'border-l-emerald-500' : 'border-l-amber-400'
+                          )}>
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <div className={cn('w-2 h-2 rounded-full shrink-0', sc.dot)} />
+                              <p className={cn('text-xs font-bold truncate hover:text-astrai-gold transition-colors', theme.textPrimary)}>{apt.patientName}</p>
+                            </div>
+                            <p className="text-[11px] text-astrai-gold font-bold truncate">{apt.procedure}</p>
+                            <p className="text-xs text-zinc-400 font-mono font-bold mt-auto">{apt.time}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -213,7 +259,7 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
       <div className="space-y-4">
         {/* Day picker */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {days.map((d, i) => {
+          {allDaysInPeriod.map((d, i) => {
             const iso = toISO(d);
             const isSel = iso === selDate;
             const cnt = appointments.filter(a => a.date === iso).length;
@@ -337,19 +383,43 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 shrink-0">
         <div>
           <h2 className={cn('text-4xl font-display font-bold tracking-tight', theme.textPrimary)}>Gestão de Agenda</h2>
-          <p className="text-sm font-mono text-astrai-gold uppercase tracking-[0.2em] mt-2 font-bold">{weekLabel}</p>
+          <p className="text-sm font-mono text-astrai-gold uppercase tracking-[0.2em] mt-2 font-bold">{periodLabel}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {/* Nav semana */}
-          <button onClick={() => setAnchor(d => addDays(d,-7))} className={cn('p-2 rounded-xl border transition-colors', isLight ? 'border-zinc-200 text-zinc-500 hover:text-blue-600' : 'border-white/10 text-zinc-500 hover:text-white')}>
+          {/* Nav período */}
+          <button onClick={() => handleNavigatePeriod(-1)} className={cn('p-2 rounded-xl border transition-colors', isLight ? 'border-zinc-200 text-zinc-500 hover:text-blue-600' : 'border-white/10 text-zinc-500 hover:text-white')}>
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={() => { setAnchor(new Date()); setSelDate(todayISO()); }} className="px-4 py-2 rounded-xl bg-astrai-gold/10 border border-astrai-gold/20 text-astrai-gold text-xs font-black uppercase tracking-widest">
+          <button onClick={() => { const today = new Date(); setFrom(toISO(today)); setTo(toISO(addDays(today, 6))); setPeriod('7'); setSelDate(todayISO()); }} className="px-4 py-2 rounded-xl bg-astrai-gold/10 border border-astrai-gold/20 text-astrai-gold text-xs font-black uppercase tracking-widest">
             Hoje
           </button>
-          <button onClick={() => setAnchor(d => addDays(d,7))} className={cn('p-2 rounded-xl border transition-colors', isLight ? 'border-zinc-200 text-zinc-500 hover:text-blue-600' : 'border-white/10 text-zinc-500 hover:text-white')}>
+          <button onClick={() => handleNavigatePeriod(1)} className={cn('p-2 rounded-xl border transition-colors', isLight ? 'border-zinc-200 text-zinc-500 hover:text-blue-600' : 'border-white/10 text-zinc-500 hover:text-white')}>
             <ChevronRight className="w-4 h-4" />
           </button>
+
+          {/* Period Selector */}
+          <div className={cn('flex p-1 rounded-2xl border shadow-inner', isLight ? 'bg-zinc-100 border-zinc-200' : 'bg-black/40 border-white/5')}>
+            {['7', '14', '30'].map(p => (
+              <button key={p} onClick={() => handlePeriodChange(p as '7'|'14'|'30')}
+                className={cn('px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all',
+                  period === p ? 'bg-astrai-gold text-astrai-blue shadow-lg' : (isLight ? 'text-zinc-400 hover:text-zinc-600' : 'text-zinc-400 hover:text-zinc-200')
+                )}>{p} dias</button>
+            ))}
+            <button onClick={() => setPeriod('custom')}
+              className={cn('px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all',
+                period === 'custom' ? 'bg-astrai-gold text-astrai-blue shadow-lg' : (isLight ? 'text-zinc-400 hover:text-zinc-600' : 'text-zinc-400 hover:text-zinc-200')
+              )}>Personalizado</button>
+          </div>
+
+          {/* Inputs de data para período personalizado */}
+          {period === 'custom' && (
+            <div className="flex gap-2">
+              <input type="date" value={customFrom} onChange={e => { setFrom(e.target.value); }}
+                className={cn('px-3 py-2 rounded-xl text-xs border text-zinc-900', isLight ? 'bg-white border-zinc-200' : 'bg-white/10 border-white/20')} />
+              <input type="date" value={customTo} onChange={e => { setTo(e.target.value); }}
+                className={cn('px-3 py-2 rounded-xl text-xs border text-zinc-900', isLight ? 'bg-white border-zinc-200' : 'bg-white/10 border-white/20')} />
+            </div>
+          )}
 
           {/* View toggle */}
           <div className={cn('flex p-1 rounded-2xl border shadow-inner', isLight ? 'bg-zinc-100 border-zinc-200' : 'bg-black/40 border-white/5')}>
