@@ -146,4 +146,20 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
+// DELETE /api/procedures/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const clinicId = await getEffectiveClinicId(req)
+    const { rowCount } = await db.query(
+      'DELETE FROM procedures WHERE id = $1 AND clinic_id = $2',
+      [req.params.id, clinicId]
+    )
+    if (!rowCount) return res.status(404).json({ error: 'Procedimento não encontrado' })
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro ao excluir procedimento' })
+  }
+})
+
 module.exports = router
