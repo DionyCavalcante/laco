@@ -77,6 +77,12 @@ app.use('/uploads', express.static(UPLOAD_DIR, {
   setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
 }))
 const pub = path.join(__dirname, '../public')
+
+// Admin CRM (front_laco) — SPA em /admin
+app.use('/admin', express.static(path.join(pub, 'admin'), { index: false }))
+app.get('/admin', (req, res) => res.sendFile(path.join(pub, 'admin/index.html')))
+app.get('/admin/*', (req, res) => res.sendFile(path.join(pub, 'admin/index.html')))
+
 app.get('/',           (req, res) => res.redirect('/login'))
 app.get('/painel',     (req, res) => res.sendFile(path.join(pub, 'painel.html')))
 app.get('/login',      (req, res) => res.sendFile(path.join(pub, 'login.html')))
