@@ -1,0 +1,134 @@
+Vamos rever a estrutura da pagina criada na fase 1 - Quero que você faça apenas uma revisão da copy da página que já criamos, sem refazer a estrutura. Vamos validar primeiro na de brow lamination
+
+Contexto:
+Essa é a página de agendamento/procedimento da Mana Beauty que já foi construída anteriormente. O layout e a estrutura base já estão bons. O foco agora é apenas melhorar a copy para deixá-la mais persuasiva, premium, humanizada e orientada à conversão, sem ficar com cara de blog e sem ficar agressiva.
+
+Objetivo:
+Substituir a copy atual por uma versão mais forte em conversão, mantendo o visual premium e a estrutura que já existe.
+
+Importante:
+- Não recrie a página do zero
+- Não mude a arquitetura nem o layout sem necessidade
+- Preserve componentes, estilos e hierarquia visual atuais
+- Faça apenas ajustes de texto e, se necessário, reposicione pequenos blocos dentro da estrutura já existente
+- Mantenha a experiência clean e elegante
+
+O que quero mudar:
+1. Reescreva toda a copy da página
+2. Inclua estes 3 blocos estratégicos:
+   - prova social
+   - quebra de crença
+   - escassez leve
+3. Garanta que a página fique mais com cara de conversão premium e menos com cara de conteúdo/blog
+
+Direção da copy:
+- linguagem leve
+- mais emocional, sem exagero
+- foco em benefício
+- quebra de objeção
+- sensação de cuidado e personalização
+- sofisticação
+- sem tom apelativo
+
+Pode usar esta versão como base da nova copy:
+
+Headline:
+Diana, veja como Brow Lamination pode realçar o que é seu
+
+Subheadline:
+Sobrancelhas mais alinhadas, definidas e naturais — sem perder sua identidade.
+
+Microtexto:
+Na Mana Beauty, cada atendimento começa entendendo o que combina com você.
+
+Bloco de benefícios:
+Título: Um resultado que valoriza, não transforma
+
+Resultado com sua identidade
+Seu formato é respeitado. O objetivo é realçar o que você já tem — não criar algo artificial.
+
+Sem complicar sua rotina
+O efeito se mantém no dia a dia, sem precisar de maquiagem ou ajustes constantes.
+
+Acompanhamento profissional
+Você é orientada em cada etapa, com segurança e clareza antes, durante e depois.
+
+Bloco de prova social:
+Título: Resultados que falam por si
+
+“Eu nunca gostei muito da minha sobrancelha… sempre achei que deixava meu olhar pesado. Depois do procedimento, ficou leve, natural — parece que já era meu.”
+
+“Fiquei com medo de ficar artificial, mas ficou exatamente do jeito que eu queria: mais definido, mas ainda sendo eu.”
+
+Texto de apoio:
+Cada resultado é único, pensado para valorizar o seu rosto — nunca seguir um padrão.
+
+Bloco de como funciona:
+Título: Como funciona na Mana Beauty
+
+Antes de qualquer procedimento, avaliamos o que realmente combina com você.
+
+A partir disso, o Brow Lamination é realizado com técnica e cuidado, respeitando o desenho natural das suas sobrancelhas.
+
+Você sai com o olhar mais definido — e sabendo exatamente como manter o resultado no seu dia a dia.
+
+Bloco de quebra de crença:
+Título: O objetivo não é mudar você
+
+Aqui, o foco não é transformar seu rosto — é realçar o que já é seu.
+
+Cada detalhe é pensado para respeitar seu formato, sua expressão e sua identidade.
+Nada marcado, exagerado ou artificial.
+
+O resultado é leve, harmônico e feito para combinar com você — não com um padrão.
+
+Bloco “Para quem é”:
+Título: Para quem é
+
+Para quem sente que a sobrancelha não valoriza o próprio olhar.
+Para quem busca mais definição sem perder naturalidade.
+Para quem quer se sentir pronta sem depender de maquiagem todos os dias.
+
+FAQ:
+Título: Dúvidas comuns
+
+Vai ficar artificial?
+Não. O procedimento é feito respeitando seu formato natural, justamente para evitar qualquer efeito marcado.
+
+Dói ou incomoda?
+É um processo tranquilo e confortável para a maioria das clientes.
+
+Quanto tempo dura o resultado?
+O efeito se mantém por semanas, mantendo o olhar alinhado e definido no dia a dia.
+
+Preciso de manutenção?
+Sim, mas de forma simples e espaçada — você será orientada sobre o melhor intervalo.
+
+Onde fica a clínica?
+Você recebe todas as informações após escolher seu horário.
+
+Frase de reforço:
+Antes de agendar, o objetivo não é mudar quem você é.
+É realçar o que já existe em você.
+
+Bloco de escassez leve:
+Título: Atendimento com tempo e cuidado
+
+Para garantir um resultado realmente personalizado, os atendimentos são limitados por dia.
+
+Por isso, os horários disponíveis podem variar rapidamente.
+
+Investimento:
+R$ 130,00
+
+CTA principal:
+Escolher meu horário com atendimento personalizado
+
+CTA secundário:
+Escolher outro procedimento
+
+O que quero na resposta:
+1. Quais textos/blocos serão alterados
+2. Como você vai encaixar os 3 novos blocos na estrutura atual
+3. Depois disso, aplique as mudanças diretamente na página já criada
+4. Ao final, me mostre um resumo objetivo do que foi alterado
