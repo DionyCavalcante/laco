@@ -152,7 +152,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [saved,     setSaved]     = useState(false);
   const [photos,    setPhotos]    = useState<{id:string;side:string;url:string;label:string|null}[]>([]);
   const [uploading, setUploading] = useState<string|null>(null);
-  const [photoMode, setPhotoMode] = useState<'before_after'|'results'>('before_after');
+  const [photoMode, setPhotoMode] = useState<'before_after'|'results'|'single'>('before_after');
 
   useEffect(() => {
     Promise.all([getProcedures(), getProfessionals()])
@@ -169,7 +169,8 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
 
   async function openEdit(p: Procedure) {
     setEditing(p); setForm({ ...p }); setModalTab('info'); setPhotos([]);
-    setPhotoMode((p.photoMode as any) === 'results' ? 'results' : 'before_after');
+    const pm = (p.photoMode as any);
+    setPhotoMode(pm === 'results' ? 'results' : pm === 'single' ? 'single' : 'before_after');
     if (p.id) {
       try { const pp = await getProfessionalsByProcedure(p.id); setSelProfs(pp.map(x => x.id)); }
       catch { setSelProfs([]); }
@@ -182,7 +183,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
     setSelProfs([]); setModalTab('info'); setPhotos([]); setPhotoMode('before_after');
   }
 
-  async function changePhotoMode(mode: 'before_after'|'results') {
+  async function changePhotoMode(mode: 'before_after'|'results'|'single') {
     setPhotoMode(mode);
     setForm(f => ({ ...f, photoMode: mode }));
     if (editing?.id) {
@@ -447,8 +448,9 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </label>
                         <div className={cn('flex rounded-2xl border overflow-hidden', isLight ? 'border-zinc-200' : 'border-white/10')}>
                           {([
-                            { value: 'before_after', label: 'Antes / Depois' },
-                            { value: 'results',      label: 'Só Resultados'  },
+                            { value: 'before_after', label: 'Antes / Depois'  },
+                            { value: 'results',      label: 'Só Resultados'   },
+                            { value: 'single',       label: 'Imagem Única'    },
                           ] as const).map(opt => (
                             <button key={opt.value} onClick={() => changePhotoMode(opt.value)}
                               className={cn('flex-1 py-3 text-sm font-black uppercase tracking-widest transition-all',
@@ -463,9 +465,46 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         <p className={cn('text-xs', isLight ? 'text-zinc-400' : 'text-zinc-500')}>
                           {photoMode === 'before_after'
                             ? 'Exibe as fotos em dois lados: Antes e Depois'
-                            : 'Exibe apenas o carrossel de resultados'}
+                            : photoMode === 'results'
+                            ? 'Exibe apenas o carrossel de resultados'
+                            : 'Exibe uma única foto em largura total no card'}
                         </p>
                       </div>
+
+                      {/* Imagem Única */}
+                      {photoMode === 'single' && (
+                        <div className="space-y-4">
+                          <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
+                            Foto Principal
+                          </label>
+                          <div className="max-w-xs">
+                            {photos.filter(p => p.side === 'before').slice(0, 1).map(ph => (
+                              <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-video mb-3">
+                                <img src={ph.url} alt="Foto" className="w-full h-full object-cover" />
+                                <button onClick={() => deletePhoto(ph.id)}
+                                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                  <X className="w-4 h-4 text-white" />
+                                </button>
+                              </div>
+                            ))}
+                            {editing?.id && photos.filter(p => p.side === 'before').length === 0 && (
+                              <label className={cn('aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
+                                uploading === 'before' ? 'border-astrai-gold/60 bg-astrai-gold/5' : (isLight ? 'bg-zinc-50 border-zinc-200 hover:border-astrai-gold/50' : 'bg-white/[0.02] border-white/10 hover:border-astrai-gold/40')
+                              )}>
+                                <input type="file" accept="image/*" className="hidden" disabled={!!uploading}
+                                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto('before', f); e.target.value=''; }} />
+                                {uploading === 'before'
+                                  ? <Loader2 className="w-8 h-8 text-astrai-gold animate-spin" />
+                                  : <><Upload className="w-8 h-8 text-zinc-500" /><span className="text-sm font-bold text-zinc-500">Clique para enviar</span></>
+                                }
+                              </label>
+                            )}
+                          </div>
+                          <p className={cn('text-xs', isLight ? 'text-zinc-400' : 'text-zinc-500')}>
+                            Aparece em largura total no card do procedimento
+                          </p>
+                        </div>
+                      )}
 
                       {/* Antes e Depois — visível apenas no modo before_after */}
                       {photoMode === 'before_after' && (

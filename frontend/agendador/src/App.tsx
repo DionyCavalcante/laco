@@ -528,7 +528,7 @@ const GalleryPage = ({
           <p className="text-center text-aura-slate/50 text-sm py-16">Nenhum procedimento disponível.</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {items.map(({ proc, before, after, isResults }, idx) => (
+        {items.map(({ proc, before, after, isSingle, isResults }, idx) => (
           <motion.article
             key={proc.id}
             initial={{ opacity: 0, y: 20 }}
@@ -538,44 +538,69 @@ const GalleryPage = ({
             className="card-transition bg-white rounded-3xl overflow-hidden shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] border border-white/50 cursor-pointer"
           >
             <div className="relative h-64 flex">
-              <div className="relative w-1/2 h-full overflow-hidden border-r border-white/20">
-                {before ? (
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: `url(${before.url})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: `${before.position_x ?? 50}% ${before.position_y ?? 50}%`,
-                    transform: before.rotation ? `rotate(${before.rotation}deg)` : undefined,
-                    scale: (before.rotation && before.rotation % 180 !== 0) ? '1.42' : undefined,
-                  }} />
-                ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">{isResults ? 'Caso 1' : 'Antes'}</div>
-                )}
-                <span className="absolute bottom-3 left-3 ba-label">{isResults ? 'Caso 1' : 'Antes'}</span>
-                {before?.label && (
-                  <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {before.label}
-                  </span>
-                )}
-              </div>
-              <div className="relative w-1/2 h-full overflow-hidden">
-                {after ? (
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: `url(${after.url})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: `${after.position_x ?? 50}% ${after.position_y ?? 50}%`,
-                    transform: after.rotation ? `rotate(${after.rotation}deg)` : undefined,
-                    scale: (after.rotation && after.rotation % 180 !== 0) ? '1.42' : undefined,
-                  }} />
-                ) : (
-                  <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">{isResults ? 'Caso 2' : 'Depois'}</div>
-                )}
-                <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
-                {after?.label && (
-                  <span className="absolute top-3 right-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {after.label}
-                  </span>
-                )}
-              </div>
+              {isSingle ? (
+                /* ── Imagem Única: foto full-width ── */
+                <div className="relative w-full h-full overflow-hidden">
+                  {before ? (
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: `url(${before.url})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: `${before.position_x ?? 50}% ${before.position_y ?? 50}%`,
+                      transform: before.rotation ? `rotate(${before.rotation}deg)` : undefined,
+                      scale: (before.rotation && before.rotation % 180 !== 0) ? '1.42' : undefined,
+                    }} />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">Foto</div>
+                  )}
+                  {before?.label && (
+                    <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {before.label}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                /* ── Dois lados: Antes/Depois ou Caso 1/Caso 2 ── */
+                <>
+                  <div className="relative w-1/2 h-full overflow-hidden border-r border-white/20">
+                    {before ? (
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `url(${before.url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: `${before.position_x ?? 50}% ${before.position_y ?? 50}%`,
+                        transform: before.rotation ? `rotate(${before.rotation}deg)` : undefined,
+                        scale: (before.rotation && before.rotation % 180 !== 0) ? '1.42' : undefined,
+                      }} />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">{isResults ? 'Caso 1' : 'Antes'}</div>
+                    )}
+                    <span className="absolute bottom-3 left-3 ba-label">{isResults ? 'Caso 1' : 'Antes'}</span>
+                    {before?.label && (
+                      <span className="absolute top-3 left-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {before.label}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative w-1/2 h-full overflow-hidden">
+                    {after ? (
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `url(${after.url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: `${after.position_x ?? 50}% ${after.position_y ?? 50}%`,
+                        transform: after.rotation ? `rotate(${after.rotation}deg)` : undefined,
+                        scale: (after.rotation && after.rotation % 180 !== 0) ? '1.42' : undefined,
+                      }} />
+                    ) : (
+                      <div className="w-full h-full bg-purple-50 flex items-center justify-center text-xs text-purple-300">{isResults ? 'Caso 2' : 'Depois'}</div>
+                    )}
+                    <span className="absolute bottom-3 right-3 ba-label">{isResults ? 'Caso 2' : 'Depois'}</span>
+                    {after?.label && (
+                      <span className="absolute top-3 right-3 pointer-events-none" style={{ background: 'linear-gradient(135deg, #D4BC9A 0%, #B89A6A 100%)', borderRadius: '999px', padding: '5px 13px', fontSize: '9px', fontWeight: 700, color: '#1A1F2C', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: '0 4px 16px rgba(184,154,106,0.45)', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {after.label}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">
