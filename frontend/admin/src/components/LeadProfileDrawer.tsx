@@ -5,7 +5,7 @@ import { formatPhoneDisplay, getPhoneForWhatsApp } from '../lib/phone';
 import { AstraiTheme } from '../types';
 import {
   MessageSquare, X,
-  Phone, Calendar, Clock, CalendarCheck, ArrowRight, ChevronDown,
+  Phone, Calendar, Clock, CalendarCheck, ArrowRight, ChevronDown, Trash2,
 } from 'lucide-react';
 import { Lead, LeadStats } from '../services/leads';
 import { Appointment } from '../services/appointments';
@@ -143,12 +143,13 @@ function InlineDropdown({ label, badgeCls, dot, options, onSelect, isLight }: {
 }
 
 /* ── lead profile drawer ──────────────────────────────────────────── */
-function LeadProfileDrawer({ lead, apts, theme, onClose, onStatusChange, onAptStatusChange, onBook, onUpdate }: {
+function LeadProfileDrawer({ lead, apts, theme, onClose, onStatusChange, onAptStatusChange, onBook, onUpdate, onDelete }: {
   lead: Lead; apts: Appointment[]; theme: AstraiTheme;
-  onClose(): void; onStatusChange(s: string): void; onAptStatusChange?(aptId: string, status: string): void; onBook(): void; onUpdate?(data: { name?: string; phone?: string }): void;
+  onClose(): void; onStatusChange(s: string): void; onAptStatusChange?(aptId: string, status: string): void; onBook(): void; onUpdate?(data: { name?: string; phone?: string }): void; onDelete?(): void;
 }) {
   const isLight = theme.id === 'light';
   const [isEditing, setIsEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editName, setEditName] = useState(lead.name);
   const [editPhone, setEditPhone] = useState(lead.phone);
   const waLink = `https://wa.me/${getPhoneForWhatsApp(lead.phone)}`;
@@ -455,6 +456,34 @@ function LeadProfileDrawer({ lead, apts, theme, onClose, onStatusChange, onAptSt
             )}>
             <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Abrir WhatsApp
           </a>
+
+          {/* ── Excluir lead ── */}
+          {onDelete && (
+            confirmDelete ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { onDelete(); onClose(); }}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-500/20 transition-all">
+                  <Trash2 className="w-3.5 h-3.5" /> Confirmar
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className={cn('flex-1 px-4 py-2 rounded-2xl border text-xs font-bold transition-all',
+                    isLight ? 'border-zinc-200 text-zinc-500 hover:bg-zinc-50' : 'border-white/10 text-zinc-500 hover:bg-white/5'
+                  )}>
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className={cn('flex items-center justify-center gap-1.5 w-full px-6 py-2 rounded-2xl border text-xs font-bold transition-all',
+                  isLight ? 'border-zinc-200 text-zinc-400 hover:border-red-300 hover:text-red-500' : 'border-white/10 text-zinc-600 hover:border-red-500/30 hover:text-red-400'
+                )}>
+                <Trash2 className="w-3.5 h-3.5" /> Excluir Lead
+              </button>
+            )
+          )}
         </div>
       </motion.aside>
     </>

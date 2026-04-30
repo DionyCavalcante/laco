@@ -220,7 +220,6 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Excluir este lead?')) return;
     await deleteLead(id);
     setLeads(p => p.filter(l => l.id !== id));
     if (openLead?.id === id) { setOpenLead(null); setOpenApts([]); }
@@ -278,6 +277,7 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
             onAptStatusChange={(aptId, status) => handleAptStatus(openLead.id, aptId, status)}
             onBook={() => setBookingLead({ id: openLead.id, name: openLead.name })}
             onUpdate={(data) => handleLeadUpdate(openLead.id, data)}
+            onDelete={() => handleDelete(openLead.id)}
           />
         )}
       </AnimatePresence>
@@ -439,7 +439,7 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
 
                   {/* Motivo */}
                   <p className="text-sm text-zinc-400 truncate pr-2">
-                    {lead.reject_reason || (apt ? apt.date : '—')}
+                    {lead.reject_reason || '—'}
                   </p>
 
                   {/* Data */}
