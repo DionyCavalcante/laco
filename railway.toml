@@ -1,6 +1,5 @@
 [build]
 builder = "nixpacks"
-rootDirectory = "."
 
 [deploy]
 startCommand = "npm start"

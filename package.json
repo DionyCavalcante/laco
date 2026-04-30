@@ -1,0 +1,10 @@
+{
+  "name": "laco-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && cd frontend/agendador && npm install && cd ../admin && npm install && cd ../../backend && npm install",
+    "build-all": "cd frontend/agendador && npm run build && cd ../admin && npm run build",
+    "start": "cd backend && npm run migrate && npm start"
+  }
+}
