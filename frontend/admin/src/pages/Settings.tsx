@@ -534,7 +534,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                   <GripVertical className="w-4 h-4 text-zinc-700 cursor-grab" />
                   <div>
                     <h4 className={cn('text-base font-black tracking-tight group-hover:text-astrai-gold transition-colors', theme.textPrimary)}>{proc.name}</h4>
-                    <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-mono font-bold mt-1 uppercase tracking-tighter">
+                    <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono font-bold mt-1 uppercase tracking-wide">
                       <span>{proc.durationMin} min</span>
                       {proc.priceOld > 0 && proc.priceOld !== proc.price && (
                         <><span className="opacity-20">·</span><span>R$ {proc.priceOld.toLocaleString('pt-BR')}</span><ChevronRight className="w-3 h-3 opacity-30" /><span className="text-astrai-gold">R$ {proc.price.toLocaleString('pt-BR')}</span></>
