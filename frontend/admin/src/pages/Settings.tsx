@@ -153,6 +153,8 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [photos,    setPhotos]    = useState<{id:string;side:string;url:string;label:string|null}[]>([]);
   const [uploading, setUploading] = useState<string|null>(null);
   const [photoMode, setPhotoMode] = useState<'before_after'|'results'|'single'>('before_after');
+  const dragIndex  = useRef<number | null>(null);
+  const dragOver   = useRef<number | null>(null);
 
   useEffect(() => {
     Promise.all([getProcedures(), getProfessionals()])
@@ -273,6 +275,22 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
       setSaved(true); setTimeout(() => { setSaved(false); closeModal(); }, 1200);
     } catch(e) { console.error(e); }
     finally { setSaving(false); }
+  }
+
+  function handleDrop() {
+    const from = dragIndex.current;
+    const to   = dragOver.current;
+    if (from === null || to === null || from === to) return;
+    const reordered = [...procs];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+    setProcs(reordered);
+    // Salva sort_order de todos que mudaram de posição
+    reordered.forEach((p, idx) => {
+      if (p.sortOrder !== idx) updateProcedure(p.id, { sort_order: idx }).catch(console.error);
+    });
+    dragIndex.current = null;
+    dragOver.current  = null;
   }
 
   async function remove(id: string) {
@@ -722,12 +740,18 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
         ) : (
           <div>
             {procs.map((proc, i) => (
-              <div key={proc.id} className={cn('group flex items-center justify-between px-8 py-5 transition-colors',
-                i < procs.length - 1 ? (isLight ? 'border-b border-zinc-50' : 'border-b border-white/[0.03]') : '',
-                isLight ? 'hover:bg-zinc-50' : 'hover:bg-white/[0.02]'
-              )}>
+              <div key={proc.id}
+                draggable
+                onDragStart={() => { dragIndex.current = i; }}
+                onDragEnter={() => { dragOver.current = i; }}
+                onDragOver={e => e.preventDefault()}
+                onDragEnd={handleDrop}
+                className={cn('group flex items-center justify-between px-8 py-5 transition-colors cursor-default',
+                  i < procs.length - 1 ? (isLight ? 'border-b border-zinc-50' : 'border-b border-white/[0.03]') : '',
+                  isLight ? 'hover:bg-zinc-50' : 'hover:bg-white/[0.02]'
+                )}>
                 <div className="flex items-center gap-6">
-                  <GripVertical className="w-4 h-4 text-zinc-700 cursor-grab" />
+                  <GripVertical className="w-4 h-4 text-zinc-400 cursor-grab active:cursor-grabbing shrink-0" />
                   <div>
                     <h4 className={cn('text-base font-black tracking-tight group-hover:text-astrai-gold transition-colors', theme.textPrimary)}>{proc.name}</h4>
                     <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono font-bold mt-1 uppercase tracking-wide">
