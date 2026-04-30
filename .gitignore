@@ -4,8 +4,12 @@ node_modules/
 .DS_Store
 dist/
 
-# Frontend agendador — build output vai para backend/public (commitar o build)
+# Frontend node_modules
 frontend/agendador/node_modules/
+frontend/admin/node_modules/
+
+# Build outputs — gerados no deploy pelo Docker, não commitar
+backend/public/admin/
 
 # Environment & Secrets (AIOX)
 .env.local
