@@ -214,69 +214,105 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                     <Loader2 className="w-6 h-6 animate-spin text-astrai-gold" />
                   </div>
                 ) : (() => {
-                  // Agrupar por dia e detectar conflitos para sub-colunas
-                  const dayApts: Record<number, Appointment[]> = {};
-                  appointments.forEach(apt => {
-                    const di = weekDays.findIndex(d => toISO(d) === apt.date);
-                    if (di < 0) return;
-                    const [hh] = apt.time.split(':').map(Number);
-                    if (hh < 8 || hh > 18) return;
-                    if (!dayApts[di]) dayApts[di] = [];
-                    dayApts[di].push(apt);
-                  });
+                  const toMin = (t: string) => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+                  const fmtMin = (m: number) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 
-                  // Para cada apt, calcular coluna interna (evitar sobreposição)
-                  type AptLayout = { apt: Appointment; col: number; totalCols: number };
-                  const layouts: AptLayout[] = [];
-                  Object.entries(dayApts).forEach(([diStr, apts]) => {
-                    const toMin = (t: string) => { const [h,m] = t.split(':').map(Number); return h*60+m; };
-                    // Ordenar por horário de início
-                    const sorted = [...apts].sort((a,b) => toMin(a.time) - toMin(b.time));
-                    // Atribuir colunas por intervalo de tempo
-                    const cols: number[] = new Array(sorted.length).fill(0);
-                    const endMins: number[] = [];
-                    sorted.forEach((apt, i) => {
-                      const start = toMin(apt.time);
-                      // Encontrar a menor coluna disponível
-                      let col = 0;
-                      while (endMins[col] !== undefined && endMins[col] > start) col++;
-                      cols[i] = col;
-                      endMins[col] = start + apt.duration;
-                    });
-                    const maxCols = Math.max(...cols) + 1;
-                    sorted.forEach((apt, i) => {
-                      layouts.push({ apt, col: cols[i], totalCols: maxCols });
-                    });
+                  // Agrupar por dia, depois em clusters de sobreposição temporal
+                  type Cluster = { apts: Appointment[]; di: number; startMin: number; endMin: number };
+                  const clusters: Cluster[] = [];
+
+                  weekDays.forEach((d, di) => {
+                    const dayApts = appointments
+                      .filter(a => {
+                        if (toISO(d) !== a.date) return false;
+                        const [hh] = a.time.split(':').map(Number);
+                        return hh >= 8 && hh <= 18;
+                      })
+                      .sort((a,b) => toMin(a.time) - toMin(b.time));
+
+                    if (!dayApts.length) return;
+
+                    let group: Appointment[] = [dayApts[0]];
+                    let maxEnd = toMin(dayApts[0].time) + dayApts[0].duration;
+
+                    for (let i = 1; i < dayApts.length; i++) {
+                      const start = toMin(dayApts[i].time);
+                      if (start < maxEnd) {
+                        group.push(dayApts[i]);
+                        maxEnd = Math.max(maxEnd, start + dayApts[i].duration);
+                      } else {
+                        clusters.push({ apts: group, di, startMin: toMin(group[0].time), endMin: maxEnd });
+                        group = [dayApts[i]];
+                        maxEnd = start + dayApts[i].duration;
+                      }
+                    }
+                    clusters.push({ apts: group, di, startMin: toMin(group[0].time), endMin: maxEnd });
                   });
 
                   return (
                     <AnimatePresence>
-                      {layouts.map(({ apt, col, totalCols }) => {
-                        const dayIndex = weekDays.findIndex(d => toISO(d) === apt.date);
-                        const [hh, mm] = apt.time.split(':').map(Number);
-                        const top    = ((hh - 8) + (mm/60)) * 80;
-                        const height = Math.max((apt.duration / 60) * 80, 48);
-                        const dayW   = `(100% - 80px) / 7`;
-                        const colW   = `(${dayW}) / ${totalCols}`;
-                        const left   = `calc(80px + ${dayW} * ${dayIndex} + ${colW} * ${col} + 2px)`;
-                        const width  = `calc(${colW} - 4px)`;
-                        const sc     = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
-                        const short  = height < 64;
+                      {clusters.map((cl, gi) => {
+                        const top    = (cl.startMin / 60 - 8) * 80;
+                        const height = Math.max((cl.endMin - cl.startMin) / 60 * 80, 52);
+                        const left   = `calc(80px + (100% - 80px) / 7 * ${cl.di} + 2px)`;
+                        const width  = `calc((100% - 80px) / 7 - 4px)`;
+                        const isMulti = cl.apts.length > 1;
+                        const hasPending = cl.apts.some(a => a.status !== 'Confirmado');
+                        const borderCls  = hasPending ? 'border-l-amber-400' : 'border-l-emerald-500';
+                        const bgCls      = isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10';
+                        const visibleApts = cl.apts.slice(0, 4);
+                        const extra       = cl.apts.length - visibleApts.length;
+
                         return (
-                          <motion.div key={apt.id} initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
-                            className="absolute z-10 cursor-pointer"
+                          <motion.div key={`cl-${gi}`}
+                            initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
+                            className="absolute z-10 cursor-pointer group"
                             style={{ top, left, width, height }}
-                            onClick={() => openDetail(apt)}>
-                            <div className={cn('w-full h-full rounded-xl border-l-[3px] px-2 py-1.5 flex flex-col overflow-hidden shadow-md hover:shadow-lg transition-shadow',
-                              isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10',
-                              apt.status === 'Confirmado' ? 'border-l-emerald-500' : 'border-l-amber-400'
+                            onClick={() => {
+                              if (isMulti) { setSelDate(cl.apts[0].date); setView('list'); }
+                              else openDetail(cl.apts[0]);
+                            }}>
+                            <div className={cn(
+                              'w-full h-full rounded-xl border-l-[3px] px-2 py-1.5 flex flex-col overflow-hidden shadow-md group-hover:shadow-lg transition-shadow',
+                              bgCls, borderCls
                             )}>
-                              <div className="flex items-center gap-1 min-w-0">
-                                <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', sc.dot)} />
-                                <p className={cn('text-[11px] font-bold truncate leading-tight', theme.textPrimary)}>{apt.patientName}</p>
-                              </div>
-                              {!short && <p className="text-[10px] text-astrai-gold font-bold truncate leading-tight mt-0.5">{apt.procedure}</p>}
-                              <p className="text-[10px] text-zinc-400 font-mono font-bold mt-auto leading-tight">{apt.time}–{apt.endTime}</p>
+                              {isMulti ? (
+                                <>
+                                  <p className="text-[9px] font-mono text-zinc-400 font-bold leading-none mb-1">
+                                    {fmtMin(cl.startMin)}–{fmtMin(cl.endMin)}
+                                  </p>
+                                  <div className="flex-1 space-y-0.5 overflow-hidden">
+                                    {visibleApts.map(apt => {
+                                      const dot = (STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando']).dot;
+                                      return (
+                                        <div key={apt.id} className="flex items-center gap-1 min-w-0">
+                                          <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', dot)} />
+                                          <span className={cn('text-[10px] font-bold truncate leading-tight', theme.textPrimary)}>
+                                            {apt.patientName}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                    {extra > 0 && (
+                                      <p className="text-[9px] text-astrai-gold font-bold leading-tight">+{extra} mais</p>
+                                    )}
+                                  </div>
+                                </>
+                              ) : (() => {
+                                const apt = cl.apts[0];
+                                const sc  = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
+                                const short = height < 64;
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-1 min-w-0">
+                                      <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', sc.dot)} />
+                                      <p className={cn('text-[11px] font-bold truncate leading-tight', theme.textPrimary)}>{apt.patientName}</p>
+                                    </div>
+                                    {!short && <p className="text-[10px] text-astrai-gold font-bold truncate leading-tight mt-0.5">{apt.procedure}</p>}
+                                    <p className="text-[10px] text-zinc-400 font-mono font-bold mt-auto leading-tight">{apt.time}–{apt.endTime}</p>
+                                  </>
+                                );
+                              })()}
                             </div>
                           </motion.div>
                         );
