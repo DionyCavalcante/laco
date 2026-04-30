@@ -5,6 +5,7 @@
   "scripts": {
     "install-all": "npm install && cd frontend/agendador && npm install && cd ../admin && npm install && cd ../../backend && npm install",
     "build-all": "cd frontend/agendador && npm run build && cd ../admin && npm run build",
-    "start": "cd backend && npm run migrate && npm start"
+    "migrate": "cd /app/backend && node src/db/migrate.js",
+    "start": "cd /app/backend && node src/index.js"
   }
 }
