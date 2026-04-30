@@ -341,32 +341,46 @@ const STATUS_BADGE: Record<string, string> = {
 **SEMPRE via GitHub — nunca `railway up` direto.**
 
 ```bash
-# 1. Fazer o build local (opcional — Railway builda no deploy)
-cd D:\Trab\laco\frontend\admin
-npm run build
-
-# 2. Commitar e fazer push do código-fonte
 cd D:\Trab\laco
 git add frontend/admin
 git commit -m "feat: descrição da mudança"
 git push origin main
-# Railway detecta o push e faz o build automaticamente
+# Railway detecta o push e builda automaticamente via Dockerfile
 ```
 
 **Por que não `railway up`?**
 - `railway up` aparece como "via CLI" sem contexto
 - `git push` aparece como "via GitHub" com o resumo do commit
-- O `nixpacks.toml` já cuida de buildar `agendador` + `admin` + backend
 
-**Processo do Railway no deploy:**
+### Arquitetura do deploy no Railway
+
+O Railway usa **Dockerfile** na raiz do repo (não nixpacks):
+
+```
+Dockerfile (raiz)
+├── COPY . .                          ← copia o repo inteiro
+├── RUN frontend/agendador npm build  ← gera portal do cliente
+├── RUN frontend/admin npm build      ← gera admin em backend/public/admin/
+└── RUN backend npm install           ← prepara o servidor
+```
+
+**Configurações críticas no painel do Railway** (Settings → Deploy):
+
+| Campo | Valor |
+|-------|-------|
+| Root Directory | *(vazio — raiz do repo)* |
+| Pre-deploy Command | `node /app/backend/src/db/migrate.js` |
+| Custom Start Command | definido via `railway.toml` |
+
+> **ATENÇÃO:** O Pre-deploy Command usa **caminho absoluto** `node /app/backend/src/db/migrate.js`. Não use `npm run migrate` nem `cd backend &&` — o Railway não garante shell no pre-deploy e falha com "Missing script".
+
+**railway.toml:**
 ```toml
-# nixpacks.toml
-[phases.build]
-cmds = [
-  "cd frontend/agendador && npm install && npm run build",
-  "cd frontend/admin && npm install && npm run build",
-  "cd backend && npm install"
-]
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "sh -c 'cd /app/backend && node src/db/migrate.js && node src/index.js'"
 ```
 
 ---
@@ -379,4 +393,6 @@ cmds = [
 | Link de agendamento não aparece | Verificar `getClinic()` em services/settings.ts |
 | "Novo Cliente" não funciona | Verificar `hasPrefill` no BookingModal (id === 'new') |
 | Telefone não formatado | Usar `formatPhoneDisplay(phone)` |
-| Build falha no Railway | Verificar `nixpacks.toml` e rodar `npm run build` local |
+| Pre-deploy falha "Missing script" | Pre-deploy Command deve ser `node /app/backend/src/db/migrate.js` (caminho absoluto, sem npm) |
+| Build todo em cache no Railway | Fazer "Redeploy" com "Clear cache" no painel |
+| Root Directory errado no Railway | Deixar vazio (raiz do repo) — se setado como `backend`, Railway ignora o Dockerfile |
