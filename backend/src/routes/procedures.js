@@ -150,6 +150,19 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const clinicId = await getEffectiveClinicId(req)
+
+    // Verifica se há agendamentos vinculados
+    const { rows: apts } = await db.query(
+      `SELECT COUNT(*) AS total FROM appointments
+       WHERE procedure_id = $1 AND clinic_id = $2 AND status != 'cancelled'`,
+      [req.params.id, clinicId]
+    )
+    if (Number(apts[0].total) > 0) {
+      return res.status(409).json({
+        error: `Este procedimento possui ${apts[0].total} agendamento(s) vinculado(s) e não pode ser excluído. Desative-o pelo toggle.`
+      })
+    }
+
     const { rowCount } = await db.query(
       'DELETE FROM procedures WHERE id = $1 AND clinic_id = $2',
       [req.params.id, clinicId]

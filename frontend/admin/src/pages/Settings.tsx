@@ -208,8 +208,12 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
 
   async function remove(id: string) {
     if (!confirm('Excluir procedimento?')) return;
-    await deleteProcedure(id);
-    setProcs(p => p.filter(x => x.id !== id));
+    try {
+      await deleteProcedure(id);
+      setProcs(p => p.filter(x => x.id !== id));
+    } catch (err: any) {
+      alert(err.message || 'Não foi possível excluir o procedimento.');
+    }
   }
   async function toggle(proc: Procedure) {
     const u = await updateProcedure(proc.id, { active: !proc.active });
