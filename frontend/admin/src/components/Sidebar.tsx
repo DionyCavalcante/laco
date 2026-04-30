@@ -24,17 +24,11 @@ const navItems = [
   { id: 'settings',  icon: Settings,        label: 'Configurações' },
 ];
 
-const AstraiIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-    <path d="M2 17l10 5 10-5"/>
-    <path d="M2 12l10 5 10-5"/>
-  </svg>
-);
 
 export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse, onThemeChange }: SidebarProps) {
   const { logout } = useAuth();
   const isAstraiBrand = theme.id === 'mixed';
+  const isLight = theme.id === 'light';
 
   return (
     <aside className={cn(
@@ -44,20 +38,22 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
       collapsed ? 'w-20' : 'w-64'
     )}>
       {/* Brand */}
-      <div className={cn('p-6 flex items-center gap-3 overflow-hidden', collapsed && 'justify-center')}>
-        <div className={cn(
-          'shrink-0 w-10 h-10 rounded-xl flex items-center justify-center',
-          'bg-gradient-to-br from-astrai-gold to-[#9A6B10]',
-          'shadow-[0_0_20px_rgba(201,169,110,0.30)]'
-        )}>
-          <span className="text-[#071318]"><AstraiIcon size={20} /></span>
-        </div>
+      <div className={cn('px-5 py-5 flex items-center gap-3 overflow-hidden', collapsed && 'justify-center')}>
+        {/* Ícone: bússola da logo */}
+        <img
+          src="/logo-icon.png"
+          alt="Astrai"
+          className="shrink-0 w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(201,169,110,0.5)]"
+        />
         {!collapsed && (
-          <div className="flex flex-col">
-            <span className={cn('text-lg font-black tracking-tight leading-none', theme.textPrimary)}>
-              Astrai
+          <div className="flex flex-col leading-none">
+            <span
+              className={cn('tracking-[0.18em] leading-none', isLight ? 'text-zinc-800' : 'text-white/90')}
+              style={{ fontFamily: '"Cinzel", serif', fontSize: '15px', fontWeight: 600, letterSpacing: '0.2em' }}
+            >
+              ASTRAI
             </span>
-            <span className="text-[10px] text-astrai-gold/50 font-mono uppercase tracking-widest mt-0.5">
+            <span className="text-[9px] text-astrai-gold/60 font-mono uppercase tracking-[0.3em] mt-1">
               Admin
             </span>
           </div>
