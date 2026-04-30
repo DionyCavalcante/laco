@@ -67,7 +67,7 @@ interface Procedure {
   benefit_2_desc?: string;
   benefit_3_title?: string;
   benefit_3_desc?: string;
-  photo_mode?: 'before_after' | 'results';
+  photo_mode?: 'before_after' | 'results' | 'single';
   // Fase 2 — campos da página de procedimento
   category?: string;
   authority_note?: string;
@@ -447,15 +447,17 @@ const GalleryPage = ({
   // Monta items de galeria a partir dos procedimentos reais
   const items = procedures.map((p) => {
     const photos = procPhotos[p.id] || { before: [], after: [], carousel: [] };
+    const isSingle  = p.photo_mode === 'single';
     const isResults = p.photo_mode === 'results';
     const mapPhoto = (photo?: Photo) => photo
       ? { url: photoUrl(photo.url), rotation: photo.rotation, position_x: photo.position_x, position_y: photo.position_y }
       : null;
     return {
       proc: p,
+      isSingle,
       isResults,
       before: isResults ? mapPhoto(photos.after[0]) : mapPhoto(photos.before[0]),
-      after: isResults ? mapPhoto(photos.after[1]) : mapPhoto(photos.after[0]),
+      after:  isSingle  ? null : (isResults ? mapPhoto(photos.after[1]) : mapPhoto(photos.after[0])),
     };
   });
 

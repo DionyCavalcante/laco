@@ -150,8 +150,9 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [selProfs,  setSelProfs]  = useState<string[]>([]);
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
-  const [photos,    setPhotos]    = useState<{id:string;side:string;url:string}[]>([]);
-  const [uploading, setUploading] = useState<string|null>(null); // side sendo upado
+  const [photos,    setPhotos]    = useState<{id:string;side:string;url:string;label:string|null}[]>([]);
+  const [uploading, setUploading] = useState<string|null>(null);
+  const [photoMode, setPhotoMode] = useState<'before_after'|'results'>('before_after');
 
   useEffect(() => {
     Promise.all([getProcedures(), getProfessionals()])
@@ -168,6 +169,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
 
   async function openEdit(p: Procedure) {
     setEditing(p); setForm({ ...p }); setModalTab('info'); setPhotos([]);
+    setPhotoMode((p.photoMode as any) === 'results' ? 'results' : 'before_after');
     if (p.id) {
       try { const pp = await getProfessionalsByProcedure(p.id); setSelProfs(pp.map(x => x.id)); }
       catch { setSelProfs([]); }
@@ -177,7 +179,19 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   function openNew() {
     setEditing({} as any);
     setForm({ name:'', durationMin:60, price:0, priceOld:0, paymentNote:'', videoUrl:'', revealDelay:5, active:true });
-    setSelProfs([]); setModalTab('info'); setPhotos([]);
+    setSelProfs([]); setModalTab('info'); setPhotos([]); setPhotoMode('before_after');
+  }
+
+  async function changePhotoMode(mode: 'before_after'|'results') {
+    setPhotoMode(mode);
+    setForm(f => ({ ...f, photoMode: mode }));
+    if (editing?.id) {
+      await fetch(`/api/procedures/${editing.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
+        body: JSON.stringify({ photo_mode: mode }),
+      }).catch(console.error);
+    }
   }
 
   async function uploadPhoto(side: 'before'|'after'|'carousel', file: File) {
@@ -202,7 +216,6 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   }
 
   async function deletePhoto(photoId: string) {
-    if (!editing?.id) return;
     try {
       const res = await fetch(`/api/upload/photo/${photoId}`, {
         method: 'DELETE',
@@ -213,6 +226,15 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
     } catch (err: any) {
       alert(err.message);
     }
+  }
+
+  async function updateLabel(photoId: string, label: string) {
+    setPhotos(p => p.map(x => x.id === photoId ? { ...x, label } : x));
+    await fetch(`/api/upload/photo/${photoId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
+      body: JSON.stringify({ label: label || null }),
+    }).catch(console.error);
   }
   function closeModal() { setEditing(null); setSaved(false); }
 
@@ -410,7 +432,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
 
                   {/* ── Imagens ── */}
                   {modalTab === 'images' && (
-                    <motion.div key="images" initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} className="space-y-10">
+                    <motion.div key="images" initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} className="space-y-8">
 
                       {!editing?.id && (
                         <div className={cn('p-5 rounded-2xl border text-sm font-semibold text-center', isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-amber-400/10 border-amber-400/20 text-amber-300')}>
@@ -418,61 +440,102 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </div>
                       )}
 
-                      {/* Antes e Depois */}
-                      <div className="space-y-4">
-                        <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
-                          Fotos Antes e Depois
+                      {/* Modo de exibição */}
+                      <div className="space-y-3">
+                        <label className={cn('block text-[10px] font-black uppercase tracking-widest', isLight ? 'text-zinc-500' : 'text-zinc-400')}>
+                          Modo de exibição das fotos
                         </label>
-                        <div className="grid grid-cols-2 gap-6">
-                          {(['before','after'] as const).map(side => {
-                            const sidePhotos = photos.filter(p => p.side === side);
-                            const sideLabel = side === 'before' ? 'Antes' : 'Depois';
-                            const isUploading = uploading === side;
-                            return (
-                              <div key={side} className="space-y-3">
-                                <span className={cn('text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-500' : 'text-zinc-400')}>{sideLabel}</span>
-                                {/* Fotos existentes */}
-                                {sidePhotos.map(ph => (
-                                  <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-square">
-                                    <img src={ph.url} alt={sideLabel} className="w-full h-full object-cover" />
-                                    <button onClick={() => deletePhoto(ph.id)}
-                                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                                      <X className="w-4 h-4 text-white" />
-                                    </button>
-                                  </div>
-                                ))}
-                                {/* Upload */}
-                                {editing?.id && (
-                                  <label className={cn('aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
-                                    isUploading ? 'border-astrai-gold/60 bg-astrai-gold/5' : (isLight ? 'bg-zinc-50 border-zinc-200 hover:border-astrai-gold/50' : 'bg-white/[0.02] border-white/10 hover:border-astrai-gold/40')
-                                  )}>
-                                    <input type="file" accept="image/*" className="hidden" disabled={!!uploading}
-                                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(side, f); e.target.value=''; }} />
-                                    {isUploading
-                                      ? <Loader2 className="w-8 h-8 text-astrai-gold animate-spin" />
-                                      : <><Upload className="w-8 h-8 text-zinc-500" /><span className="text-sm font-bold text-zinc-500">Clique para enviar</span></>
-                                    }
-                                  </label>
-                                )}
-                              </div>
-                            );
-                          })}
+                        <div className={cn('flex rounded-2xl border overflow-hidden', isLight ? 'border-zinc-200' : 'border-white/10')}>
+                          {([
+                            { value: 'before_after', label: 'Antes / Depois' },
+                            { value: 'results',      label: 'Só Resultados'  },
+                          ] as const).map(opt => (
+                            <button key={opt.value} onClick={() => changePhotoMode(opt.value)}
+                              className={cn('flex-1 py-3 text-sm font-black uppercase tracking-widest transition-all',
+                                photoMode === opt.value
+                                  ? 'bg-astrai-gold text-astrai-blue'
+                                  : (isLight ? 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5')
+                              )}>
+                              {opt.label}
+                            </button>
+                          ))}
                         </div>
+                        <p className={cn('text-xs', isLight ? 'text-zinc-400' : 'text-zinc-500')}>
+                          {photoMode === 'before_after'
+                            ? 'Exibe as fotos em dois lados: Antes e Depois'
+                            : 'Exibe apenas o carrossel de resultados'}
+                        </p>
                       </div>
+
+                      {/* Antes e Depois — visível apenas no modo before_after */}
+                      {photoMode === 'before_after' && (
+                        <div className="space-y-4">
+                          <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
+                            Fotos Antes e Depois
+                          </label>
+                          <div className="grid grid-cols-2 gap-6">
+                            {(['before','after'] as const).map(side => {
+                              const sidePhotos = photos.filter(p => p.side === side);
+                              const sideLabel = side === 'before' ? 'Antes' : 'Depois';
+                              const isUploading = uploading === side;
+                              return (
+                                <div key={side} className="space-y-3">
+                                  <span className={cn('text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-500' : 'text-zinc-400')}>{sideLabel}</span>
+                                  {sidePhotos.map(ph => (
+                                    <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-square">
+                                      <img src={ph.url} alt={sideLabel} className="w-full h-full object-cover" />
+                                      <button onClick={() => deletePhoto(ph.id)}
+                                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                        <X className="w-4 h-4 text-white" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {editing?.id && (
+                                    <label className={cn('aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
+                                      isUploading ? 'border-astrai-gold/60 bg-astrai-gold/5' : (isLight ? 'bg-zinc-50 border-zinc-200 hover:border-astrai-gold/50' : 'bg-white/[0.02] border-white/10 hover:border-astrai-gold/40')
+                                    )}>
+                                      <input type="file" accept="image/*" className="hidden" disabled={!!uploading}
+                                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(side, f); e.target.value=''; }} />
+                                      {isUploading
+                                        ? <Loader2 className="w-8 h-8 text-astrai-gold animate-spin" />
+                                        : <><Upload className="w-8 h-8 text-zinc-500" /><span className="text-sm font-bold text-zinc-500">Clique para enviar</span></>
+                                      }
+                                    </label>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Carrossel */}
                       <div className="space-y-4">
                         <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
-                          Carrossel da página do procedimento
+                          {photoMode === 'results' ? 'Fotos de Resultados' : 'Carrossel da página do procedimento'}
                         </label>
                         <div className="flex flex-wrap gap-4">
                           {photos.filter(p => p.side === 'carousel').map(ph => (
-                            <div key={ph.id} className="relative group w-28 aspect-[4/5] rounded-2xl overflow-hidden">
-                              <img src={ph.url} alt="carousel" className="w-full h-full object-cover" />
-                              <button onClick={() => deletePhoto(ph.id)}
-                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
-                                <X className="w-3 h-3 text-white" />
-                              </button>
+                            <div key={ph.id} className="relative group w-28 flex flex-col gap-1">
+                              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+                                <img src={ph.url} alt="carousel" className="w-full h-full object-cover" />
+                                <button onClick={() => deletePhoto(ph.id)}
+                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                                  <X className="w-3 h-3 text-white" />
+                                </button>
+                              </div>
+                              {/* Label editável */}
+                              <input
+                                value={ph.label ?? ''}
+                                onChange={e => updateLabel(ph.id, e.target.value)}
+                                placeholder="Legenda..."
+                                className={cn(
+                                  'w-full px-2 py-1 rounded-lg border text-xs font-semibold outline-none transition-all',
+                                  isLight
+                                    ? 'bg-zinc-50 border-zinc-200 text-zinc-700 placeholder-zinc-400 focus:border-astrai-gold/50'
+                                    : 'bg-white/5 border-white/10 text-zinc-300 placeholder-zinc-600 focus:border-astrai-gold/40'
+                                )}
+                              />
                             </div>
                           ))}
                           {editing?.id && photos.filter(p => p.side === 'carousel').length < 10 && (
@@ -488,8 +551,10 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                             </label>
                           )}
                         </div>
-                        <p className={cn('text-sm', isLight ? 'text-zinc-500' : 'text-zinc-500')}>
-                          Se vazio, usa as fotos antes/depois · Máx. 10 imagens
+                        <p className={cn('text-xs', isLight ? 'text-zinc-400' : 'text-zinc-500')}>
+                          {photoMode === 'results'
+                            ? `${photos.filter(p => p.side === 'carousel').length}/10 fotos · Adicione legendas clicando no campo abaixo de cada imagem`
+                            : 'Se vazio, usa as fotos antes/depois · Máx. 10 imagens'}
                         </p>
                       </div>
                     </motion.div>
