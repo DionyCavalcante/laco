@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { AstraiTheme } from '../types';
 import {
   Plus, Trash2, Clock, X, Check, Loader2, Eye,
-  GripVertical, Camera, HelpCircle, Trophy, ChevronRight,
+  GripVertical, Camera, HelpCircle, Trophy, ChevronRight, Upload,
 } from 'lucide-react';
+import { getApiKey } from '../services/api';
 import { getClinic, updateClinic, getSettings, saveSettings, getHours, saveHours } from '../services/settings';
 import { getProcedures, createProcedure, updateProcedure, deleteProcedure, Procedure } from '../services/procedures';
 import { getProfessionals, createProfessional, updateProfessional, Professional, getProfessionalsByProcedure, setProfessionalsByProcedure, getProfessionalHours, saveProfessionalHours, getProfessionalProcedures, setProfessionalProcedures, ProfessionalHour } from '../services/professionals';
@@ -149,6 +150,8 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [selProfs,  setSelProfs]  = useState<string[]>([]);
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
+  const [photos,    setPhotos]    = useState<{id:string;side:string;url:string}[]>([]);
+  const [uploading, setUploading] = useState<string|null>(null); // side sendo upado
 
   useEffect(() => {
     Promise.all([getProcedures(), getProfessionals()])
@@ -156,17 +159,60 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
       .catch(console.error);
   }, []);
 
+  async function loadPhotos(procId: string) {
+    try {
+      const res = await fetch(`/api/upload/procedure/${procId}/photos`);
+      if (res.ok) setPhotos(await res.json());
+    } catch { setPhotos([]); }
+  }
+
   async function openEdit(p: Procedure) {
-    setEditing(p); setForm({ ...p }); setModalTab('info');
+    setEditing(p); setForm({ ...p }); setModalTab('info'); setPhotos([]);
     if (p.id) {
       try { const pp = await getProfessionalsByProcedure(p.id); setSelProfs(pp.map(x => x.id)); }
       catch { setSelProfs([]); }
+      loadPhotos(p.id);
     }
   }
   function openNew() {
     setEditing({} as any);
     setForm({ name:'', durationMin:60, price:0, priceOld:0, paymentNote:'', videoUrl:'', revealDelay:5, active:true });
-    setSelProfs([]); setModalTab('info');
+    setSelProfs([]); setModalTab('info'); setPhotos([]);
+  }
+
+  async function uploadPhoto(side: 'before'|'after'|'carousel', file: File) {
+    if (!editing?.id) return;
+    setUploading(side);
+    try {
+      const fd = new FormData();
+      fd.append(side, file);
+      const res = await fetch(`/api/upload/procedure/${editing.id}/photos`, {
+        method: 'POST',
+        headers: { 'x-api-key': getApiKey() },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro no upload');
+      await loadPhotos(editing.id);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setUploading(null);
+    }
+  }
+
+  async function deletePhoto(photoId: string) {
+    if (!editing?.id) return;
+    try {
+      const res = await fetch(`/api/upload/photo/${photoId}`, {
+        method: 'DELETE',
+        headers: { 'x-api-key': getApiKey() },
+      });
+      if (!res.ok) throw new Error('Erro ao deletar foto');
+      setPhotos(p => p.filter(x => x.id !== photoId));
+    } catch (err: any) {
+      alert(err.message);
+    }
   }
   function closeModal() { setEditing(null); setSaved(false); }
 
@@ -365,40 +411,86 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                   {/* ── Imagens ── */}
                   {modalTab === 'images' && (
                     <motion.div key="images" initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} className="space-y-10">
+
+                      {!editing?.id && (
+                        <div className={cn('p-5 rounded-2xl border text-sm font-semibold text-center', isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-amber-400/10 border-amber-400/20 text-amber-300')}>
+                          Salve o procedimento primeiro para fazer upload de imagens.
+                        </div>
+                      )}
+
+                      {/* Antes e Depois */}
                       <div className="space-y-4">
-                        <label className={lbl}>Fotos da página de agendamento — Antes e Depois</label>
+                        <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
+                          Fotos Antes e Depois
+                        </label>
                         <div className="grid grid-cols-2 gap-6">
-                          {['Antes', 'Depois'].map(label => (
-                            <div key={label} className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{label}</span>
-                                <button className="text-astrai-gold text-[9px] font-black uppercase">+ Adicionar</button>
+                          {(['before','after'] as const).map(side => {
+                            const sidePhotos = photos.filter(p => p.side === side);
+                            const sideLabel = side === 'before' ? 'Antes' : 'Depois';
+                            const isUploading = uploading === side;
+                            return (
+                              <div key={side} className="space-y-3">
+                                <span className={cn('text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-500' : 'text-zinc-400')}>{sideLabel}</span>
+                                {/* Fotos existentes */}
+                                {sidePhotos.map(ph => (
+                                  <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-square">
+                                    <img src={ph.url} alt={sideLabel} className="w-full h-full object-cover" />
+                                    <button onClick={() => deletePhoto(ph.id)}
+                                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                      <X className="w-4 h-4 text-white" />
+                                    </button>
+                                  </div>
+                                ))}
+                                {/* Upload */}
+                                {editing?.id && (
+                                  <label className={cn('aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
+                                    isUploading ? 'border-astrai-gold/60 bg-astrai-gold/5' : (isLight ? 'bg-zinc-50 border-zinc-200 hover:border-astrai-gold/50' : 'bg-white/[0.02] border-white/10 hover:border-astrai-gold/40')
+                                  )}>
+                                    <input type="file" accept="image/*" className="hidden" disabled={!!uploading}
+                                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(side, f); e.target.value=''; }} />
+                                    {isUploading
+                                      ? <Loader2 className="w-8 h-8 text-astrai-gold animate-spin" />
+                                      : <><Upload className="w-8 h-8 text-zinc-500" /><span className="text-sm font-bold text-zinc-500">Clique para enviar</span></>
+                                    }
+                                  </label>
+                                )}
                               </div>
-                              <div className={cn('aspect-square rounded-[2rem] border border-dashed flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-astrai-gold/50 transition-all',
-                                isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.02] border-white/10'
-                              )}>
-                                <Camera className="w-8 h-8 text-zinc-600 group-hover:text-astrai-gold transition-colors" />
-                                <span className="text-[9px] text-zinc-600 font-black uppercase">Upload Foto</span>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
+
+                      {/* Carrossel */}
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <label className={lbl}>Carrossel da página do procedimento</label>
-                          <button className="text-astrai-gold text-[9px] font-black uppercase">+ Adicionar</button>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          {[1,2,3].map(i => (
-                            <div key={i} className={cn('aspect-[4/5] rounded-2xl border border-dashed flex items-center justify-center group cursor-pointer hover:border-astrai-gold/50 transition-all',
-                              isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.02] border-white/10'
-                            )}>
-                              <Camera className="w-6 h-6 text-zinc-600 group-hover:text-astrai-gold transition-colors" />
+                        <label className={cn('block text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-600' : 'text-zinc-300')}>
+                          Carrossel da página do procedimento
+                        </label>
+                        <div className="flex flex-wrap gap-4">
+                          {photos.filter(p => p.side === 'carousel').map(ph => (
+                            <div key={ph.id} className="relative group w-28 aspect-[4/5] rounded-2xl overflow-hidden">
+                              <img src={ph.url} alt="carousel" className="w-full h-full object-cover" />
+                              <button onClick={() => deletePhoto(ph.id)}
+                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                                <X className="w-3 h-3 text-white" />
+                              </button>
                             </div>
                           ))}
+                          {editing?.id && photos.filter(p => p.side === 'carousel').length < 10 && (
+                            <label className={cn('w-28 aspect-[4/5] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all',
+                              uploading === 'carousel' ? 'border-astrai-gold/60 bg-astrai-gold/5' : (isLight ? 'bg-zinc-50 border-zinc-200 hover:border-astrai-gold/50' : 'bg-white/[0.02] border-white/10 hover:border-astrai-gold/40')
+                            )}>
+                              <input type="file" accept="image/*" className="hidden" disabled={!!uploading}
+                                onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto('carousel', f); e.target.value=''; }} />
+                              {uploading === 'carousel'
+                                ? <Loader2 className="w-5 h-5 text-astrai-gold animate-spin" />
+                                : <><Upload className="w-5 h-5 text-zinc-500" /><span className="text-xs font-bold text-zinc-500 text-center">Enviar</span></>
+                              }
+                            </label>
+                          )}
                         </div>
-                        <p className="text-[10px] text-zinc-600 ml-1">Carrossel de imagens · se vazio, usa as fotos antes/depois · Máx. 10</p>
+                        <p className={cn('text-sm', isLight ? 'text-zinc-500' : 'text-zinc-500')}>
+                          Se vazio, usa as fotos antes/depois · Máx. 10 imagens
+                        </p>
                       </div>
                     </motion.div>
                   )}
