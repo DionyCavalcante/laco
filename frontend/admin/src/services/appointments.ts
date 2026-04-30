@@ -7,7 +7,9 @@ export interface Appointment {
   patientName: string;
   procedure: string;
   time: string;        // "HH:MM"
+  endTime: string;     // "HH:MM" calculado
   date: string;        // "YYYY-MM-DD"
+  duration: number;    // minutos
   status: 'Confirmado' | 'Aguardando' | 'Pendente' | 'Cancelado';
   value: number;       // em reais
   leadId: string;
@@ -35,12 +37,16 @@ const STATUS_MAP: Record<string, Appointment['status']> = {
 
 function mapAppointment(raw: any): Appointment {
   const dt = new Date(raw.scheduled_at);
+  const duration = Number(raw.duration ?? 60);
+  const endDt = new Date(dt.getTime() + duration * 60_000);
   return {
     id: raw.id,
     patientName: raw.lead_name || raw.name || '—',
     procedure: raw.procedure_name || '—',
     time: dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    endTime: endDt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     date: dt.toISOString().split('T')[0],
+    duration,
     status: STATUS_MAP[raw.status] ?? 'Aguardando',
     value: Math.round(Number(raw.price ?? 0) / 100),
     leadId: raw.lead_id,

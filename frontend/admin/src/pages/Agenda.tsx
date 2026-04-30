@@ -213,38 +213,77 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Loader2 className="w-6 h-6 animate-spin text-astrai-gold" />
                   </div>
-                ) : (
-                  <AnimatePresence>
-                    {appointments.map(apt => {
-                      const dayIndex = weekDays.findIndex(d => toISO(d) === apt.date);
-                      if (dayIndex < 0) return null;
-                      const [hh, mm] = apt.time.split(':').map(Number);
-                      if (hh < 8 || hh > 18) return null;
-                      const top  = ((hh - 8) + (mm/60)) * 80;
-                      const left = `calc(80px + (100% - 80px) / 7 * ${dayIndex})`;
-                      const width = `calc((100% - 80px) / 7 - 4px)`;
-                      const sc = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
-                      return (
-                        <motion.div key={apt.id} initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
-                          className="absolute px-0.5 z-10 cursor-pointer"
-                          style={{ top, left, width, height:72 }}
-                          onClick={() => openDetail(apt)}>
-                          <div className={cn('w-full h-full rounded-xl border-l-[4px] p-2.5 flex flex-col shadow-lg hover:shadow-xl transition-shadow',
-                            isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10',
-                            apt.status === 'Confirmado' ? 'border-l-emerald-500' : 'border-l-amber-400'
-                          )}>
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <div className={cn('w-2 h-2 rounded-full shrink-0', sc.dot)} />
-                              <p className={cn('text-xs font-bold truncate hover:text-astrai-gold transition-colors', theme.textPrimary)}>{apt.patientName}</p>
+                ) : (() => {
+                  // Agrupar por dia e detectar conflitos para sub-colunas
+                  const dayApts: Record<number, Appointment[]> = {};
+                  appointments.forEach(apt => {
+                    const di = weekDays.findIndex(d => toISO(d) === apt.date);
+                    if (di < 0) return;
+                    const [hh] = apt.time.split(':').map(Number);
+                    if (hh < 8 || hh > 18) return;
+                    if (!dayApts[di]) dayApts[di] = [];
+                    dayApts[di].push(apt);
+                  });
+
+                  // Para cada apt, calcular coluna interna (evitar sobreposição)
+                  type AptLayout = { apt: Appointment; col: number; totalCols: number };
+                  const layouts: AptLayout[] = [];
+                  Object.entries(dayApts).forEach(([diStr, apts]) => {
+                    const toMin = (t: string) => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+                    // Ordenar por horário de início
+                    const sorted = [...apts].sort((a,b) => toMin(a.time) - toMin(b.time));
+                    // Atribuir colunas por intervalo de tempo
+                    const cols: number[] = new Array(sorted.length).fill(0);
+                    const endMins: number[] = [];
+                    sorted.forEach((apt, i) => {
+                      const start = toMin(apt.time);
+                      // Encontrar a menor coluna disponível
+                      let col = 0;
+                      while (endMins[col] !== undefined && endMins[col] > start) col++;
+                      cols[i] = col;
+                      endMins[col] = start + apt.duration;
+                    });
+                    const maxCols = Math.max(...cols) + 1;
+                    sorted.forEach((apt, i) => {
+                      layouts.push({ apt, col: cols[i], totalCols: maxCols });
+                    });
+                  });
+
+                  return (
+                    <AnimatePresence>
+                      {layouts.map(({ apt, col, totalCols }) => {
+                        const dayIndex = weekDays.findIndex(d => toISO(d) === apt.date);
+                        const [hh, mm] = apt.time.split(':').map(Number);
+                        const top    = ((hh - 8) + (mm/60)) * 80;
+                        const height = Math.max((apt.duration / 60) * 80, 48);
+                        const dayW   = `(100% - 80px) / 7`;
+                        const colW   = `(${dayW}) / ${totalCols}`;
+                        const left   = `calc(80px + ${dayW} * ${dayIndex} + ${colW} * ${col} + 2px)`;
+                        const width  = `calc(${colW} - 4px)`;
+                        const sc     = STATUS_COLOR[apt.status] ?? STATUS_COLOR['Aguardando'];
+                        const short  = height < 64;
+                        return (
+                          <motion.div key={apt.id} initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
+                            className="absolute z-10 cursor-pointer"
+                            style={{ top, left, width, height }}
+                            onClick={() => openDetail(apt)}>
+                            <div className={cn('w-full h-full rounded-xl border-l-[3px] px-2 py-1.5 flex flex-col overflow-hidden shadow-md hover:shadow-lg transition-shadow',
+                              isLight ? 'bg-white border-zinc-200' : 'bg-[#132d3d] border-white/10',
+                              apt.status === 'Confirmado' ? 'border-l-emerald-500' : 'border-l-amber-400'
+                            )}>
+                              <div className="flex items-center gap-1 min-w-0">
+                                <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', sc.dot)} />
+                                <p className={cn('text-[11px] font-bold truncate leading-tight', theme.textPrimary)}>{apt.patientName}</p>
+                              </div>
+                              {!short && <p className="text-[10px] text-astrai-gold font-bold truncate leading-tight mt-0.5">{apt.procedure}</p>}
+                              <p className="text-[10px] text-zinc-400 font-mono font-bold mt-auto leading-tight">{apt.time}–{apt.endTime}</p>
                             </div>
-                            <p className="text-[11px] text-astrai-gold font-bold truncate">{apt.procedure}</p>
-                            <p className="text-xs text-zinc-400 font-mono font-bold mt-auto">{apt.time}</p>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                )}
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  );
+                })()}
               </div>
             </div>
           ))}
@@ -299,9 +338,10 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                 onClick={() => openDetail(apt)}>
                 <div className="flex items-center gap-6">
                   {/* Horário */}
-                  <div className="w-[100px] shrink-0">
+                  <div className="w-[130px] shrink-0">
                     <div className={cn('text-[10px] font-black uppercase tracking-[0.25em] mb-1', isLight ? 'text-zinc-500' : 'text-zinc-400')}>Horário</div>
-                    <div className={cn('text-3xl font-black tracking-tight tabular-nums', theme.textPrimary)}>{apt.time}</div>
+                    <div className={cn('text-2xl font-black tracking-tight tabular-nums', theme.textPrimary)}>{apt.time}</div>
+                    <div className={cn('text-[11px] font-mono font-bold tabular-nums mt-0.5', isLight ? 'text-zinc-400' : 'text-zinc-500')}>até {apt.endTime}</div>
                   </div>
                   <div className={cn('h-14 w-px hidden md:block shrink-0', isLight ? 'bg-zinc-200' : 'bg-white/10')} />
                   {/* Info */}
