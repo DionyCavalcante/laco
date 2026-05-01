@@ -41,6 +41,10 @@ function getSaoPauloDateParts(date) {
   }
 }
 
+function getDayOfWeekFromDateString(date) {
+  return new Date(`${date}T12:00:00-03:00`).getUTCDay()
+}
+
 /**
  * Retorna os slots disponíveis para um procedimento em um dia específico.
  *
@@ -53,8 +57,7 @@ function getSaoPauloDateParts(date) {
  * Se nenhum profissional está vinculado → fallback por clínica (compatibilidade).
  */
 async function computeSlots(clinicId, date, procedureId) {
-  const d = new Date(date)
-  const dayOfWeek = d.getDay()
+  const dayOfWeek = getDayOfWeekFromDateString(date)
 
   // Horário da clínica — usado como referência para "a clínica está aberta hoje?"
   const { rows: [clinicHours] } = await db.query(
