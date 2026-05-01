@@ -7,7 +7,6 @@ import {
   GripVertical, Camera, HelpCircle, Trophy, ChevronRight, Upload,
   RotateCw, Crosshair, ScissorsLineDashed, Sparkles,
 } from 'lucide-react';
-import OpenAI from 'openai';
 import { getApiKey } from '../services/api';
 import { getClinic, updateClinic, getSettings, saveSettings, getHours, saveHours } from '../services/settings';
 import { getProcedures, createProcedure, updateProcedure, deleteProcedure, Procedure } from '../services/procedures';
@@ -461,35 +460,16 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   }
 
   async function generatePage() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) { alert('Variável OPENAI_API_KEY não configurada.'); return; }
     if (!form.name) { alert('Informe o nome do procedimento primeiro.'); return; }
     setGeneratingPage(true);
     try {
-      const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-      const prompt = `Você é especialista em marketing para clínicas de estética. Gere conteúdo para a página de venda do procedimento "${form.name}"${form.subheadline ? ` (${form.subheadline})` : ''}.
-
-Retorne APENAS um JSON válido (sem markdown, sem explicações) com exatamente estas chaves:
-{
-  "headline": "frase de impacto curta (máx 12 palavras) que transmite transformação ou resultado",
-  "howItWorks": "descrição direta em 2-3 frases de como funciona o procedimento, linguagem acessível",
-  "authorityNote": "nota de autoridade em 2-3 frases destacando expertise, tecnologia ou diferenciais da clínica",
-  "faqSessionDuration": "resposta curta sobre duração (ex: '45 a 60 minutos')",
-  "faqPainDiscomfort": "resposta curta sobre dor (ex: 'Sensação mínima de formigamento, tolerável')",
-  "faqAftercare": "lista de 3 a 5 cuidados pós-procedimento, um por linha, começando com -",
-  "closingNote": "frase motivacional curta de fechamento (máx 10 palavras)"
-}
-
-Use linguagem feminina, sofisticada e acolhedora. Evite termos médicos complexos.`;
-
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
+      const res = await fetch('/api/ai/generate-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
+        body: JSON.stringify({ name: form.name, subheadline: form.subheadline }),
       });
-
-      const text = completion.choices[0]?.message?.content ?? '';
-      const data = JSON.parse(text);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao gerar conteúdo');
       setForm(f => ({
         ...f,
         headline:            data.headline            ?? f.headline,

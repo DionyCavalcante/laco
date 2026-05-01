@@ -66,6 +66,7 @@ app.use('/api/settings',     require('./routes/settings'))
 app.use('/api/superadmin',   require('./routes/superadmin'))
 app.use('/api/onboarding',   require('./routes/onboarding'))
 app.use('/api/billing',      require('./routes/billing'))
+app.use('/api/ai',           require('./routes/ai'))
 app.use('/webhook',          require('./routes/webhook'))
 
 // Serve arquivos de upload (fotos antes/depois)
