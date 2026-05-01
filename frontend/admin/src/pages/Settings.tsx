@@ -5,8 +5,9 @@ import { AstraiTheme } from '../types';
 import {
   Plus, Trash2, Clock, X, Check, Loader2, Eye,
   GripVertical, Camera, HelpCircle, Trophy, ChevronRight, Upload,
-  RotateCw, Crosshair, ScissorsLineDashed,
+  RotateCw, Crosshair, ScissorsLineDashed, Sparkles,
 } from 'lucide-react';
+import { GoogleGenAI } from '@google/genai';
 import { getApiKey } from '../services/api';
 import { getClinic, updateClinic, getSettings, saveSettings, getHours, saveHours } from '../services/settings';
 import { getProcedures, createProcedure, updateProcedure, deleteProcedure, Procedure } from '../services/procedures';
@@ -412,8 +413,9 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [photos,       setPhotos]       = useState<{id:string;side:string;url:string;label:string|null;rotation?:number;position_x?:number;position_y?:number}[]>([]);
   const [uploading,    setUploading]    = useState<string|null>(null);
   const [photoMode,    setPhotoMode]    = useState<'before_after'|'results'|'single'>('before_after');
-  const [editorPhoto,  setEditorPhoto]  = useState<EditorPhotoData|null>(null);
-  const [focalPhotoId, setFocalPhotoId] = useState<string|null>(null);
+  const [editorPhoto,    setEditorPhoto]    = useState<EditorPhotoData|null>(null);
+  const [focalPhotoId,   setFocalPhotoId]   = useState<string|null>(null);
+  const [generatingPage, setGeneratingPage] = useState(false);
   const dragIndex  = useRef<number | null>(null);
   const dragOver   = useRef<number | null>(null);
 
@@ -455,6 +457,54 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
         headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
         body: JSON.stringify({ photo_mode: mode }),
       }).catch(console.error);
+    }
+  }
+
+  async function generatePage() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) { alert('Variável GEMINI_API_KEY não configurada.'); return; }
+    if (!form.name) { alert('Informe o nome do procedimento primeiro.'); return; }
+    setGeneratingPage(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `Você é especialista em marketing para clínicas de estética. Gere conteúdo para a página de venda do procedimento "${form.name}"${form.subheadline ? ` (${form.subheadline})` : ''}.
+
+Retorne APENAS um JSON válido (sem markdown, sem explicações) com exatamente estas chaves:
+{
+  "headline": "frase de impacto curta (máx 12 palavras) que transmite transformação ou resultado",
+  "howItWorks": "descrição direta em 2-3 frases de como funciona o procedimento, linguagem acessível",
+  "authorityNote": "nota de autoridade em 2-3 frases destacando expertise, tecnologia ou diferenciais da clínica",
+  "faqSessionDuration": "resposta curta sobre duração (ex: '45 a 60 minutos')",
+  "faqPainDiscomfort": "resposta curta sobre dor (ex: 'Sensação mínima de formigamento, tolerável')",
+  "faqAftercare": "lista de 3 a 5 cuidados pós-procedimento, um por linha, começando com -",
+  "closingNote": "frase motivacional curta de fechamento (máx 10 palavras)"
+}
+
+Use linguagem feminina, sofisticada e acolhedora. Evite termos médicos complexos.`;
+
+      const result = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: prompt,
+      });
+
+      const text = result.text ?? '';
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Resposta inválida da IA');
+      const data = JSON.parse(jsonMatch[0]);
+      setForm(f => ({
+        ...f,
+        headline:            data.headline            ?? f.headline,
+        howItWorks:          data.howItWorks          ?? f.howItWorks,
+        authorityNote:       data.authorityNote       ?? f.authorityNote,
+        faqSessionDuration:  data.faqSessionDuration  ?? f.faqSessionDuration,
+        faqPainDiscomfort:   data.faqPainDiscomfort   ?? f.faqPainDiscomfort,
+        faqAftercare:        data.faqAftercare        ?? f.faqAftercare,
+        closingNote:         data.closingNote         ?? f.closingNote,
+      }));
+    } catch (e: any) {
+      alert('Erro ao gerar conteúdo: ' + e.message);
+    } finally {
+      setGeneratingPage(false);
     }
   }
 
@@ -911,6 +961,27 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                   {/* ── Página ── */}
                   {modalTab === 'page' && (
                     <motion.div key="page" initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} className="space-y-7">
+
+                      {/* Botão gerar com IA */}
+                      <button
+                        onClick={generatePage}
+                        disabled={generatingPage}
+                        className={cn(
+                          'w-full py-3 px-5 rounded-2xl border flex items-center justify-center gap-2.5 font-black text-sm uppercase tracking-widest transition-all',
+                          generatingPage
+                            ? 'opacity-70 cursor-not-allowed'
+                            : 'hover:scale-[1.01] active:scale-95',
+                          isLight
+                            ? 'bg-gradient-to-r from-violet-50 to-indigo-50 border-violet-200 text-violet-700 hover:from-violet-100 hover:to-indigo-100'
+                            : 'bg-gradient-to-r from-violet-900/20 to-indigo-900/20 border-violet-500/30 text-violet-300 hover:border-violet-400/50'
+                        )}
+                      >
+                        {generatingPage
+                          ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando conteúdo...</>
+                          : <><Sparkles className="w-4 h-4" /> Gerar conteúdo com IA</>
+                        }
+                      </button>
+
                       <div className={cn('p-4 rounded-xl flex flex-wrap gap-4', isLight ? 'bg-zinc-100' : 'bg-white/5')}>
                         {[
                           ['{nome}', 'nome da cliente'],
