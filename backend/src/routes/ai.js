@@ -8,7 +8,7 @@ router.post('/generate-page', async (req, res) => {
     return res.status(500).json({ error: 'OPENAI_API_KEY não configurada no servidor.' })
   }
 
-  const { name, subheadline, description, clinicName, durationMin } = req.body
+  const { name, subheadline, description, clinicName, durationMin, context } = req.body
   if (!name) return res.status(400).json({ error: 'Campo "name" obrigatório.' })
 
   const clinic = clinicName || 'a clínica'
@@ -21,6 +21,11 @@ ${subheadline ? `SUBTÍTULO ATUAL: "${subheadline}"` : ''}
 ${description ? `DESCRIÇÃO: "${description}"` : ''}
 CLÍNICA: ${clinic}
 ${dur ? `DURAÇÃO: ${dur}` : ''}
+${context ? `\nINSUMOS DA PROFISSIONAL (use como base prioritária para o conteúdo — linguagem, diferenciais, técnica, observações):
+"""
+${context}
+"""
+Extraia dessas informações os pontos mais relevantes: diferenciais da técnica, cuidados específicos, tom de comunicação, nomenclaturas usadas pela profissional.` : ''}
 
 ---
 

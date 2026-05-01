@@ -416,6 +416,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [editorPhoto,    setEditorPhoto]    = useState<EditorPhotoData|null>(null);
   const [focalPhotoId,   setFocalPhotoId]   = useState<string|null>(null);
   const [generatingPage, setGeneratingPage] = useState(false);
+  const [aiContext,      setAiContext]      = useState('');
   const dragIndex  = useRef<number | null>(null);
   const dragOver   = useRef<number | null>(null);
 
@@ -473,6 +474,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
           description: (form as any).description,
           durationMin: form.durationMin,
           clinicName,
+          context:     aiContext.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -557,7 +559,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
       body: JSON.stringify({ label: label || null }),
     }).catch(console.error);
   }
-  function closeModal() { setEditing(null); setSaved(false); }
+  function closeModal() { setEditing(null); setSaved(false); setAiContext(''); }
 
   async function save() {
     setSaving(true);
@@ -947,6 +949,32 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                   {/* ── Página ── */}
                   {modalTab === 'page' && (
                     <motion.div key="page" initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} className="space-y-7">
+
+                      {/* Insumos para a IA */}
+                      <div className={cn('rounded-2xl border p-5 space-y-3', isLight ? 'bg-violet-50/60 border-violet-200' : 'bg-violet-900/10 border-violet-500/20')}>
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                          <label className={cn('text-[10px] font-black uppercase tracking-widest', isLight ? 'text-violet-700' : 'text-violet-300')}>
+                            Insumos para a IA
+                          </label>
+                          <span className={cn('text-[9px] font-medium ml-1', isLight ? 'text-violet-400' : 'text-violet-500')}>opcional</span>
+                        </div>
+                        <textarea
+                          rows={4}
+                          value={aiContext}
+                          onChange={e => setAiContext(e.target.value)}
+                          placeholder="Cole aqui transcrições de áudios, anotações sobre o procedimento, diferenciais da técnica, observações da cliente... A IA usa como base para gerar um conteúdo mais preciso e personalizado."
+                          className={cn(
+                            'w-full p-3 rounded-xl border text-[12px] resize-none outline-none transition-all leading-relaxed',
+                            isLight
+                              ? 'bg-white border-violet-200 text-zinc-800 placeholder-zinc-400 focus:border-violet-400'
+                              : 'bg-black/20 border-violet-500/20 text-zinc-200 placeholder-zinc-600 focus:border-violet-400/50'
+                          )}
+                        />
+                        <p className={cn('text-[9px] leading-relaxed', isLight ? 'text-violet-500' : 'text-violet-500/70')}>
+                          O texto não é salvo no procedimento — serve apenas como contexto para a geração.
+                        </p>
+                      </div>
 
                       {/* Botão gerar com IA */}
                       <button
