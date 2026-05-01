@@ -160,11 +160,22 @@ function PhotoEditor({ photo, procId, onClose, onSaved }: PhotoEditorProps) {
   const [splitDir,    setSplitDir]    = useState<'vertical'|'horizontal'>('vertical');
   const [splitPos,    setSplitPos]    = useState(0.5);
   const [saving,      setSaving]      = useState(false);
+  const [loading,     setLoading]     = useState(true);
+  const blobUrlRef = useRef('');
 
   useEffect(() => {
-    const img = new Image();
-    img.onload = () => { imgRef.current = img; drawCanvas(0); };
-    img.src = photo.url;
+    // Fetch via blob URL para evitar "tainted canvas" (foto está no Supabase Storage)
+    fetch(photo.url)
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        const img = new Image();
+        img.onload = () => { imgRef.current = img; drawCanvas(0); setLoading(false); };
+        img.src = url;
+      })
+      .catch(console.error);
+    return () => { if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current); };
   }, []);
 
   function drawCanvas(rot: number) {
@@ -266,7 +277,8 @@ function PhotoEditor({ photo, procId, onClose, onSaved }: PhotoEditorProps) {
         onMouseUp={() => { dragging.current = false; }}
         onMouseLeave={() => { dragging.current = false; }}
       >
-        <canvas ref={canvasRef} style={{ display:'block', maxWidth:'100%', maxHeight:'58vh' }} />
+        {loading && <Loader2 className="w-10 h-10 text-astrai-gold animate-spin" />}
+        <canvas ref={canvasRef} style={{ display: loading ? 'none' : 'block', maxWidth:'100%', maxHeight:'58vh' }} />
         {splitActive && (
           <div
             className="absolute bg-white/90 shadow-lg cursor-grab active:cursor-grabbing"
@@ -301,7 +313,7 @@ function PhotoEditor({ photo, procId, onClose, onSaved }: PhotoEditorProps) {
             {splitDir === 'vertical' ? '↕ Mudar para horizontal' : '↔ Mudar para vertical'}
           </button>
         )}
-        <button onClick={save} disabled={saving}
+        <button onClick={save} disabled={saving || loading}
           className="px-4 py-2 rounded-xl bg-astrai-gold text-astrai-blue text-sm font-bold flex items-center gap-2 disabled:opacity-60"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
