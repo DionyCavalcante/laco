@@ -81,6 +81,7 @@ async function computeSlots(clinicId, date, procedureId) {
     let cur = sh * 60 + sm
     const end = eh * 60 + em
 
+    const step = Math.max(10, Math.min(duration, 30))
     while (cur + duration <= end) {
       const hh = String(Math.floor(cur / 60)).padStart(2, '0')
       const mm = String(cur % 60).padStart(2, '0')
@@ -92,7 +93,7 @@ async function computeSlots(clinicId, date, procedureId) {
         return slotStart < be && slotEnd > bs
       })
       slots.push({ time: `${hh}:${mm}`, taken })
-      cur += 30
+      cur += step
     }
     return { slots }
   }
@@ -129,6 +130,7 @@ async function computeSlots(clinicId, date, procedureId) {
   let cur = sh * 60 + sm
   const end = eh * 60 + em
 
+  const step = Math.max(10, Math.min(duration, 30))
   const slots = []
   while (cur + duration <= end) {
     const hh = String(Math.floor(cur / 60)).padStart(2, '0')
@@ -162,7 +164,7 @@ async function computeSlots(clinicId, date, procedureId) {
     })
 
     slots.push({ time: `${hh}:${mm}`, taken: !atLeastOneFree })
-    cur += 30
+    cur += step
   }
 
   return { slots }
