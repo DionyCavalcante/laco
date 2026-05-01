@@ -278,7 +278,7 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                             )}>
                               {isMulti ? (
                                 <>
-                                  <p className="text-[9px] font-mono text-zinc-400 font-bold leading-none mb-1">
+                                  <p className="text-[11px] font-mono text-zinc-400 font-bold leading-none mb-1">
                                     {fmtMin(cl.startMin)}–{fmtMin(cl.endMin)}
                                   </p>
                                   <div className="flex-1 space-y-0.5 overflow-hidden">
@@ -287,14 +287,14 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                                       return (
                                         <div key={apt.id} className="flex items-center gap-1 min-w-0">
                                           <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', dot)} />
-                                          <span className={cn('text-[10px] font-bold truncate leading-tight', theme.textPrimary)}>
+                                          <span className={cn('text-[12px] font-bold truncate leading-tight', theme.textPrimary)}>
                                             {apt.patientName}
                                           </span>
                                         </div>
                                       );
                                     })}
                                     {extra > 0 && (
-                                      <p className="text-[9px] text-astrai-gold font-bold leading-tight">+{extra} mais</p>
+                                      <p className="text-[11px] text-astrai-gold font-bold leading-tight">+{extra} mais</p>
                                     )}
                                   </div>
                                 </>
@@ -306,10 +306,10 @@ export default function Agenda({ theme }: { theme: AstraiTheme }) {
                                   <>
                                     <div className="flex items-center gap-1 min-w-0">
                                       <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', sc.dot)} />
-                                      <p className={cn('text-[11px] font-bold truncate leading-tight', theme.textPrimary)}>{apt.patientName}</p>
+                                      <p className={cn('text-[13px] font-bold truncate leading-tight', theme.textPrimary)}>{apt.patientName}</p>
                                     </div>
-                                    {!short && <p className="text-[10px] text-astrai-gold font-bold truncate leading-tight mt-0.5">{apt.procedure}</p>}
-                                    <p className="text-[10px] text-zinc-400 font-mono font-bold mt-auto leading-tight">{apt.time}–{apt.endTime}</p>
+                                    {!short && <p className="text-[12px] text-astrai-gold font-bold truncate leading-tight mt-0.5">{apt.procedure}</p>}
+                                    <p className="text-[11px] text-zinc-400 font-mono font-bold mt-auto leading-tight">{apt.time}–{apt.endTime}</p>
                                   </>
                                 );
                               })()}
