@@ -606,10 +606,21 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
         subheadline: form.subheadline,
         headline: form.headline,
         authority_note: form.authorityNote,
+        main_pain: form.mainPain,
+        emotional_desire: form.emotionalDesire,
+        day_to_day_fit: form.dayToDayFit,
         how_it_works: form.howItWorks,
         faq_session_duration: form.faqSessionDuration,
+        faq_result_duration: form.faqResultDuration,
         faq_pain_discomfort: form.faqPainDiscomfort,
+        faq_maintenance: form.faqMaintenance,
         faq_aftercare: form.faqAftercare,
+        benefit_1_title: form.benefit1Title,
+        benefit_1_desc: form.benefit1Desc,
+        benefit_2_title: form.benefit2Title,
+        benefit_2_desc: form.benefit2Desc,
+        benefit_3_title: form.benefit3Title,
+        benefit_3_desc: form.benefit3Desc,
         closing_note: form.closingNote,
       };
       let updated: Procedure;
@@ -1060,6 +1071,12 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                               isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
                             )} value={form.headline??''} onChange={e => setForm(f=>({...f, headline:e.target.value}))} />
                           </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] uppercase font-bold text-zinc-500">Subtítulo</label>
+                            <textarea rows={2} className={cn('w-full p-3 rounded-lg border outline-none text-sm font-medium resize-none',
+                              isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
+                            )} value={form.subheadline??''} onChange={e => setForm(f=>({...f, subheadline:e.target.value}))} />
+                          </div>
                         </div>
                       </div>
 
@@ -1108,6 +1125,66 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         )} value={form.authorityNote??''} onChange={e => setForm(f=>({...f, authorityNote:e.target.value}))} />
                       </div>
 
+                      {/* Benefícios */}
+                      <div className={cn('p-6 rounded-2xl border space-y-5', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
+                        <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
+                          <Sparkles className="w-3.5 h-3.5 text-astrai-gold" /> Três benefícios
+                        </h4>
+                        <div className={cn('divide-y', isLight ? 'divide-zinc-200' : 'divide-white/10')}>
+                          {[
+                            ['benefit1Title', 'benefit1Desc'],
+                            ['benefit2Title', 'benefit2Desc'],
+                            ['benefit3Title', 'benefit3Desc'],
+                          ].map(([titleKey, descKey], index) => (
+                            <div key={titleKey} className="grid grid-cols-[32px_1fr] gap-4 py-4 first:pt-0 last:pb-0">
+                              <div className="w-7 h-7 rounded-full bg-astrai-gold text-astrai-blue flex items-center justify-center text-[11px] font-black mt-1">
+                                {index + 1}
+                              </div>
+                              <div className="space-y-2">
+                                <input
+                                  placeholder={`Título do benefício ${index + 1}`}
+                                  value={(form as any)[titleKey] ?? ''}
+                                  onChange={e => setForm(f=>({...f, [titleKey]: e.target.value}))}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-sm font-black',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
+                                  )}
+                                />
+                                <textarea
+                                  rows={2}
+                                  placeholder="Descrição curta do benefício"
+                                  value={(form as any)[descKey] ?? ''}
+                                  onChange={e => setForm(f=>({...f, [descKey]: e.target.value}))}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-[12px] leading-relaxed resize-none',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-800 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-zinc-200 focus:border-astrai-gold/40'
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Para quem é */}
+                      <div className={cn('p-6 rounded-2xl border space-y-4', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
+                        <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
+                          <Check className="w-3.5 h-3.5 text-astrai-gold" /> Para quem é
+                        </h4>
+                        <div className="space-y-3">
+                          <textarea placeholder="Dor principal ou incômodo" rows={2} value={form.mainPain??''}
+                            onChange={e => setForm(f=>({...f, mainPain:e.target.value}))}
+                            className={cn('w-full p-3 rounded-lg border text-[12px] resize-none outline-none',
+                              isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
+                          <textarea placeholder="Desejo emocional" rows={2} value={form.emotionalDesire??''}
+                            onChange={e => setForm(f=>({...f, emotionalDesire:e.target.value}))}
+                            className={cn('w-full p-3 rounded-lg border text-[12px] resize-none outline-none',
+                              isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
+                          <textarea placeholder="Como combina com a rotina da cliente" rows={2} value={form.dayToDayFit??''}
+                            onChange={e => setForm(f=>({...f, dayToDayFit:e.target.value}))}
+                            className={cn('w-full p-3 rounded-lg border text-[12px] resize-none outline-none',
+                              isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
+                        </div>
+                      </div>
+
                       {/* FAQ + Cuidados */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className={cn('p-6 rounded-2xl border space-y-4', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
@@ -1119,8 +1196,16 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                               onChange={e => setForm(f=>({...f, faqSessionDuration:e.target.value}))}
                               className={cn('w-full p-3 rounded-lg border text-[11px] outline-none',
                                 isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
+                            <input placeholder="Quanto tempo dura o resultado?" value={form.faqResultDuration??''}
+                              onChange={e => setForm(f=>({...f, faqResultDuration:e.target.value}))}
+                              className={cn('w-full p-3 rounded-lg border text-[11px] outline-none',
+                                isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
                             <input placeholder="Dói ou incomoda?" value={form.faqPainDiscomfort??''}
                               onChange={e => setForm(f=>({...f, faqPainDiscomfort:e.target.value}))}
+                              className={cn('w-full p-3 rounded-lg border text-[11px] outline-none',
+                                isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
+                            <input placeholder="Precisa de manutenção?" value={form.faqMaintenance??''}
+                              onChange={e => setForm(f=>({...f, faqMaintenance:e.target.value}))}
                               className={cn('w-full p-3 rounded-lg border text-[11px] outline-none',
                                 isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/20 border-white/5 text-white')} />
                           </div>
