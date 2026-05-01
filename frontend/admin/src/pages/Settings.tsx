@@ -97,6 +97,36 @@ function Card({ children, isLight }: { children:React.ReactNode; isLight:boolean
 }
 
 /* ── Clínica ──────────────────────────────────────────────────── */
+type HowItWorksStep = { title: string; desc: string };
+
+function parseHowItWorksSteps(raw?: string): HowItWorksStep[] {
+  const text = (raw || '').replace(/\r\n/g, '\n').replace(/\\n/g, '\n').trim();
+  if (!text) return [];
+
+  const parsed = text
+    .split(/\n\n+/)
+    .map((block) => {
+      const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
+      if (!/^[1-3][.)]?$/.test(lines[0] || '')) return null;
+      return { title: lines[1] || '', desc: lines.slice(2).join(' ') };
+    })
+    .filter((step): step is HowItWorksStep => Boolean(step && (step.title || step.desc)));
+
+  return parsed.length ? parsed.slice(0, 3) : [{ title: '', desc: text }];
+}
+
+function getHowItWorksEditorSteps(raw?: string): HowItWorksStep[] {
+  const parsed = parseHowItWorksSteps(raw);
+  return [0, 1, 2].map((index) => parsed[index] || { title: '', desc: '' });
+}
+
+function serializeHowItWorksSteps(steps: HowItWorksStep[]): string {
+  return steps
+    .slice(0, 3)
+    .map((step, index) => `${index + 1}\n${step.title.trim()}\n${step.desc.trim()}`)
+    .join('\n\n');
+}
+
 function ClinicaTab({ theme, isLight }: { theme:AstraiTheme; isLight:boolean }) {
   const [name,    setName]    = useState('');
   const [slug,    setSlug]    = useState('');
@@ -630,6 +660,15 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const inp = cn('w-full p-4 rounded-xl border outline-none focus:border-astrai-gold/50 transition-all font-semibold text-sm',
     isLight ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-white/[0.03] border-white/10 text-white');
   const lbl = cn('text-[10px] uppercase font-black tracking-widest ml-1', isLight ? 'text-zinc-500' : 'text-zinc-400');
+  const howItWorksEditorSteps = getHowItWorksEditorSteps(form.howItWorks);
+
+  function updateHowItWorksStep(index: number, field: keyof HowItWorksStep, value: string) {
+    setForm(f => {
+      const steps = getHowItWorksEditorSteps(f.howItWorks);
+      steps[index] = { ...steps[index], [field]: value };
+      return { ...f, howItWorks: serializeHowItWorksSteps(steps) };
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -1021,12 +1060,41 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                               isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
                             )} value={form.headline??''} onChange={e => setForm(f=>({...f, headline:e.target.value}))} />
                           </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] uppercase font-bold text-zinc-500">Como funciona</label>
-                            <textarea rows={3} className={cn('w-full p-3 rounded-lg border outline-none text-sm font-medium resize-none',
-                              isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
-                            )} value={form.howItWorks??''} onChange={e => setForm(f=>({...f, howItWorks:e.target.value}))} />
-                          </div>
+                        </div>
+                      </div>
+
+                      {/* Como funciona */}
+                      <div className={cn('p-6 rounded-2xl border space-y-5', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
+                        <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
+                          <ChevronRight className="w-3.5 h-3.5 text-astrai-gold" /> Como funciona
+                        </h4>
+                        <div className={cn('divide-y', isLight ? 'divide-zinc-200' : 'divide-white/10')}>
+                          {howItWorksEditorSteps.map((step, index) => (
+                            <div key={index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                              <div className="w-7 h-7 rounded-full bg-astrai-gold text-astrai-blue flex items-center justify-center text-[11px] font-black shrink-0 mt-1">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <input
+                                  placeholder={`Título do passo ${index + 1}`}
+                                  value={step.title}
+                                  onChange={e => updateHowItWorksStep(index, 'title', e.target.value)}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-sm font-black',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
+                                  )}
+                                />
+                                <textarea
+                                  rows={2}
+                                  placeholder="Descrição em 1 frase"
+                                  value={step.desc}
+                                  onChange={e => updateHowItWorksStep(index, 'desc', e.target.value)}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-[12px] leading-relaxed resize-none',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-800 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-zinc-200 focus:border-astrai-gold/40'
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
