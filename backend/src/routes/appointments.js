@@ -109,6 +109,17 @@ router.post('/', async (req, res) => {
 
     const { findAvailableProfessional } = require('../lib/slots')
     const professionalId = await findAvailableProfessional(clinicId, procedure_id, scheduled_at, duration)
+    if (!professionalId) {
+      const { rows: [availability] } = await db.query(`
+        SELECT COUNT(*)::int AS total
+        FROM procedure_professionals pp
+        JOIN professionals pf ON pf.id = pp.professional_id
+        WHERE pp.procedure_id = $1 AND pf.active = true
+      `, [procedure_id])
+      if (availability?.total > 0) {
+        return res.status(409).json({ error: 'Horário indisponível para este procedimento' })
+      }
+    }
 
     const { rows: [apt] } = await db.query(`
       INSERT INTO appointments (clinic_id, lead_id, procedure_id, scheduled_at, status, source, professional_id)

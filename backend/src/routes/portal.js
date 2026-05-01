@@ -134,6 +134,17 @@ router.post('/:slug/book', async (req, res) => {
     const duration = proc ? proc.duration : 60
     const { findAvailableProfessional } = require('../lib/slots')
     const professionalId = await findAvailableProfessional(clinic.id, procedure_id, scheduledAt, duration)
+    if (!professionalId) {
+      const { rows: [availability] } = await db.query(`
+        SELECT COUNT(*)::int AS total
+        FROM procedure_professionals pp
+        JOIN professionals pf ON pf.id = pp.professional_id
+        WHERE pp.procedure_id = $1 AND pf.active = true
+      `, [procedure_id])
+      if (availability?.total > 0) {
+        return res.status(409).json({ error: 'Horário indisponível para este procedimento' })
+      }
+    }
 
     // Cria o agendamento com o profissional atribuído
     const { rows: [apt] } = await db.query(`

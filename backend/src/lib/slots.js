@@ -18,6 +18,29 @@ async function getProfessionalDayHours(professionalId, clinicId, dayOfWeek) {
   return bh || null
 }
 
+function getSaoPauloDateParts(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date).reduce((acc, part) => {
+    acc[part.type] = part.value
+    return acc
+  }, {})
+
+  const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    dayOfWeek: weekdayMap[parts.weekday],
+    minutes: Number(parts.hour) * 60 + Number(parts.minute),
+  }
+}
+
 /**
  * Retorna os slots disponíveis para um procedimento em um dia específico.
  *
@@ -112,13 +135,18 @@ async function computeSlots(clinicId, date, procedureId) {
     FROM appointments a
     JOIN procedures p ON a.procedure_id = p.id
     WHERE a.clinic_id = $1
-      AND a.professional_id = ANY($2::uuid[])
+      AND (a.professional_id = ANY($2::uuid[]) OR a.professional_id IS NULL)
       AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $3
       AND a.status != 'cancelled'
   `, [clinicId, professionalIds, date])
 
   const bookedByProfessional = {}
+  const bookedWithoutProfessional = []
   for (const b of booked) {
+    if (!b.professional_id) {
+      bookedWithoutProfessional.push(b)
+      continue
+    }
     if (!bookedByProfessional[b.professional_id]) bookedByProfessional[b.professional_id] = []
     bookedByProfessional[b.professional_id].push(b)
   }
@@ -155,7 +183,7 @@ async function computeSlots(clinicId, date, procedureId) {
 
       if (slotMinStart < profStart || slotMinEnd > profEnd) return false
 
-      const profBooked = bookedByProfessional[profId] || []
+      const profBooked = [...bookedWithoutProfessional, ...(bookedByProfessional[profId] || [])]
       return !profBooked.some(b => {
         const bs = new Date(b.scheduled_at)
         const be = new Date(bs.getTime() + b.duration * 60000)
@@ -188,9 +216,7 @@ async function findAvailableProfessional(clinicId, procedureId, scheduledAt, dur
 
   const slotStart = new Date(scheduledAt)
   const slotEnd = new Date(slotStart.getTime() + duration * 60000)
-  const date = slotStart.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
-  const dayOfWeek = slotStart.getDay()
-  const slotMin = slotStart.getHours() * 60 + slotStart.getMinutes()
+  const { date, dayOfWeek, minutes: slotMin } = getSaoPauloDateParts(slotStart)
   const slotMinEnd = slotMin + duration
 
   const { rows: booked } = await db.query(`
@@ -198,13 +224,18 @@ async function findAvailableProfessional(clinicId, procedureId, scheduledAt, dur
     FROM appointments a
     JOIN procedures p ON a.procedure_id = p.id
     WHERE a.clinic_id = $1
-      AND a.professional_id = ANY($2::uuid[])
+      AND (a.professional_id = ANY($2::uuid[]) OR a.professional_id IS NULL)
       AND DATE(a.scheduled_at AT TIME ZONE 'America/Sao_Paulo') = $3
       AND a.status != 'cancelled'
   `, [clinicId, professionalIds, date])
 
   const bookedByProfessional = {}
+  const bookedWithoutProfessional = []
   for (const b of booked) {
+    if (!b.professional_id) {
+      bookedWithoutProfessional.push(b)
+      continue
+    }
     if (!bookedByProfessional[b.professional_id]) bookedByProfessional[b.professional_id] = []
     bookedByProfessional[b.professional_id].push(b)
   }
@@ -217,7 +248,7 @@ async function findAvailableProfessional(clinicId, procedureId, scheduledAt, dur
     const [peh, pem] = ph.end_time.split(':').map(Number)
     if (slotMin < psh * 60 + psm || slotMinEnd > peh * 60 + pem) continue
 
-    const profBooked = bookedByProfessional[profId] || []
+    const profBooked = [...bookedWithoutProfessional, ...(bookedByProfessional[profId] || [])]
     const hasConflict = profBooked.some(b => {
       const bs = new Date(b.scheduled_at)
       const be = new Date(bs.getTime() + b.duration * 60000)
