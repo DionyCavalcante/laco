@@ -89,18 +89,30 @@ router.post('/', async (req, res) => {
     if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' })
 
     const clinicId = await getEffectiveClinicId(req)
-    const { rows } = await db.query(`
+    const { rows: [existing] } = await db.query(
+      'SELECT id FROM leads WHERE clinic_id = $1 AND phone = $2 LIMIT 1',
+      [clinicId, phone]
+    )
+
+    if (existing) {
+      const { rows: [lead] } = await db.query(`
+        UPDATE leads
+        SET name = $1,
+            status = $2,
+            last_interaction_at = NOW(),
+            updated_at = NOW()
+        WHERE id = $3 AND clinic_id = $4
+        RETURNING *
+      `, [name, status, existing.id, clinicId])
+      return res.status(200).json(lead)
+    }
+
+    const { rows: [lead] } = await db.query(`
       INSERT INTO leads (clinic_id, name, phone, source, status, last_interaction_at)
       VALUES ($1, $2, $3, $4, $5, NOW())
-      ON CONFLICT (clinic_id, phone)
-      DO UPDATE SET
-        name = EXCLUDED.name,
-        status = EXCLUDED.status,
-        last_interaction_at = NOW(),
-        updated_at = NOW()
       RETURNING *
     `, [clinicId, name, phone, source, status])
-    res.status(201).json(rows[0])
+    res.status(201).json(lead)
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro ao criar lead' })
