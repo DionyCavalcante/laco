@@ -5,6 +5,7 @@ import { AstraiTheme } from '../types';
 import {
   Plus, Trash2, Clock, X, Check, Loader2, Eye,
   GripVertical, Camera, HelpCircle, Trophy, ChevronRight, Upload,
+  RotateCw, Crosshair, ScissorsLineDashed,
 } from 'lucide-react';
 import { getApiKey } from '../services/api';
 import { getClinic, updateClinic, getSettings, saveSettings, getHours, saveHours } from '../services/settings';
@@ -139,6 +140,252 @@ function ClinicaTab({ theme, isLight }: { theme:AstraiTheme; isLight:boolean }) 
   );
 }
 
+/* ── PhotoEditor ───────────────────────────────────────────────── */
+interface EditorPhotoData { id: string; url: string; side: string; }
+interface PhotoEditorProps {
+  photo: EditorPhotoData;
+  procId: string;
+  onClose: () => void;
+  onSaved: () => void;
+}
+function PhotoEditor({ photo, procId, onClose, onSaved }: PhotoEditorProps) {
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const wrapRef    = useRef<HTMLDivElement>(null);
+  const imgRef     = useRef<HTMLImageElement | null>(null);
+  const rotRef     = useRef(0);
+  const dragging   = useRef(false);
+
+  const [rotation,    setRotation]    = useState(0);
+  const [splitActive, setSplitActive] = useState(false);
+  const [splitDir,    setSplitDir]    = useState<'vertical'|'horizontal'>('vertical');
+  const [splitPos,    setSplitPos]    = useState(0.5);
+  const [saving,      setSaving]      = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => { imgRef.current = img; drawCanvas(0); };
+    img.src = photo.url;
+  }, []);
+
+  function drawCanvas(rot: number) {
+    const canvas = canvasRef.current;
+    const img    = imgRef.current;
+    if (!canvas || !img) return;
+    const ctx  = canvas.getContext('2d')!;
+    const rad  = rot * Math.PI / 180;
+    const sw   = img.naturalWidth, sh = img.naturalHeight;
+    const rot90 = rot % 180 !== 0;
+    canvas.width  = rot90 ? sh : sw;
+    canvas.height = rot90 ? sw : sh;
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(rad);
+    ctx.drawImage(img, -sw / 2, -sh / 2);
+    ctx.restore();
+  }
+
+  function rotate() {
+    const r = (rotRef.current + 90) % 360;
+    rotRef.current = r;
+    setRotation(r);
+    drawCanvas(r);
+  }
+
+  function canvasToBlob(c: HTMLCanvasElement): Promise<Blob> {
+    return new Promise(res => c.toBlob(b => res(b!), 'image/jpeg', 0.92));
+  }
+
+  function sliceCanvas(src: HTMLCanvasElement, x: number, y: number, w: number, h: number) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d')!.drawImage(src, x, y, w, h, 0, 0, w, h);
+    return c;
+  }
+
+  async function uploadBlob(blob: Blob) {
+    const fd = new FormData();
+    fd.append(photo.side, blob, 'photo.jpg');
+    await fetch(`/api/upload/procedure/${procId}/photos`, {
+      method: 'POST',
+      headers: { 'x-api-key': getApiKey() },
+      body: fd,
+    });
+  }
+
+  async function save() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setSaving(true);
+    try {
+      if (splitActive) {
+        const cw = canvas.width, ch = canvas.height;
+        let a: HTMLCanvasElement, b: HTMLCanvasElement;
+        if (splitDir === 'vertical') {
+          const px = Math.round(splitPos * cw);
+          a = sliceCanvas(canvas, 0, 0, px, ch);
+          b = sliceCanvas(canvas, px, 0, cw - px, ch);
+        } else {
+          const py = Math.round(splitPos * ch);
+          a = sliceCanvas(canvas, 0, 0, cw, py);
+          b = sliceCanvas(canvas, 0, py, cw, ch - py);
+        }
+        await uploadBlob(await canvasToBlob(a));
+        await uploadBlob(await canvasToBlob(b));
+      } else {
+        await uploadBlob(await canvasToBlob(canvas));
+      }
+      await fetch(`/api/upload/photo/${photo.id}`, {
+        method: 'DELETE', headers: { 'x-api-key': getApiKey() },
+      });
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      alert('Erro ao salvar: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function onMouseMove(e: React.MouseEvent) {
+    if (!dragging.current || !wrapRef.current) return;
+    const rect = wrapRef.current.getBoundingClientRect();
+    if (splitDir === 'vertical') {
+      setSplitPos(Math.max(0.1, Math.min(0.9, (e.clientX - rect.left) / rect.width)));
+    } else {
+      setSplitPos(Math.max(0.1, Math.min(0.9, (e.clientY - rect.top) / rect.height)));
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 gap-4">
+      <p className="text-white text-lg font-bold">Editar foto — girar ou dividir</p>
+      <div
+        ref={wrapRef}
+        className="relative max-h-[58vh] overflow-hidden flex items-center justify-center"
+        onMouseMove={onMouseMove}
+        onMouseUp={() => { dragging.current = false; }}
+        onMouseLeave={() => { dragging.current = false; }}
+      >
+        <canvas ref={canvasRef} style={{ display:'block', maxWidth:'100%', maxHeight:'58vh' }} />
+        {splitActive && (
+          <div
+            className="absolute bg-white/90 shadow-lg cursor-grab active:cursor-grabbing"
+            style={splitDir === 'vertical'
+              ? { left:`${splitPos*100}%`, top:0, bottom:0, width:3, transform:'translateX(-50%)' }
+              : { top:`${splitPos*100}%`, left:0, right:0, height:3, transform:'translateY(-50%)' }
+            }
+            onMouseDown={e => { dragging.current = true; e.preventDefault(); }}
+            onTouchStart={e => { dragging.current = true; e.preventDefault(); }}
+          />
+        )}
+      </div>
+      <div className="flex gap-2 flex-wrap justify-center">
+        <button onClick={onClose} className="px-4 py-2 rounded-xl bg-zinc-700 text-white text-sm font-bold">
+          Cancelar
+        </button>
+        <button onClick={rotate} className="px-4 py-2 rounded-xl bg-zinc-600 text-white text-sm font-bold flex items-center gap-2">
+          <RotateCw className="w-4 h-4" /> Girar 90°
+        </button>
+        <button
+          onClick={() => { setSplitActive(a => !a); setSplitPos(0.5); }}
+          className={cn('px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2',
+            splitActive ? 'bg-astrai-gold text-astrai-blue' : 'bg-zinc-600 text-white')}
+        >
+          <ScissorsLineDashed className="w-4 h-4" /> {splitActive ? 'Desativar divisão' : 'Dividir foto'}
+        </button>
+        {splitActive && (
+          <button
+            onClick={() => { setSplitDir(d => d === 'vertical' ? 'horizontal' : 'vertical'); setSplitPos(0.5); }}
+            className="px-4 py-2 rounded-xl bg-zinc-600 text-white text-sm font-bold"
+          >
+            {splitDir === 'vertical' ? '↕ Mudar para horizontal' : '↔ Mudar para vertical'}
+          </button>
+        )}
+        <button onClick={save} disabled={saving}
+          className="px-4 py-2 rounded-xl bg-astrai-gold text-astrai-blue text-sm font-bold flex items-center gap-2 disabled:opacity-60"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          Salvar
+        </button>
+      </div>
+      {splitActive && (
+        <p className="text-zinc-400 text-xs">Arraste a linha para definir o ponto de divisão</p>
+      )}
+    </div>
+  );
+}
+
+/* ── PhotoThumb ────────────────────────────────────────────────── */
+interface PhotoThumbProps {
+  ph: { id:string; url:string; side:string; rotation?:number; position_x?:number; position_y?:number };
+  aspect: string;
+  isFocal: boolean;
+  small?: boolean;
+  onDelete: () => void;
+  onRotate: () => void;
+  onFocal: () => void;
+  onEditor: () => void;
+  onFocalClick: (x:number, y:number) => void;
+}
+function PhotoThumb({ ph, aspect, isFocal, small=false, onDelete, onRotate, onFocal, onEditor, onFocalClick }: PhotoThumbProps) {
+  const rot   = ph.rotation || 0;
+  const scale = rot % 180 !== 0 ? 1.42 : 1;
+  const btn   = small ? 'w-5 h-5' : 'w-7 h-7';
+  const ico   = small ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5';
+
+  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (!isFocal) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    onFocalClick(
+      Math.round(((e.clientX - rect.left) / rect.width) * 100),
+      Math.round(((e.clientY - rect.top)  / rect.height) * 100),
+    );
+  }
+
+  return (
+    <div
+      className={cn('relative group rounded-2xl overflow-hidden', aspect, isFocal && 'ring-2 ring-astrai-gold ring-offset-2')}
+      style={{ cursor: isFocal ? 'crosshair' : undefined }}
+      onClick={handleClick}
+    >
+      <img src={ph.url} alt="" className="w-full h-full object-cover transition-transform"
+        style={{
+          transform: rot ? `rotate(${rot}deg) scale(${scale})` : undefined,
+          objectPosition: `${ph.position_x ?? 50}% ${ph.position_y ?? 50}%`,
+        }}
+      />
+      {isFocal ? (
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+          <Crosshair className="w-8 h-8 text-white drop-shadow-lg animate-pulse" />
+          <span className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white font-bold">Clique para definir foco</span>
+        </div>
+      ) : (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute top-1.5 right-1.5 flex gap-1">
+            <button title="Girar 90°" onClick={e => { e.stopPropagation(); onRotate(); }}
+              className={cn('rounded-full bg-black/60 hover:bg-zinc-700 flex items-center justify-center', btn)}>
+              <RotateCw className={cn('text-white', ico)} />
+            </button>
+            <button title="Enquadrar foco" onClick={e => { e.stopPropagation(); onFocal(); }}
+              className={cn('rounded-full bg-black/60 hover:bg-astrai-gold flex items-center justify-center', btn)}>
+              <Crosshair className={cn('text-white', ico)} />
+            </button>
+            <button title="Editar / dividir" onClick={e => { e.stopPropagation(); onEditor(); }}
+              className={cn('rounded-full bg-black/60 hover:bg-blue-500 flex items-center justify-center', btn)}>
+              <ScissorsLineDashed className={cn('text-white', ico)} />
+            </button>
+            <button title="Remover" onClick={e => { e.stopPropagation(); onDelete(); }}
+              className={cn('rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center', btn)}>
+              <X className={cn('text-white', ico)} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Procedimentos ─────────────────────────────────────────────── */
 function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boolean }) {
   const [procs,     setProcs]     = useState<Procedure[]>([]);
@@ -150,9 +397,11 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [selProfs,  setSelProfs]  = useState<string[]>([]);
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
-  const [photos,    setPhotos]    = useState<{id:string;side:string;url:string;label:string|null}[]>([]);
-  const [uploading, setUploading] = useState<string|null>(null);
-  const [photoMode, setPhotoMode] = useState<'before_after'|'results'|'single'>('before_after');
+  const [photos,       setPhotos]       = useState<{id:string;side:string;url:string;label:string|null;rotation?:number;position_x?:number;position_y?:number}[]>([]);
+  const [uploading,    setUploading]    = useState<string|null>(null);
+  const [photoMode,    setPhotoMode]    = useState<'before_after'|'results'|'single'>('before_after');
+  const [editorPhoto,  setEditorPhoto]  = useState<EditorPhotoData|null>(null);
+  const [focalPhotoId, setFocalPhotoId] = useState<string|null>(null);
   const dragIndex  = useRef<number | null>(null);
   const dragOver   = useRef<number | null>(null);
 
@@ -229,6 +478,27 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
     } catch (err: any) {
       alert(err.message);
     }
+  }
+
+  async function rotatePhoto(photoId: string) {
+    try {
+      const res = await fetch(`/api/upload/photo/${photoId}/rotate`, {
+        method: 'POST', headers: { 'x-api-key': getApiKey() },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPhotos(p => p.map(x => x.id === photoId ? { ...x, rotation: data.rotation } : x));
+    } catch { }
+  }
+
+  async function saveFocalPoint(photoId: string, pctX: number, pctY: number) {
+    setPhotos(p => p.map(x => x.id === photoId ? { ...x, position_x: pctX, position_y: pctY } : x));
+    setFocalPhotoId(null);
+    await fetch(`/api/upload/photo/${photoId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
+      body: JSON.stringify({ position_x: pctX, position_y: pctY }),
+    }).catch(console.error);
   }
 
   async function updateLabel(photoId: string, label: string) {
@@ -497,13 +767,16 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                           </label>
                           <div className="max-w-xs">
                             {photos.filter(p => p.side === 'before').slice(0, 1).map(ph => (
-                              <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-video mb-3">
-                                <img src={ph.url} alt="Foto" className="w-full h-full object-cover" />
-                                <button onClick={() => deletePhoto(ph.id)}
-                                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                                  <X className="w-4 h-4 text-white" />
-                                </button>
-                              </div>
+                              <PhotoThumb
+                                key={ph.id} ph={ph}
+                                aspect="aspect-video"
+                                isFocal={focalPhotoId === ph.id}
+                                onDelete={() => deletePhoto(ph.id)}
+                                onRotate={() => rotatePhoto(ph.id)}
+                                onFocal={() => setFocalPhotoId(focalPhotoId === ph.id ? null : ph.id)}
+                                onEditor={() => setEditorPhoto({ id: ph.id, url: ph.url, side: ph.side })}
+                                onFocalClick={(x, y) => saveFocalPoint(ph.id, x, y)}
+                              />
                             ))}
                             {editing?.id && photos.filter(p => p.side === 'before').length === 0 && (
                               <label className={cn('aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
@@ -539,13 +812,16 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                                 <div key={side} className="space-y-3">
                                   <span className={cn('text-sm font-black uppercase tracking-widest', isLight ? 'text-zinc-500' : 'text-zinc-400')}>{sideLabel}</span>
                                   {sidePhotos.map(ph => (
-                                    <div key={ph.id} className="relative group rounded-2xl overflow-hidden aspect-square">
-                                      <img src={ph.url} alt={sideLabel} className="w-full h-full object-cover" />
-                                      <button onClick={() => deletePhoto(ph.id)}
-                                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                                        <X className="w-4 h-4 text-white" />
-                                      </button>
-                                    </div>
+                                    <PhotoThumb
+                                      key={ph.id} ph={ph}
+                                      aspect="aspect-square"
+                                      isFocal={focalPhotoId === ph.id}
+                                      onDelete={() => deletePhoto(ph.id)}
+                                      onRotate={() => rotatePhoto(ph.id)}
+                                      onFocal={() => setFocalPhotoId(focalPhotoId === ph.id ? null : ph.id)}
+                                      onEditor={() => setEditorPhoto({ id: ph.id, url: ph.url, side: ph.side })}
+                                      onFocalClick={(x, y) => saveFocalPoint(ph.id, x, y)}
+                                    />
                                   ))}
                                   {editing?.id && (
                                     <label className={cn('aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all',
@@ -573,15 +849,18 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </label>
                         <div className="flex flex-wrap gap-4">
                           {photos.filter(p => p.side === 'carousel').map(ph => (
-                            <div key={ph.id} className="relative group w-28 flex flex-col gap-1">
-                              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
-                                <img src={ph.url} alt="carousel" className="w-full h-full object-cover" />
-                                <button onClick={() => deletePhoto(ph.id)}
-                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
-                                  <X className="w-3 h-3 text-white" />
-                                </button>
-                              </div>
-                              {/* Label editável */}
+                            <div key={ph.id} className="w-28 flex flex-col gap-1">
+                              <PhotoThumb
+                                ph={ph}
+                                aspect="aspect-[4/5]"
+                                isFocal={focalPhotoId === ph.id}
+                                onDelete={() => deletePhoto(ph.id)}
+                                onRotate={() => rotatePhoto(ph.id)}
+                                onFocal={() => setFocalPhotoId(focalPhotoId === ph.id ? null : ph.id)}
+                                onEditor={() => setEditorPhoto({ id: ph.id, url: ph.url, side: ph.side })}
+                                onFocalClick={(x, y) => saveFocalPoint(ph.id, x, y)}
+                                small
+                              />
                               <input
                                 value={ph.label ?? ''}
                                 onChange={e => updateLabel(ph.id, e.target.value)}
@@ -722,6 +1001,16 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Editor de foto ── */}
+      {editorPhoto && editing?.id && (
+        <PhotoEditor
+          photo={editorPhoto}
+          procId={editing.id}
+          onClose={() => setEditorPhoto(null)}
+          onSaved={() => { setEditorPhoto(null); if (editing?.id) loadPhotos(editing.id); }}
+        />
+      )}
 
       {/* ── Lista ── */}
       <div className={cn('rounded-[2rem] border overflow-hidden', isLight ? 'bg-white border-zinc-200 shadow-lg' : 'bg-white/[0.02] border-white/[0.05]')}>
