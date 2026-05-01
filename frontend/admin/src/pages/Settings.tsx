@@ -400,9 +400,10 @@ function PhotoThumb({ ph, aspect, isFocal, small=false, onDelete, onRotate, onFo
 
 /* ── Procedimentos ─────────────────────────────────────────────── */
 function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boolean }) {
-  const [procs,     setProcs]     = useState<Procedure[]>([]);
-  const [allProfs,  setAllProfs]  = useState<Professional[]>([]);
-  const [loading,   setLoading]   = useState(true);
+  const [procs,      setProcs]      = useState<Procedure[]>([]);
+  const [allProfs,   setAllProfs]   = useState<Professional[]>([]);
+  const [clinicName, setClinicName] = useState('');
+  const [loading,    setLoading]    = useState(true);
   const [editing,   setEditing]   = useState<Procedure|null>(null);
   const [modalTab,  setModalTab]  = useState<'info'|'images'|'page'>('info');
   const [form,      setForm]      = useState<Partial<Procedure>>({});
@@ -419,8 +420,8 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const dragOver   = useRef<number | null>(null);
 
   useEffect(() => {
-    Promise.all([getProcedures(), getProfessionals()])
-      .then(([p, pr]) => { setProcs(p); setAllProfs(pr); setLoading(false); })
+    Promise.all([getProcedures(), getProfessionals(), getClinic()])
+      .then(([p, pr, c]) => { setProcs(p); setAllProfs(pr); setClinicName(c.name || ''); setLoading(false); })
       .catch(console.error);
   }, []);
 
@@ -466,7 +467,13 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
       const res = await fetch('/api/ai/generate-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey() },
-        body: JSON.stringify({ name: form.name, subheadline: form.subheadline }),
+        body: JSON.stringify({
+          name:        form.name,
+          subheadline: form.subheadline,
+          description: (form as any).description,
+          durationMin: form.durationMin,
+          clinicName,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro ao gerar conteúdo');
