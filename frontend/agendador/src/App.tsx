@@ -450,7 +450,7 @@ const GalleryPage = ({
     const isSingle  = p.photo_mode === 'single';
     const isResults = p.photo_mode === 'results';
     const mapPhoto = (photo?: Photo) => photo
-      ? { url: photoUrl(photo.url), rotation: photo.rotation, position_x: photo.position_x, position_y: photo.position_y }
+      ? { url: photoUrl(photo.url), rotation: photo.rotation, position_x: photo.position_x, position_y: photo.position_y, label: photo.label ?? null }
       : null;
     return {
       proc: p,
@@ -770,7 +770,7 @@ const OfferPage = ({
           if (t.startsWith('**') && t.endsWith('**'))
             return <strong key={i} className="font-bold text-primary">{t.slice(2, -2)}</strong>;
           if (t.startsWith('==') && t.endsWith('=='))
-            return <ProcHighlight key={i}>{t.slice(2, -2)}</ProcHighlight>;
+            return <React.Fragment key={i}><ProcHighlight>{t.slice(2, -2)}</ProcHighlight></React.Fragment>;
           return t;
         })}
       </>
@@ -813,13 +813,17 @@ const OfferPage = ({
   ];
 
   const parseHowItWorks = (raw: string) =>
-    raw.split(/\n\n+/).map((block) => {
+    raw.replace(/\r\n/g, '\n').split(/\n\n+/).map((block) => {
       const lines = block.split('\n');
       return { num: lines[0] || '', title: lines[1] || '', desc: lines.slice(2).join(' ') };
     }).filter((s) => s.title);
 
-  const howItWorksSteps = selectedProc?.how_it_works
+  const customHowItWorksSteps = selectedProc?.how_it_works
     ? parseHowItWorks(selectedProc.how_it_works)
+    : [];
+
+  const howItWorksSteps = customHowItWorksSteps.length > 0
+    ? customHowItWorksSteps
     : [
     { num: '1', title: 'Avaliação personalizada', desc: 'Entendemos o que realmente valoriza o seu rosto.' },
     { num: '2', title: 'Procedimento com técnica', desc: 'Aplicamos com precisão, respeitando sua estrutura natural.' },
