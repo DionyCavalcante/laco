@@ -1,11 +1,11 @@
 const express = require('express')
-const router  = express.Router()
-const OpenAI  = require('openai')
+const router = express.Router()
+const OpenAI = require('openai')
 
 function cleanStepText(value) {
   return String(value ?? '')
     .replace(/\s+/g, ' ')
-    .replace(/^[-•*]\s*/, '')
+    .replace(/^[-*]\s*/, '')
     .trim()
 }
 
@@ -30,7 +30,7 @@ function normalizeHowItWorks(raw) {
 
     if (steps.length === 3) {
       return steps
-        .map((step, index) => `${index + 1}\n${step.title || `Etapa ${index + 1}`}\n${step.desc || 'Você recebe orientação clara sobre esta etapa do procedimento.'}`)
+        .map((step, index) => `${index + 1}\n${step.title || `Etapa ${index + 1}`}\n${step.desc || 'Voce recebe orientacao clara sobre esta etapa do procedimento.'}`)
         .join('\n\n')
     }
   }
@@ -75,78 +75,112 @@ function normalizeHowItWorks(raw) {
         }
       }
 
-      return `${index + 1}\n${title || `Etapa ${index + 1}`}\n${desc || 'Você recebe orientação clara sobre esta etapa do procedimento.'}`
+      return `${index + 1}\n${title || `Etapa ${index + 1}`}\n${desc || 'Voce recebe orientacao clara sobre esta etapa do procedimento.'}`
     })
     .join('\n\n')
 }
 
-// POST /api/ai/generate-page — gera conteúdo da página do procedimento
+function normalizeText(value) {
+  if (value == null) return ''
+  return String(value).trim()
+}
+
+// POST /api/ai/generate-page - gera conteudo da pagina do procedimento
 router.post('/generate-page', async (req, res) => {
   if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'OPENAI_API_KEY não configurada no servidor.' })
+    return res.status(500).json({ error: 'OPENAI_API_KEY nao configurada no servidor.' })
   }
 
   const { name, subheadline, description, clinicName, durationMin, context } = req.body
-  if (!name) return res.status(400).json({ error: 'Campo "name" obrigatório.' })
+  if (!name) return res.status(400).json({ error: 'Campo "name" obrigatorio.' })
 
-  const clinic = clinicName || 'a clínica'
-  const dur    = durationMin ? `${durationMin} minutos` : null
+  const clinic = clinicName || 'a clinica'
+  const dur = durationMin ? `${durationMin} minutos` : null
 
-  const prompt = `Você é especialista em copy para clínicas de estética premium. Gere conteúdo para a página de um procedimento seguindo as diretrizes abaixo com rigor.
+  const prompt = `Voce e especialista em copy para clinicas de estetica premium. Gere conteudo para a pagina de um procedimento seguindo as diretrizes abaixo com rigor.
 
 PROCEDIMENTO: "${name}"
-${subheadline ? `SUBTÍTULO ATUAL: "${subheadline}"` : ''}
-${description ? `DESCRIÇÃO: "${description}"` : ''}
-CLÍNICA: ${clinic}
-${dur ? `DURAÇÃO: ${dur}` : ''}
-${context ? `\nINSUMOS DA PROFISSIONAL (use como base prioritária para o conteúdo — linguagem, diferenciais, técnica, observações):
+${subheadline ? `SUBTITULO ATUAL: "${subheadline}"` : ''}
+${description ? `DESCRICAO: "${description}"` : ''}
+CLINICA: ${clinic}
+${dur ? `DURACAO: ${dur}` : ''}
+${context ? `\nINSUMOS DA PROFISSIONAL (use como base prioritaria para o conteudo - linguagem, diferenciais, tecnica, observacoes):
 """
 ${context}
 """
-Extraia dessas informações os pontos mais relevantes: diferenciais da técnica, cuidados específicos, tom de comunicação, nomenclaturas usadas pela profissional.` : ''}
+Extraia dessas informacoes os pontos mais relevantes: diferenciais da tecnica, cuidados especificos, tom de comunicacao, nomenclaturas usadas pela profissional.` : ''}
 
 ---
 
-REGRAS DE COPY (obrigatórias):
+REGRAS DE COPY (obrigatorias):
 
-1. TOM: a clínica fala com a cliente. Conversa premium, acolhedora, honesta. Nunca slogan de marca, nunca promessa absoluta.
+1. TOM: a clinica fala com a cliente. Conversa premium, acolhedora, honesta. Nunca slogan de marca, nunca promessa absoluta.
 
-2. HEADLINE — regras específicas:
-   - Modelo base: "Veja como [procedimento] pode [benefício pessoal]" — adaptado criativamente
-   - Deve fazer a leitora parar de rolar. É o maior peso visual da página.
-   - Usa o nome do procedimento naturalmente na frase
-   - Foca em "realçar", "definir", "revelar", "valorizar" — nunca "transformar completamente" ou "perfeição"
-   - Máximo 12 palavras
-   - NÃO terminar com "!"
+2. HEADLINE:
+   - Modelo base: "Veja como [procedimento] pode [beneficio pessoal]" adaptado criativamente
+   - Usa o nome do procedimento naturalmente
+   - Maximo 12 palavras
+   - Nao terminar com "!"
 
-3. PALAVRAS PROIBIDAS em qualquer campo:
-   "resultado garantido", "sem dor", "sem risco", "segurança máxima", "recuperação imediata", "100%", "perfeito", "perfeição", "incrível", "revolucionário"
+3. PALAVRAS PROIBIDAS:
+   "resultado garantido", "sem dor", "sem risco", "seguranca maxima", "recuperacao imediata", "100%", "perfeito", "perfeicao", "incrivel", "revolucionario"
 
 4. PALAVRAS PREFERIDAS:
-   "pode variar", "avaliação individual", "respeitando", "o efeito que combina com você", "naturalidade", "o que combina com a sua rotina"
+   "pode variar", "avaliacao individual", "respeitando", "o efeito que combina com voce", "naturalidade", "o que combina com a sua rotina"
 
 5. TAMANHO: mobile-first. Nenhum campo com mais de 3 linhas de texto no celular.
 
-6. authorityNote: mencionar a clínica (${clinic}) naturalmente. Tom: como se a profissional estivesse falando na recepção, não como slogan institucional.
+6. subheadline: complementar a headline com 1 ou 2 frases curtas. Mostrar naturalidade, resultado esperado e contexto real. Sem "!".
 
-7. howItWorks: descreve o processo em EXATAMENTE 3 passos numerados. O valor de "howItWorks" deve ser uma STRING, nunca array ou objeto. Não use Markdown, bullets, "Passo 1" nem texto antes/depois. Formato obrigatório (cada passo separado por uma linha em branco):
-   "1\nTítulo curto do passo\nDescrição em 1 frase\n\n2\nTítulo curto do passo\nDescrição em 1 frase\n\n3\nTítulo curto do passo\nDescrição em 1 frase"
-   Exemplo: "1\nAvaliação personalizada\nEntendemos o que realmente valoriza o seu rosto.\n\n2\nAplicação com técnica\nRespeitamos sua estrutura natural com precisão.\n\n3\nOrientação final\nVocê sai sabendo exatamente como manter no dia a dia."
-   Tom transparente, elimina insegurança.
+7. authorityNote: mencionar a clinica (${clinic}) naturalmente. Tom: como se a profissional estivesse falando na recepcao, nao como slogan institucional.
 
-8. faqAftercare: lista de cuidados reais e específicos para este procedimento, 3–5 itens, cada um em uma linha começando com "- "
+8. benefit1Title, benefit1Desc, benefit2Title, benefit2Desc, benefit3Title, benefit3Desc:
+   - representam os 3 beneficios principais da pagina
+   - cada title com no maximo 5 palavras
+   - cada desc com 1 frase curta, concreta, sem exagero
 
-9. closingNote: última frase antes do preço. Reduz a última fricção ("e se não for para mim?"). Sem "!". Tom leve, como conversa.
+9. mainPain: listar 2 ou 3 dores ou incomodos reais em blocos separados por linha em branco. Cada bloco com 1 frase.
+
+10. emotionalDesire: 1 frase curta sobre como a cliente quer se sentir.
+
+11. dayToDayFit: 1 frase curta explicando como o procedimento combina com a rotina da cliente.
+
+12. howItWorks: descreve o processo em EXATAMENTE 3 passos numerados. O valor deve ser uma STRING, nunca array ou objeto. Formato obrigatorio:
+   "1\nTitulo curto do passo\nDescricao em 1 frase\n\n2\nTitulo curto do passo\nDescricao em 1 frase\n\n3\nTitulo curto do passo\nDescricao em 1 frase"
+
+13. faqSessionDuration: responder objetivamente quanto tempo leva a sessao.
+
+14. faqResultDuration: responder quanto tempo o resultado costuma durar, sem prometer absoluto.
+
+15. faqPainDiscomfort: responder de forma honesta sobre dor, sensibilidade ou desconforto.
+
+16. faqMaintenance: responder se existe manutencao e em que ritmo costuma fazer sentido.
+
+17. faqAftercare: lista de cuidados reais e especificos para este procedimento, 3 a 5 itens, cada um em uma linha comecando com "- ".
+
+18. closingNote: ultima frase antes do preco. Reduz a ultima friccao ("e se nao for para mim?"). Sem "!". Tom leve, como conversa.
 
 ---
 
-Retorne APENAS um JSON válido com exatamente estas chaves:
+Retorne APENAS um JSON valido com exatamente estas chaves:
 {
   "headline": "...",
+  "subheadline": "...",
+  "benefit1Title": "...",
+  "benefit1Desc": "...",
+  "benefit2Title": "...",
+  "benefit2Desc": "...",
+  "benefit3Title": "...",
+  "benefit3Desc": "...",
+  "mainPain": "...",
+  "emotionalDesire": "...",
+  "dayToDayFit": "...",
   "howItWorks": "...",
   "authorityNote": "...",
   "faqSessionDuration": "...",
+  "faqResultDuration": "...",
   "faqPainDiscomfort": "...",
+  "faqMaintenance": "...",
   "faqAftercare": "...",
   "closingNote": "..."
 }`
@@ -158,14 +192,35 @@ Retorne APENAS um JSON válido com exatamente estas chaves:
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     }, { timeout: 30000 })
+
     const data = JSON.parse(completion.choices[0]?.message?.content ?? '{}')
+
+    data.headline = normalizeText(data.headline)
+    data.subheadline = normalizeText(data.subheadline)
+    data.benefit1Title = normalizeText(data.benefit1Title)
+    data.benefit1Desc = normalizeText(data.benefit1Desc)
+    data.benefit2Title = normalizeText(data.benefit2Title)
+    data.benefit2Desc = normalizeText(data.benefit2Desc)
+    data.benefit3Title = normalizeText(data.benefit3Title)
+    data.benefit3Desc = normalizeText(data.benefit3Desc)
+    data.mainPain = normalizeText(data.mainPain)
+    data.emotionalDesire = normalizeText(data.emotionalDesire)
+    data.dayToDayFit = normalizeText(data.dayToDayFit)
     data.howItWorks = normalizeHowItWorks(data.howItWorks)
+    data.authorityNote = normalizeText(data.authorityNote)
+    data.faqSessionDuration = normalizeText(data.faqSessionDuration)
+    data.faqResultDuration = normalizeText(data.faqResultDuration)
+    data.faqPainDiscomfort = normalizeText(data.faqPainDiscomfort)
+    data.faqMaintenance = normalizeText(data.faqMaintenance)
+    data.faqAftercare = normalizeText(data.faqAftercare)
+    data.closingNote = normalizeText(data.closingNote)
+
     res.json(data)
   } catch (err) {
     console.error('AI generate-page error:', err.message)
     const msg = err.message?.includes('timeout')
-      ? 'Não foi possível gerar o conteúdo. Tente novamente.'
-      : err.message || 'Erro ao gerar conteúdo.'
+      ? 'Nao foi possivel gerar o conteudo. Tente novamente.'
+      : err.message || 'Erro ao gerar conteudo.'
     res.status(500).json({ error: msg })
   }
 })
