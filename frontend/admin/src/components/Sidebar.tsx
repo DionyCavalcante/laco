@@ -41,7 +41,7 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
       <div className={cn('px-5 py-5 flex items-center gap-3 overflow-hidden', collapsed && 'justify-center')}>
         {/* Ícone: bússola da logo */}
         <img
-          src="/logo-icon.png"
+          src={`${import.meta.env.BASE_URL}logo-icon.png`}
           alt="Astrai"
           className="shrink-0 w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(201,169,110,0.5)]"
         />
