@@ -76,8 +76,7 @@ Retorne APENAS um JSON válido com exatamente estas chaves:
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
-      timeout: 15000,
-    })
+    }, { timeout: 30000 })
     const data = JSON.parse(completion.choices[0]?.message?.content ?? '{}')
     res.json(data)
   } catch (err) {
