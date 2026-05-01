@@ -1080,41 +1080,6 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </div>
                       </div>
 
-                      {/* Como funciona */}
-                      <div className={cn('p-6 rounded-2xl border space-y-5', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
-                        <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
-                          <ChevronRight className="w-3.5 h-3.5 text-astrai-gold" /> Como funciona
-                        </h4>
-                        <div className={cn('divide-y', isLight ? 'divide-zinc-200' : 'divide-white/10')}>
-                          {howItWorksEditorSteps.map((step, index) => (
-                            <div key={index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                              <div className="w-7 h-7 rounded-full bg-astrai-gold text-astrai-blue flex items-center justify-center text-[11px] font-black shrink-0 mt-1">
-                                {index + 1}
-                              </div>
-                              <div className="flex-1 space-y-2">
-                                <input
-                                  placeholder={`Título do passo ${index + 1}`}
-                                  value={step.title}
-                                  onChange={e => updateHowItWorksStep(index, 'title', e.target.value)}
-                                  className={cn('w-full p-3 rounded-lg border outline-none text-sm font-black',
-                                    isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
-                                  )}
-                                />
-                                <textarea
-                                  rows={2}
-                                  placeholder="Descrição em 1 frase"
-                                  value={step.desc}
-                                  onChange={e => updateHowItWorksStep(index, 'desc', e.target.value)}
-                                  className={cn('w-full p-3 rounded-lg border outline-none text-[12px] leading-relaxed resize-none',
-                                    isLight ? 'bg-white border-zinc-200 text-zinc-800 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-zinc-200 focus:border-astrai-gold/40'
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
                       {/* Autoridade */}
                       <div className={cn('p-6 rounded-2xl border space-y-4', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
                         <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
@@ -1185,6 +1150,49 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </div>
                       </div>
 
+                      {/* Como funciona */}
+                      <div className={cn('p-6 rounded-2xl border space-y-5', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
+                        <h4 className={cn('text-[10px] uppercase font-black tracking-widest flex items-center gap-2', theme.textPrimary)}>
+                          <ChevronRight className="w-3.5 h-3.5 text-astrai-gold" /> Como funciona
+                        </h4>
+                        <div className={cn('divide-y', isLight ? 'divide-zinc-200' : 'divide-white/10')}>
+                          {howItWorksEditorSteps.map((step, index) => (
+                            <div key={index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                              <div className="w-7 h-7 rounded-full bg-astrai-gold text-astrai-blue flex items-center justify-center text-[11px] font-black shrink-0 mt-1">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <input
+                                  placeholder={`Título do passo ${index + 1}`}
+                                  value={step.title}
+                                  onChange={e => updateHowItWorksStep(index, 'title', e.target.value)}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-sm font-black',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-900 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-white focus:border-astrai-gold/40'
+                                  )}
+                                />
+                                <textarea
+                                  rows={2}
+                                  placeholder="Descrição em 1 frase"
+                                  value={step.desc}
+                                  onChange={e => updateHowItWorksStep(index, 'desc', e.target.value)}
+                                  className={cn('w-full p-3 rounded-lg border outline-none text-[12px] leading-relaxed resize-none',
+                                    isLight ? 'bg-white border-zinc-200 text-zinc-800 focus:border-astrai-gold/40' : 'bg-[#0A1A26] border-white/10 text-zinc-200 focus:border-astrai-gold/40'
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Nota de fechamento */}
+                      <div className="space-y-1.5">
+                        <label className={lbl}>Nota de fechamento</label>
+                        <input className={cn('w-full p-3 rounded-lg border outline-none text-sm font-medium',
+                          isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-[#0A1A26] border-white/10 text-white'
+                        )} value={form.closingNote??''} onChange={e => setForm(f=>({...f, closingNote:e.target.value}))} />
+                      </div>
+
                       {/* FAQ + Cuidados */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className={cn('p-6 rounded-2xl border space-y-4', isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.01] border-white/5')}>
@@ -1221,13 +1229,6 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                         </div>
                       </div>
 
-                      {/* Nota de fechamento */}
-                      <div className="space-y-1.5">
-                        <label className={lbl}>Nota de fechamento</label>
-                        <input className={cn('w-full p-3 rounded-lg border outline-none text-sm font-medium',
-                          isLight ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-[#0A1A26] border-white/10 text-white'
-                        )} value={form.closingNote??''} onChange={e => setForm(f=>({...f, closingNote:e.target.value}))} />
-                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
