@@ -87,6 +87,7 @@ router.get('/slots', async (req, res) => {
 
     const { computeSlots } = require('../lib/slots')
     const result = await computeSlots(clinicId, date, procedure_id || null)
+    res.set('Cache-Control', 'no-store')
     res.json(result)
   } catch (err) {
     console.error(err)
