@@ -729,7 +729,13 @@ const OfferPage = ({
     ...(procPhotos[selectedProc.id]?.after || []),
   ] : [];
   const allProcPhotos: Photo[] = (carouselPhotos.length > 0 ? carouselPhotos : fallbackProcPhotos)
-    .map((p) => ({ url: photoUrl(p.url), rotation: p.rotation, label: p.label ?? null }));
+    .map((p) => ({
+      url: photoUrl(p.url),
+      rotation: p.rotation,
+      position_x: p.position_x,
+      position_y: p.position_y,
+      label: p.label ?? null,
+    }));
   const fallbackImages: Photo[] = [
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=800&auto=format&fit=crop',
@@ -897,10 +903,10 @@ const OfferPage = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.25, duration: 0.8 }}
-            className="relative rounded-[28px] overflow-hidden"
+            className="relative rounded-[28px] overflow-hidden max-w-[280px] mx-auto"
             style={{ boxShadow: '0 24px 60px -12px rgba(200,170,130,0.22)' }}
           >
-            <div className="relative overflow-hidden bg-surface-container-low" style={{ aspectRatio: '3/4', minHeight: 480 }}>
+            <div className="relative overflow-hidden bg-surface-container-low w-full" style={{ aspectRatio: '4 / 5' }}>
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentImg}
@@ -911,7 +917,15 @@ const OfferPage = ({
                   className="w-full h-full object-cover"
                   src={images[currentImg].url}
                   alt="Procedimento"
-                  style={images[currentImg].rotation ? { transform: `rotate(${images[currentImg].rotation}deg)`, scale: images[currentImg].rotation % 180 !== 0 ? '1.4' : '1' } : undefined}
+                  style={{
+                    objectPosition: `${images[currentImg].position_x ?? 50}% ${images[currentImg].position_y ?? 50}%`,
+                    ...(images[currentImg].rotation
+                      ? {
+                          transform: `rotate(${images[currentImg].rotation}deg)`,
+                          scale: images[currentImg].rotation % 180 !== 0 ? '1.4' : '1',
+                        }
+                      : {}),
+                  }}
                 />
               </AnimatePresence>
               <div className="absolute inset-0 bg-gradient-to-t from-primary/75 via-transparent to-transparent" />
