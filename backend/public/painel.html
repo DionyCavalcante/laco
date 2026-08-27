@@ -1188,7 +1188,8 @@ const SLUG = location.pathname.split('/').filter(Boolean)[0] || localStorage.get
   const slugFromStorage = localStorage.getItem('laco_slug')
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   // Superadmin sem clínica não deve acessar /:slug/ diretamente
-  if (user.role === 'superadmin') {
+  // (mas se há superadminToken, é impersonate — deixa passar)
+  if (user.role === 'superadmin' && !localStorage.getItem('superadminToken')) {
     location.replace('/superadmin')
     return
   }
