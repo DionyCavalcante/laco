@@ -440,6 +440,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
   const [selProfs,  setSelProfs]  = useState<string[]>([]);
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [photos,       setPhotos]       = useState<{id:string;side:string;url:string;label:string|null;rotation?:number;position_x?:number;position_y?:number}[]>([]);
   const [uploading,    setUploading]    = useState<string|null>(null);
   const [photoMode,    setPhotoMode]    = useState<'before_after'|'results'|'single'>('before_after');
@@ -601,9 +602,17 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
       body: JSON.stringify({ label: label || null }),
     }).catch(console.error);
   }
-  function closeModal() { setEditing(null); setSaved(false); setAiContext(''); }
+  function closeModal() { setEditing(null); setSaved(false); setSaveError(''); setAiContext(''); }
 
   async function save() {
+    setSaveError('');
+    const errors: string[] = [];
+    if (!form.name?.trim()) errors.push('Nome do procedimento');
+    if (!form.durationMin) errors.push('Duração');
+    if (errors.length) {
+      setSaveError(`Preencha: ${errors.join(', ')}`);
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -646,7 +655,10 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
         setProcs(p => [...p, updated]);
       }
       setSaved(true); setTimeout(() => { setSaved(false); closeModal(); }, 1200);
-    } catch(e) { console.error(e); }
+    } catch(e: any) {
+      console.error(e);
+      setSaveError(e?.message || 'Erro ao salvar procedimento. Tente novamente.');
+    }
     finally { setSaving(false); }
   }
 
@@ -1247,7 +1259,13 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
               </div>
 
               {/* Footer */}
-              <div className={cn('px-10 py-6 border-t flex justify-between', isLight ? 'border-zinc-100 bg-zinc-50' : 'border-white/5 bg-black/10')}>
+              <div className={cn('px-10 py-6 border-t', isLight ? 'border-zinc-100 bg-zinc-50' : 'border-white/5 bg-black/10')}>
+                {saveError && (
+                  <div className="mb-3 px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold">
+                    {saveError}
+                  </div>
+                )}
+                <div className="flex justify-between">
                 <button onClick={closeModal} className="px-8 py-3 rounded-xl text-zinc-500 font-bold text-xs hover:text-white transition-all uppercase tracking-widest border border-transparent hover:border-white/10">
                   Cancelar
                 </button>
@@ -1259,6 +1277,7 @@ function ProcedimentosTab({ theme, isLight }: { theme:AstraiTheme; isLight:boole
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : null}
                   {saving ? 'Salvando…' : saved ? 'Salvo!' : 'Salvar procedimento'}
                 </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

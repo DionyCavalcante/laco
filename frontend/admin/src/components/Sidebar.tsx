@@ -1,7 +1,8 @@
 import React from 'react';
 import {
   LayoutDashboard, Calendar, Users, Contact, Settings,
-  ChevronLeft, ChevronRight, Moon, Sun,
+  ChevronLeft, ChevronRight, Moon, Sun, HelpCircle, Search,
+  LogOut,
 } from 'lucide-react';
 import logoIcon from '../assets/logo-icon.png';
 import { cn } from '../lib/utils';
@@ -28,8 +29,117 @@ const navItems = [
 
 export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse, onThemeChange }: SidebarProps) {
   const { logout } = useAuth();
+  const useNewDS = theme.id === 'light';
+
+  /* ───────────────────────────────────────────────
+     Novo Design System (light)
+     ─────────────────────────────────────────────── */
+  if (useNewDS) {
+    return (
+      <aside className={cn(
+        'h-screen flex flex-col border-r border-border bg-surface transition-all duration-300 relative z-20',
+        collapsed ? 'w-16' : 'w-[220px]'
+      )}>
+        {/* Brand */}
+        <div className={cn('px-4 py-4 flex items-center gap-2.5 overflow-hidden', collapsed && 'justify-center px-2')}>
+          <img
+            src={logoIcon}
+            alt="Astrai"
+            className="shrink-0 w-8 h-8 object-contain"
+          />
+          {!collapsed && (
+            <div className="flex flex-col leading-none">
+              <span
+                className="text-text-primary tracking-[0.18em] leading-none"
+                style={{ fontFamily: '"Cinzel", serif', fontSize: '14px', fontWeight: 600, letterSpacing: '0.2em' }}
+              >
+                ASTRAI
+              </span>
+              <span className="text-[9px] text-accent/60 font-mono uppercase tracking-[0.25em] mt-0.5">
+                Admin
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {!collapsed && (
+            <p className="text-[10px] font-semibold uppercase tracking-wider px-2.5 mb-2 text-text-muted">
+              Gestão
+            </p>
+          )}
+          {navItems.map((item) => {
+            const isActive = active === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActive(item.id)}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-md)] transition-all duration-150 group',
+                  isActive
+                    ? 'bg-primary-soft text-primary font-medium'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover',
+                  collapsed && 'justify-center px-0'
+                )}
+              >
+                <item.icon className={cn(
+                  'w-[18px] h-[18px] shrink-0 transition-colors',
+                  isActive ? 'text-primary' : 'text-text-muted group-hover:text-text-secondary'
+                )} />
+                {!collapsed && (
+                  <span className="text-[13px] whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="px-3 py-3 border-t border-border space-y-1">
+          {!collapsed && (
+            <button
+              onClick={() => onThemeChange('mixed')}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-md)] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+            >
+              <Moon className="w-[18px] h-[18px] text-text-muted" />
+              <span className="text-[13px]">Tema escuro</span>
+            </button>
+          )}
+
+          <button
+            onClick={onToggleCollapse}
+            className={cn(
+              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-md)] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors',
+              collapsed && 'justify-center px-0'
+            )}
+          >
+            {collapsed
+              ? <ChevronRight className="w-[18px] h-[18px] text-text-muted" />
+              : (<><ChevronLeft className="w-[18px] h-[18px] text-text-muted" /><span className="text-[13px]">Recolher</span></>)
+            }
+          </button>
+
+          {!collapsed && (
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-md)] text-text-secondary hover:text-danger hover:bg-danger-soft transition-colors"
+            >
+              <LogOut className="w-[18px] h-[18px] text-text-muted" />
+              <span className="text-[13px]">Sair</span>
+            </button>
+          )}
+        </div>
+      </aside>
+    );
+  }
+
+  /* ───────────────────────────────────────────────
+     Tema legado (mixed / dark / terminal)
+     ─────────────────────────────────────────────── */
   const isAstraiBrand = theme.id === 'mixed';
-  const isLight = theme.id === 'light';
 
   return (
     <aside className={cn(
@@ -40,7 +150,6 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
     )}>
       {/* Brand */}
       <div className={cn('px-5 py-5 flex items-center gap-3 overflow-hidden', collapsed && 'justify-center')}>
-        {/* Ícone: bússola da logo */}
         <img
           src={logoIcon}
           alt="Astrai"
@@ -49,7 +158,7 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
         {!collapsed && (
           <div className="flex flex-col leading-none">
             <span
-              className={cn('tracking-[0.18em] leading-none', isLight ? 'text-zinc-800' : 'text-white/90')}
+              className={cn('tracking-[0.18em] leading-none', 'text-white/90')}
               style={{ fontFamily: '"Cinzel", serif', fontSize: '15px', fontWeight: 600, letterSpacing: '0.2em' }}
             >
               ASTRAI
@@ -80,12 +189,9 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
                   ? (isAstraiBrand
                       ? 'bg-astrai-gold/10 text-astrai-gold-bright'
                       : (theme.isTerminal ? 'bg-green-500/10 text-green-400'
-                        : theme.id === 'light' ? 'bg-blue-600/10 text-blue-600'
                         : 'bg-white/5 text-white'))
                   : (theme.isTerminal
                       ? 'text-green-900/60 hover:text-green-500 hover:bg-green-500/5'
-                      : theme.id === 'light'
-                      ? 'text-zinc-500 hover:text-blue-600 hover:bg-blue-600/5'
                       : 'text-zinc-500 hover:text-white hover:bg-white/5'),
                 collapsed && 'justify-center'
               )}
@@ -93,8 +199,8 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
               <item.icon className={cn(
                 'w-5 h-5 shrink-0 transition-colors',
                 isActive
-                  ? (isAstraiBrand ? 'text-astrai-gold' : (theme.isTerminal ? 'text-green-400' : theme.id === 'light' ? 'text-blue-600' : 'text-white'))
-                  : (theme.isTerminal ? 'text-green-900/60 group-hover:text-green-500' : theme.id === 'light' ? 'text-zinc-400 group-hover:text-blue-600' : 'text-zinc-500 group-hover:text-white')
+                  ? (isAstraiBrand ? 'text-astrai-gold' : (theme.isTerminal ? 'text-green-400' : 'text-white'))
+                  : (theme.isTerminal ? 'text-green-900/60 group-hover:text-green-500' : 'text-zinc-500 group-hover:text-white')
               )} />
               {!collapsed && (
                 <span className={cn('text-sm font-medium whitespace-nowrap', isActive && isAstraiBrand && 'font-bold')}>
@@ -105,7 +211,7 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
                 <div className={cn(
                   'ml-auto w-1.5 h-1.5 rounded-full shrink-0',
                   isAstraiBrand ? 'bg-astrai-gold shadow-[0_0_8px_rgba(201,169,110,0.8)]'
-                    : (theme.isTerminal ? 'bg-green-400' : theme.id === 'light' ? 'bg-blue-600' : 'bg-white')
+                    : (theme.isTerminal ? 'bg-green-400' : 'bg-white')
                 )} />
               )}
             </button>
@@ -124,13 +230,13 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
         )}
 
         {!collapsed && (
-          <div className={cn('flex items-center justify-center mb-4 p-1 rounded-lg', theme.id === 'light' ? 'bg-zinc-100' : 'bg-black/20')}>
+          <div className={cn('flex items-center justify-center mb-4 p-1 rounded-lg', 'bg-black/20')}>
             <button
-              onClick={() => onThemeChange(theme.id === 'light' ? 'mixed' : 'light')}
+              onClick={() => onThemeChange('light')}
               className="p-1.5 text-zinc-500 hover:text-white transition-colors"
               title="Alternar tema"
             >
-              {theme.id === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              <Sun className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -140,7 +246,6 @@ export function Sidebar({ active, setActive, theme, collapsed, onToggleCollapse,
           className={cn(
             'w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200',
             theme.isTerminal ? 'text-green-900 hover:text-green-500'
-              : theme.id === 'light' ? 'text-zinc-500 hover:text-blue-600'
               : 'text-zinc-500 hover:text-white'
           )}
         >

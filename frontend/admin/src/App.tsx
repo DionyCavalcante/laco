@@ -19,7 +19,11 @@ export default function App() {
   const theme = THEMES[themeName];
 
   useEffect(() => {
-    document.body.className = theme.bgMain;
+    if (theme.id === 'light') {
+      document.body.className = 'bg-background text-text-primary';
+    } else {
+      document.body.className = theme.bgMain;
+    }
   }, [theme]);
 
   const getTitle = () => ({

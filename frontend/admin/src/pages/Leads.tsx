@@ -6,13 +6,18 @@ import { AstraiTheme } from '../types';
 import {
   Search, User as UserIcon, MessageSquare, Trash2,
   TrendingUp, CheckCircle2, Loader2,
-  ChevronDown, Plus, Copy, Check,
+  ChevronDown, Plus, Copy, Check, Users, Send,
 } from 'lucide-react';
 import { getLeads, getLeadStats, deleteLead, updateLeadStatus, Lead, LeadStats } from '../services/leads';
 import { getAppointments, updateAppointmentStatus, Appointment } from '../services/appointments';
 import { getClinic } from '../services/settings';
 import BookingModal from '../components/BookingModal';
 import LeadProfileDrawer from '../components/LeadProfileDrawer';
+import { PageHeader } from '../components/ui/page-header';
+import { StatCard } from '../components/ui/stat-card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 
 /* ── helpers ──────────────────────────────────────────────────────── */
 function fmtDate(iso: string) {
@@ -56,6 +61,15 @@ const APT_BADGE: Record<string, string> = {
   Cancelado:  'text-red-400 bg-red-400/10 border-red-400/30',
 };
 
+/* ── Light DS status variant mapping ─────────────────────────────── */
+const STATUS_VARIANT: Record<string, 'info' | 'warning' | 'success' | 'danger' | 'default'> = {
+  new: 'info', link_sent: 'warning', scheduled: 'success',
+  confirmed: 'success', rejected: 'danger',
+};
+const APT_VARIANT: Record<string, 'info' | 'warning' | 'success' | 'danger' | 'default'> = {
+  Confirmado: 'success', Aguardando: 'warning', Pendente: 'warning', Cancelado: 'danger',
+};
+
 /* ── dropdown inline reutilizável (tabela) ───────────────────────── */
 function InlineDrop({ label, badgeCls, dot, options, onSelect, isLight }: {
   label: string;
@@ -68,9 +82,9 @@ function InlineDrop({ label, badgeCls, dot, options, onSelect, isLight }: {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative" onClick={e => e.stopPropagation()}>
-      {/* ── Trigger ── */}
       <button onClick={() => setOpen(o => !o)}
         className={cn('flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold transition-all whitespace-nowrap',
+          isLight ? 'border-border hover:border-primary/30' : '',
           badgeCls
         )}>
         <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', dot)} />
@@ -78,24 +92,23 @@ function InlineDrop({ label, badgeCls, dot, options, onSelect, isLight }: {
         <ChevronDown className={cn('w-3 h-3 opacity-60 transition-transform ml-0.5', open && 'rotate-180')} />
       </button>
 
-      {/* ── Lista ── */}
       <AnimatePresence>
         {open && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
             <motion.div initial={{ opacity:0, y:-4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-4 }}
               transition={{ duration: 0.12 }}
-              className={cn('absolute top-full left-0 mt-1.5 z-20 rounded-xl border overflow-hidden shadow-2xl min-w-[160px]',
-                isLight ? 'bg-white border-zinc-200' : 'bg-[#0D1F2D] border-white/10'
+              className={cn('absolute top-full left-0 mt-1.5 z-20 rounded-[var(--radius-md)] border overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.08)] min-w-[160px]',
+                isLight ? 'bg-surface border-border' : 'bg-[#0D1F2D] border-white/10'
               )}>
               {options.map(opt => {
                 const isSelected = opt.label === label;
                 return (
                   <button key={opt.value} onClick={() => { onSelect(opt.value); setOpen(false); }}
-                    className={cn('w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-left transition-colors',
+                    className={cn('w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-left transition-colors',
                       isSelected
-                        ? opt.badge                                                          // cor do badge da opção (bg + text)
-                        : isLight ? 'text-zinc-600 hover:bg-zinc-50' : 'text-zinc-300 hover:bg-white/5'
+                        ? opt.badge
+                        : isLight ? 'text-text-secondary hover:bg-surface-hover' : 'text-zinc-300 hover:bg-white/5'
                     )}>
                     <div className={cn('w-2 h-2 rounded-full shrink-0', opt.dot)} />
                     {opt.label}
@@ -139,7 +152,7 @@ function AptDropdown({ apt, onChange, isLight }: {
   );
 }
 
-/* ── lead status inline (tabela) — mesma base de InlineDrop ─────── */
+/* ── lead status inline (tabela) ─────────────────────────────────── */
 const LEAD_OPTIONS_INLINE = [
   { value: 'new',       label: 'Captado',      dot: 'bg-sky-400',    badge: 'text-sky-400 bg-sky-400/10'         },
   { value: 'link_sent', label: 'Link Enviado',  dot: 'bg-amber-400',  badge: 'text-amber-400 bg-amber-400/10'     },
@@ -163,7 +176,7 @@ function LeadStatusInline({ status, onChange, isLight }: { status: string; onCha
 }
 
 
-/* ── main page ────────────────────────────────────────────────────── */
+/* ── filters ─────────────────────────────────────────────────────── */
 const FILTERS = [
   { key: 'todos',      label: 'Todos'        },
   { key: 'rejected',   label: 'Não agendaram'},
@@ -171,6 +184,7 @@ const FILTERS = [
   { key: 'scheduled',  label: 'Agendados'    },
 ];
 
+/* ── main page ────────────────────────────────────────────────────── */
 export default function Leads({ theme }: { theme: AstraiTheme }) {
   const [leads,     setLeads]     = useState<Lead[]>([]);
   const [aptMap,    setAptMap]    = useState<Map<string, Appointment>>(new Map());
@@ -197,7 +211,6 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
       ]);
       setLeads(ls);
       setStats(st);
-      // Build lead_id → most recent appointment map
       const m = new Map<string, Appointment>();
       for (const a of apts) {
         if (a.leadId && (!m.has(a.leadId) || a.date > (m.get(a.leadId)!.date))) m.set(a.leadId, a);
@@ -236,8 +249,6 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
       const updated = { ...openLead! };
       if (data.name) updated.name = data.name;
       if (data.phone) updated.phone = data.phone;
-      // TODO: Se houver endpoint PUT /api/leads/{id}, chamar aqui
-      // await updateLead(id, data);
       setOpenLead(updated);
       setLeads(p => p.map(l => l.id === id ? updated : l));
     } catch (e) {
@@ -266,7 +277,8 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
     return matchSearch && matchFilter;
   });
 
-  return (
+  /* ── Drawers / Modais (usados em ambos os temas) ─── */
+  const drawersAndModals = (
     <>
       <AnimatePresence>
         {openLead && (
@@ -281,7 +293,6 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
           />
         )}
       </AnimatePresence>
-
       <AnimatePresence>
         {bookingLead && (
           <BookingModal
@@ -292,89 +303,241 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
           />
         )}
       </AnimatePresence>
+    </>
+  );
 
-      <div className="flex flex-col h-full p-8 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
-          <div>
-            <h2 className={cn('text-4xl font-display font-bold tracking-tight', theme.textPrimary)}>Clientes</h2>
-            <p className="text-sm font-mono text-astrai-gold uppercase tracking-[0.2em] mt-2 font-bold">Gestão de Leads & Conversões</p>
+  /* ───────────────────────────────────────────────
+     Tema legado (mixed / dark / terminal)
+     ─────────────────────────────────────────────── */
+  if (!isLight) {
+    return (
+      <>
+        {drawersAndModals}
+        <div className="flex flex-col h-full p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
+            <div>
+              <h2 className={cn('text-4xl font-display font-bold tracking-tight', theme.textPrimary)}>Clientes</h2>
+              <p className="text-sm font-mono text-astrai-gold uppercase tracking-[0.2em] mt-2 font-bold">Gestão de Leads & Conversões</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button onClick={() => setBookingLead({ id: 'new', name: '' })}
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl hover:scale-[1.02] active:scale-95 bg-astrai-gold text-astrai-blue border border-astrai-gold shadow-astrai-gold/30">
+                <Plus className="w-4 h-4 stroke-[3px]" /> Novo Cliente
+              </button>
+              {slug && (
+                <div className={cn('flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm group cursor-pointer transition-all hover:border-astrai-gold/40', 'bg-astrai-gold/5 border-astrai-gold/20')}
+                  onClick={() => {
+                    const link = `${window.location.origin.replace(':5173', '').replace(':5174', '').replace(':5175', '')}/${slug}/agendar`;
+                    navigator.clipboard.writeText(link);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  }}>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-astrai-gold">Link</span>
+                  <span className={cn('font-mono text-[11px] truncate max-w-[260px]', theme.textSecondary)}>
+                    {window.location.origin.replace(':5173', '').replace(':5174', '').replace(':5175', '')}/{slug}/agendar
+                  </span>
+                  <span className={cn('ml-auto shrink-0 transition-all opacity-0 group-hover:opacity-100', copiedLink && 'opacity-100 text-emerald-500')}>
+                    {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4 text-zinc-500" />}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
+            {[
+              { label: 'Total Leads',  value: stats?.total ?? 0,     icon: UserIcon,     color: 'text-astrai-gold', bg: 'bg-astrai-gold/10' },
+              { label: 'Link Enviado', value: stats?.link_sent ?? 0, icon: MessageSquare, color: 'text-amber-400',  bg: 'bg-amber-400/10'   },
+              { label: 'Agendados',    value: stats?.scheduled ?? 0, icon: CheckCircle2,  color: 'text-emerald-400',bg: 'bg-emerald-400/10' },
+              { label: 'Conversão',    value: `${convRate}%`,        icon: TrendingUp,    color: 'text-sky-400',    bg: 'bg-sky-400/10'     },
+            ].map(kpi => (
+              <div key={kpi.label} className="p-6 rounded-[2rem] border transition-all bg-white/[0.02] border-white/[0.05]">
+                <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', kpi.bg)}>
+                  <kpi.icon className={cn('w-4 h-4', kpi.color)} />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">{kpi.label}</p>
+                <p className={cn('text-2xl font-black font-mono', kpi.color)}>{kpi.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex-1 rounded-[2rem] border overflow-hidden flex flex-col bg-white/[0.02] border-white/[0.05]">
+            <div className="flex items-center gap-3 p-4 border-b border-white/5 flex-wrap">
+              <div className="relative flex-1 min-w-[180px] max-w-[300px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input type="text" placeholder="Buscar por nome ou telefone…" value={search} onChange={e => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl outline-none border bg-white/5 border-white/5 text-white focus:border-astrai-gold/40" />
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {FILTERS.map(f => (
+                  <button key={f.key} onClick={() => setFilter(f.key)}
+                    className={cn('px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all',
+                      filter === f.key
+                        ? 'bg-astrai-gold text-astrai-blue border-astrai-gold'
+                        : 'border-white/10 text-zinc-500 hover:border-white/20'
+                    )}>{f.label}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid text-xs font-black uppercase tracking-[0.15em] px-5 py-3 border-b bg-black/20 border-white/10 text-zinc-300"
+              style={{ gridTemplateColumns: '40px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}>
+              <div /><div>Cliente</div><div>Procedimento</div><div>Status Lead</div><div>Agendamento</div><div>Motivo</div><div className="text-right">Data</div><div />
+            </div>
+
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+              {loading ? (
+                <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-astrai-gold" /></div>
+              ) : visible.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                  <UserIcon className="w-12 h-12 mb-3" /><p className="font-display italic text-lg">Nenhum lead encontrado</p>
+                </div>
+              ) : visible.map((lead, idx) => {
+                const apt = aptMap.get(lead.id);
+                return (
+                  <motion.div key={lead.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.02 }}
+                    className="grid items-center px-5 py-3.5 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all group cursor-pointer"
+                    style={{ gridTemplateColumns: '40px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}
+                    onClick={() => openDetail(lead)}>
+                    <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-black shrink-0', avColor(lead.name))}>{initials(lead.name)}</div>
+                    <div className="min-w-0 pr-3">
+                      <p className={cn('text-sm font-semibold truncate group-hover:text-astrai-gold transition-colors', theme.textPrimary)}>{lead.name}</p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">{formatPhoneDisplay(lead.phone)}</p>
+                    </div>
+                    <p className="text-sm text-zinc-400 truncate pr-3">{lead.procedure || '—'}</p>
+                    <LeadStatusInline status={lead.status} onChange={s => handleStatus(lead.id, s)} isLight={isLight} />
+                    <div>{apt ? <AptDropdown apt={apt} isLight={isLight} onChange={s => handleAptStatus(lead.id, apt.id, s)} /> : <span className="text-zinc-600 text-sm">—</span>}</div>
+                    <p className="text-sm text-zinc-400 truncate pr-2">{lead.reject_reason || '—'}</p>
+                    <p className="text-sm text-zinc-400 text-right pr-1">{lead.time}</p>
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => window.open(`https://wa.me/${getPhoneForWhatsApp(lead.phone)}`, '_blank')} className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-400/10 transition-colors" title="WhatsApp"><MessageSquare className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleDelete(lead.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Excluir"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  /* ───────────────────────────────────────────────
+     NOVO Design System Light — Leads
+     Referência: imagem 8 (Clientes)
+     ─────────────────────────────────────────────── */
+  return (
+    <>
+      {drawersAndModals}
+      <div className="flex flex-col h-full p-6 space-y-5">
+        {/* Page Header */}
+        <PageHeader
+          icon={Users}
+          title="Clientes"
+          subtitle="Gerencie leads, agendamentos e conversões."
+        >
+          {slug && (
             <button
               onClick={() => {
-                setBookingLead({ id: 'new', name: '' });
+                const link = `${window.location.origin.replace(':5173', '').replace(':5174', '').replace(':5175', '')}/${slug}/agendar`;
+                navigator.clipboard.writeText(link);
+                setCopiedLink(true);
+                setTimeout(() => setCopiedLink(false), 2000);
               }}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl hover:scale-[1.02] active:scale-95 bg-astrai-gold text-astrai-blue border border-astrai-gold shadow-astrai-gold/30">
-              <Plus className="w-4 h-4 stroke-[3px]" /> Novo Cliente
+              className={cn(
+                'flex items-center gap-2 px-3 h-8 rounded-[var(--radius-md)] border border-border text-[12px] text-text-secondary hover:border-primary/30 transition-colors',
+                copiedLink && 'border-success text-success'
+              )}
+            >
+              {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedLink ? 'Copiado!' : 'Link do portal'}
             </button>
-            {slug && (
-              <div className={cn('flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm group cursor-pointer transition-all hover:border-astrai-gold/40', isLight ? 'bg-white border-zinc-200' : 'bg-astrai-gold/5 border-astrai-gold/20')}
-                onClick={() => {
-                  const link = `${window.location.origin.replace(':5173', '').replace(':5174', '').replace(':5175', '')}/${slug}/agendar`;
-                  navigator.clipboard.writeText(link);
-                  setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2000);
-                }}>
-                <span className="text-[10px] font-black uppercase tracking-widest text-astrai-gold">Link</span>
-                <span className={cn('font-mono text-[11px] truncate max-w-[260px]', theme.textSecondary)}>
-                  {window.location.origin.replace(':5173', '').replace(':5174', '').replace(':5175', '')}/{slug}/agendar
-                </span>
-                <span className={cn('ml-auto shrink-0 transition-all opacity-0 group-hover:opacity-100', copiedLink && 'opacity-100 text-emerald-500')}>
-                  {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4 text-zinc-500" />}
-                </span>
-              </div>
-            )}
-          </div>
+          )}
+          <Button onClick={() => setBookingLead({ id: 'new', name: '' })}>
+            <Plus className="w-4 h-4" />
+            Novo Cliente
+          </Button>
+        </PageHeader>
+
+        {/* KPI Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+          <StatCard
+            label="Total Leads"
+            category="CRM"
+            icon={UserIcon}
+            iconBg="bg-primary-soft"
+            iconColor="text-primary"
+            value={stats?.total ?? 0}
+            description="No período selecionado"
+          />
+          <StatCard
+            label="Link Enviado"
+            category="PORTAL"
+            icon={Send}
+            iconBg="bg-warning-soft"
+            iconColor="text-warning"
+            value={stats?.link_sent ?? 0}
+            description="Aguardando agendamento"
+          />
+          <StatCard
+            label="Agendados"
+            category="AGENDA"
+            icon={CheckCircle2}
+            iconBg="bg-success-soft"
+            iconColor="text-success"
+            value={stats?.scheduled ?? 0}
+            description="Convertidos para agenda"
+          />
+          <StatCard
+            label="Conversão"
+            category="METAS"
+            icon={TrendingUp}
+            iconBg="bg-info-soft"
+            iconColor="text-info"
+            value={`${convRate}%`}
+            description="Leads → Agendados"
+          />
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
-          {[
-            { label: 'Total Leads',  value: stats?.total ?? 0,     icon: UserIcon,     color: 'text-astrai-gold', bg: 'bg-astrai-gold/10' },
-            { label: 'Link Enviado', value: stats?.link_sent ?? 0, icon: MessageSquare, color: 'text-amber-400',  bg: 'bg-amber-400/10'   },
-            { label: 'Agendados',    value: stats?.scheduled ?? 0, icon: CheckCircle2,  color: 'text-emerald-400',bg: 'bg-emerald-400/10' },
-            { label: 'Conversão',    value: `${convRate}%`,        icon: TrendingUp,    color: 'text-sky-400',    bg: 'bg-sky-400/10'     },
-          ].map(kpi => (
-            <div key={kpi.label} className={cn('p-6 rounded-[2rem] border transition-all hover:border-astrai-gold/30',
-              isLight ? 'bg-white border-zinc-200 shadow-lg' : 'bg-white/[0.02] border-white/[0.05]'
-            )}>
-              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', kpi.bg)}>
-                <kpi.icon className={cn('w-4 h-4', kpi.color)} />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">{kpi.label}</p>
-              <p className={cn('text-2xl font-black font-mono', kpi.color)}>{kpi.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Table */}
-        <div className={cn('flex-1 rounded-[2rem] border overflow-hidden flex flex-col', isLight ? 'bg-white border-zinc-200' : 'bg-white/[0.02] border-white/[0.05]')}>
+        {/* Table Card */}
+        <div className="flex-1 bg-surface border border-border rounded-[var(--radius-lg)] overflow-hidden flex flex-col shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           {/* Toolbar */}
-          <div className={cn('flex items-center gap-3 p-4 border-b flex-wrap', isLight ? 'border-zinc-100' : 'border-white/5')}>
-            <div className="relative flex-1 min-w-[180px] max-w-[300px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <input type="text" placeholder="Buscar por nome ou telefone…" value={search} onChange={e => setSearch(e.target.value)}
-                className={cn('w-full pl-9 pr-3 py-2 text-sm rounded-xl outline-none border',
-                  isLight ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-white/5 border-white/5 text-white focus:border-astrai-gold/40'
-                )} />
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-border flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-[320px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Buscar por nome, empresa, telefone..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-[var(--radius-md)] border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary transition-all"
+              />
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+
+            <div className="flex items-center gap-1.5 flex-wrap">
               {FILTERS.map(f => (
-                <button key={f.key} onClick={() => setFilter(f.key)}
-                  className={cn('px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all',
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-[var(--radius-md)] text-[12px] font-medium transition-all',
                     filter === f.key
-                      ? 'bg-astrai-gold text-astrai-blue border-astrai-gold'
-                      : isLight ? 'border-zinc-200 text-zinc-500 hover:border-zinc-300' : 'border-white/10 text-zinc-500 hover:border-white/20'
-                  )}>{f.label}</button>
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+                  )}
+                >
+                  {f.label}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Table head */}
-          <div className={cn('grid text-xs font-black uppercase tracking-[0.15em] px-5 py-3 border-b',
-            isLight ? 'bg-zinc-50 border-zinc-200 text-zinc-500' : 'bg-black/20 border-white/10 text-zinc-300'
-          )} style={{ gridTemplateColumns: '40px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}>
+          {/* Table Header */}
+          <div
+            className="grid text-[11px] font-semibold uppercase tracking-wider px-5 py-2.5 border-b border-border bg-surface-muted text-text-secondary"
+            style={{ gridTemplateColumns: '36px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}
+          >
             <div />
             <div>Cliente</div>
             <div>Procedimento</div>
@@ -385,79 +548,76 @@ export default function Leads({ theme }: { theme: AstraiTheme }) {
             <div />
           </div>
 
-          {/* Table body */}
+          {/* Table Body */}
           <div className="flex-1 overflow-y-auto scrollbar-hide">
             {loading ? (
-              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-astrai-gold" /></div>
+              <div className="flex justify-center py-16">
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              </div>
             ) : visible.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 opacity-20">
-                <UserIcon className="w-12 h-12 mb-3" /><p className="font-display italic text-lg">Nenhum lead encontrado</p>
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-12 h-12 rounded-full bg-surface-muted flex items-center justify-center mb-3">
+                  <UserIcon className="w-5 h-5 text-text-muted" />
+                </div>
+                <p className="text-sm font-medium text-text-primary">Nenhum lead encontrado</p>
+                <p className="text-[13px] text-text-muted mt-1">Tente ajustar os filtros ou busca.</p>
               </div>
             ) : visible.map((lead, idx) => {
               const apt = aptMap.get(lead.id);
               return (
-                <motion.div key={lead.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.02 }}
-                  className={cn('grid items-center px-5 py-3.5 border-b transition-all group cursor-pointer',
-                    isLight ? 'border-zinc-50 hover:bg-zinc-50' : 'border-white/[0.03] hover:bg-white/[0.03]'
-                  )}
-                  style={{ gridTemplateColumns: '40px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}
-                  onClick={() => openDetail(lead)}>
-
+                <div
+                  key={lead.id}
+                  className="grid items-center px-5 py-3 border-b border-border-light hover:bg-surface-hover transition-colors group cursor-pointer"
+                  style={{ gridTemplateColumns: '36px 1.6fr 1fr 1.1fr 1fr 1fr 0.8fr 48px' }}
+                  onClick={() => openDetail(lead)}
+                >
                   {/* Avatar */}
-                  <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-black shrink-0', avColor(lead.name))}>
+                  <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-semibold shrink-0', avColor(lead.name))}>
                     {initials(lead.name)}
                   </div>
 
-                  {/* Cliente: nome + telefone */}
+                  {/* Cliente */}
                   <div className="min-w-0 pr-3">
-                    <p className={cn('text-sm font-semibold truncate group-hover:text-astrai-gold transition-colors', theme.textPrimary)}>{lead.name}</p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">{formatPhoneDisplay(lead.phone)}</p>
+                    <p className="text-[13px] font-medium text-text-primary truncate group-hover:text-primary transition-colors">{lead.name}</p>
+                    <p className="text-[11px] text-text-muted mt-0.5">{formatPhoneDisplay(lead.phone)}</p>
                   </div>
 
                   {/* Procedimento */}
-                  <p className="text-sm text-zinc-400 truncate pr-3">{lead.procedure || '—'}</p>
+                  <p className="text-[13px] text-text-secondary truncate pr-3">{lead.procedure || '—'}</p>
 
-                  {/* Status Lead — dropdown inline customizado */}
-                  <LeadStatusInline
-                    status={lead.status}
-                    onChange={s => handleStatus(lead.id, s)}
-                    isLight={isLight}
-                  />
+                  {/* Status Lead */}
+                  <LeadStatusInline status={lead.status} onChange={s => handleStatus(lead.id, s)} isLight={isLight} />
 
-                  {/* Agendamento — dropdown inline */}
+                  {/* Agendamento */}
                   <div>
-                    {apt ? (
-                      <AptDropdown
-                        apt={apt}
-                        isLight={isLight}
-                        onChange={s => handleAptStatus(lead.id, apt.id, s)}
-                      />
-                    ) : (
-                      <span className="text-zinc-600 text-sm">—</span>
-                    )}
+                    {apt
+                      ? <AptDropdown apt={apt} isLight={isLight} onChange={s => handleAptStatus(lead.id, apt.id, s)} />
+                      : <span className="text-[13px] text-text-muted">—</span>
+                    }
                   </div>
 
                   {/* Motivo */}
-                  <p className="text-sm text-zinc-400 truncate pr-2">
-                    {lead.reject_reason || '—'}
-                  </p>
+                  <p className="text-[13px] text-text-secondary truncate pr-2">{lead.reject_reason || '—'}</p>
 
                   {/* Data */}
-                  <p className="text-sm text-zinc-400 text-right pr-1">{lead.time}</p>
+                  <p className="text-[13px] text-text-secondary text-right pr-1">{lead.time}</p>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={e => e.stopPropagation()}>
-                    <button onClick={() => window.open(`https://wa.me/${getPhoneForWhatsApp(lead.phone)}`, '_blank')}
-                      className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-400/10 transition-colors" title="WhatsApp">
+                  <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => window.open(`https://wa.me/${getPhoneForWhatsApp(lead.phone)}`, '_blank')}
+                      className="p-1.5 rounded-[var(--radius-sm)] text-success hover:bg-success-soft transition-colors" title="WhatsApp"
+                    >
                       <MessageSquare className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleDelete(lead.id)}
-                      className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Excluir">
+                    <button
+                      onClick={() => handleDelete(lead.id)}
+                      className="p-1.5 rounded-[var(--radius-sm)] text-danger hover:bg-danger-soft transition-colors" title="Excluir"
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
           </div>

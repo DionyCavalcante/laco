@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
   try {
     const { name, duration, price, price_old, payment_note, description, video_url } = req.body
     const clinicId = await getEffectiveClinicId(req)
-    if (!name || !duration || !price) {
+    if (!name || !duration || price == null) {
       return res.status(400).json({ error: 'Nome, duração e preço obrigatórios' })
     }
     const { rows } = await db.query(`
@@ -35,7 +35,8 @@ router.post('/', async (req, res) => {
     `, [clinicId, name, duration, price, price_old || null, payment_note || null, description || null, video_url || null])
     res.status(201).json(rows[0])
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao criar procedimento' })
+    console.error('Erro ao criar procedimento:', err)
+    res.status(err.status || 500).json({ error: err.message || 'Erro ao criar procedimento' })
   }
 })
 
