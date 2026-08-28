@@ -25,6 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => localStorage.getItem('laco_api_key') || ''
   );
 
+  // JWT do login legado também autentica
+  const jwtToken = localStorage.getItem('token') || '';
+  const isAuthenticated = apiKey.length > 0 || jwtToken.length > 0;
+
   const setApiKey = useCallback((key: string) => {
     const trimmed = key.trim();
     localStorage.setItem('laco_api_key', trimmed);
@@ -34,13 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem('laco_api_key');
     localStorage.removeItem('laco_slug');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('laco_auth');
     setApiKeyState('');
+    window.location.href = '/login';
   }, []);
 
   return (
-    <AuthContext.Provider value={{ apiKey, isAuthenticated: apiKey.length > 0, setApiKey, logout }}>
-      {apiKey ? children : <LoginScreen onLogin={setApiKey} />}
+    <AuthContext.Provider value={{ apiKey, isAuthenticated, setApiKey, logout }}>
+      {isAuthenticated ? children : <LoginScreen onLogin={setApiKey} />}
     </AuthContext.Provider>
   );
 }

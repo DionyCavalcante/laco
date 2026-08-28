@@ -5,11 +5,20 @@ export function getApiKey(): string {
   return localStorage.getItem('laco_api_key') || '';
 }
 
+export function getToken(): string {
+  return localStorage.getItem('token') || '';
+}
+
 function buildHeaders(): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    'x-api-key': getApiKey(),
-  };
+  const token = getToken();
+  const apiKey = getApiKey();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = 'Bearer ' + token;
+  } else if (apiKey) {
+    headers['x-api-key'] = apiKey;
+  }
+  return headers;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {

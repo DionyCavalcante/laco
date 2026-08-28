@@ -106,7 +106,7 @@ app.get('/:slug/config',    (req, res) => res.sendFile(path.join(pub, 'config/in
 app.get('/:slug/hoje',      (req, res) => res.sendFile(path.join(pub, 'hoje.html')))
 app.get('/:slug/relatorio', (req, res) => res.sendFile(path.join(pub, 'relatorio.html')))
 app.get('/:slug/cliente',   (req, res) => res.sendFile(path.join(pub, 'cliente.html')))
-app.get('/:slug',           (req, res) => res.sendFile(path.join(pub, 'painel.html')))
+app.get('/:slug',           (req, res) => res.sendFile(path.join(pub, 'admin/index.html')))
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada' }))

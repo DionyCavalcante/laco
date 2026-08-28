@@ -144,7 +144,7 @@ export default function IA({ theme }: { theme: AstraiTheme }) {
             </button>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-            {AGENTS.map(a => <AgentItem key={a.label} {...a} />)}
+            {AGENTS.map(a => <AgentItem key={a.label} label={a.label} active={a.active} />)}
           </div>
         </div>
 

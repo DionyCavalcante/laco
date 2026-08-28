@@ -11,6 +11,7 @@ export interface PortalSettings {
 export interface ClinicInfo {
   name: string;
   slug: string;
+  phone: string | null;
   address: string | null;
 }
 

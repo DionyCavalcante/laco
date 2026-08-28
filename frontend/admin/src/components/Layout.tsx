@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import ScreenContainer from './ScreenContainer';
+import { Sidebar } from './Sidebar';
+import { ScreenContainer } from './ScreenContainer';
 
 const PAGE_TITLES: Record<string, string> = {
   '/':         'Dashboard',
