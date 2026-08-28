@@ -20,8 +20,9 @@
     <section id="app"></section>
   </main>
   <script>
-    const token = localStorage.getItem('token')
-    const headers = { 'Content-Type':'application/json', Authorization:'Bearer ' + token }
+    const token = localStorage.getItem('token') || localStorage.getItem('laco_api_key') || ''
+    const isJwt = token.includes('.')
+    const headers = { 'Content-Type':'application/json', ...(isJwt ? { Authorization:'Bearer ' + token } : { 'x-api-key': token }) }
     let state = { step: 1, clinic: {} }
     async function load(){
       const res = await fetch('/api/onboarding' + location.search, { headers })
